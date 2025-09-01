@@ -23,10 +23,11 @@ export default function Navbar() {
     }`}>
       <div className="flex items-center justify-between p-4 md:p-6 max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-[#e3a72f] rounded-full flex items-center justify-center">
-            <span className="text-slate-900 font-bold text-sm">A</span>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center">
+            <a href="#inicio" className="hover:opacity-80 transition-opacity duration-200">
+              <img src="/asme_logo.png" alt="ASME Logo" className="w-16 h-16" />
+            </a>
           </div>
-          <span className="text-xl font-bold">ASME</span>
         </div>
 
         <div className="hidden md:flex items-center space-x-8">
