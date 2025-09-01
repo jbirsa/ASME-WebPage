@@ -12,8 +12,7 @@ import {
   MapPin,
   Phone,
   Instagram,
-  Linkedin,
-  User,
+  Linkedin
 } from "lucide-react";
 import { TeamMemberCard } from "@/components/TeamMemberCard";
 
