@@ -5,79 +5,34 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react"
+import { Evento } from "@/types/db_types"
 
-interface PastEvent {
-  id: number
-  title: string
-  date: string
-  location: string
-  description: string
-  image: string
-}
 
-const pastEvents: PastEvent[] = [
-  {
-    id: 1,
-    title: "Charla: Energías Renovables",
-    date: "10 de Diciembre, 2024",
-    location: "Aula Magna ITBA",
-    description: "Conferencia sobre el futuro de las energías renovables y su impacto en la ingeniería mecánica moderna.",
-    image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=600&fit=crop"
-  },
-  {
-    id: 2,
-    title: "Competencia de Robótica",
-    date: "25 de Noviembre, 2024",
-    location: "Laboratorios ITBA",
-    description: "Desafío anual de diseño y programación de robots con participación de estudiantes de toda la universidad.",
-    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=600&fit=crop"
-  },
-  {
-    id: 3,
-    title: "Workshop: Impresión 3D",
-    date: "15 de Noviembre, 2024",
-    location: "FabLab ITBA",
-    description: "Taller práctico sobre tecnologías de impresión 3D y sus aplicaciones en ingeniería mecánica.",
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=600&fit=crop"
-  },
-  {
-    id: 4,
-    title: "Networking con Empresas",
-    date: "5 de Noviembre, 2024",
-    location: "Auditorio Principal",
-    description: "Evento de networking con representantes de las principales empresas del sector industrial.",
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop"
-  },
-  {
-    id: 5,
-    title: "Charla: Industria 4.0",
-    date: "20 de Octubre, 2024",
-    location: "Aula Magna ITBA",
-    description: "Presentación sobre la cuarta revolución industrial y sus implicaciones para los ingenieros mecánicos.",
-    image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&h=600&fit=crop"
-  },
-  {
-    id: 6,
-    title: "Visita Técnica a Planta",
-    date: "10 de Octubre, 2024",
-    location: "Planta Industrial",
-    description: "Visita guiada a una planta industrial para conocer procesos de manufactura avanzada.",
-    image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&h=600&fit=crop"
-  }
-]
-
-export default function PastEvents() {
+export default function PastEvents( {events} : {events: Evento[]} ) {
   const [currentIndex, setCurrentIndex] = useState(0)
+
+  // Validación para array vacío
+  if (!events || events.length === 0) {
+    return (
+      <section className="relative z-10 py-20 px-6 bg-slate-800/30">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Eventos Pasados</h2>
+          <p className="text-xl text-gray-300">No hay eventos disponibles</p>
+          <p className="text-sm text-gray-400 mt-2">Events length: {events?.length || 0}</p>
+        </div>
+      </section>
+    );
+  }
 
   const nextEvent = () => {
     setCurrentIndex((prevIndex) => 
-      prevIndex === pastEvents.length - 1 ? 0 : prevIndex + 1
+      prevIndex === events.length - 1 ? 0 : prevIndex + 1
     )
   }
 
   const prevEvent = () => {
     setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? pastEvents.length - 1 : prevIndex - 1
+      prevIndex === 0 ? events.length - 1 : prevIndex - 1
     )
   }
 
@@ -102,8 +57,8 @@ export default function PastEvents() {
               {/* Image Section */}
               <div className="relative h-64 md:h-full">
                 <Image
-                  src={pastEvents[currentIndex].image}
-                  alt={pastEvents[currentIndex].title}
+                  src={events[currentIndex].imagen_url}
+                  alt={events[currentIndex].nombre}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -118,20 +73,20 @@ export default function PastEvents() {
                 <div className="mb-4">
                   <div className="flex items-center text-[#e3a72f] text-sm font-medium mb-2">
                     <Calendar className="w-4 h-4 mr-2" />
-                    {pastEvents[currentIndex].date}
+                    {new Date(events[currentIndex].fecha).toLocaleDateString()}  {/* se puede asi o que el tipo tenga isostring directo */}
                   </div>
                   <div className="flex items-center text-[#5f87ab] text-sm font-medium mb-4">
                     <MapPin className="w-4 h-4 mr-2" />
-                    {pastEvents[currentIndex].location}
+                    {events[currentIndex].direccion}
                   </div>
                 </div>
 
                 <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">
-                  {pastEvents[currentIndex].title}
+                  {events[currentIndex].nombre}
                 </h3>
 
                 <p className="text-gray-300 text-base md:text-lg leading-relaxed">
-                  {pastEvents[currentIndex].description}
+                  {events[currentIndex].descripcion}
                 </p>
               </div>
             </div>
@@ -157,7 +112,7 @@ export default function PastEvents() {
 
         {/* Event Indicators */}
         <div className="flex justify-center space-x-2 mb-8">
-          {pastEvents.map((_, index) => (
+          {events.map((_, index) => (
             <button
               key={index}
               onClick={() => goToEvent(index)}
@@ -173,7 +128,7 @@ export default function PastEvents() {
         {/* Event Counter */}
         <div className="text-center">
           <p className="text-gray-400 text-sm">
-            Evento {currentIndex + 1} de {pastEvents.length}
+            Evento {currentIndex + 1} de {events.length}
           </p>
         </div>
       </div>
