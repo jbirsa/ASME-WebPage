@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
+import Image from "next/image"
+import Link from "next/link"
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -23,10 +25,15 @@ export default function Navbar() {
     }`}>
       <div className="flex items-center justify-between p-4 md:p-6 max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center">
-            <a href="#inicio" className="hover:opacity-80 transition-opacity duration-200">
-              <img src="/asme_logo.png" alt="ASME Logo" className="w-16 h-16" />
-            </a>
+          <div className="w-16 h-16 rounded-full relative flex items-center justify-center">
+            <Link href="#inicio" className="hover:opacity-80 transition-opacity duration-200">
+              <Image
+                src="/asme_logo_blanco.png"
+                alt="ASME Logo"
+                fill
+                style={{ objectFit: "contain" }}
+              />
+            </Link>
           </div>
         </div>
 

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/asme_logo.png",
+        url: "@/public/asme_logo.png",
         type: "image/png",
       },
     ],
