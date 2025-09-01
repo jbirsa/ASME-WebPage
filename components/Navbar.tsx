@@ -43,6 +43,9 @@ export default function Navbar() {
           >
             Eventos
           </a>
+          <a href="#equipo" className="hover:text-[#e3a72f] transition-colors">
+            Equipo
+          </a>
           <a 
             href="#contacto" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
