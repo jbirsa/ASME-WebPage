@@ -5,6 +5,7 @@ export type Patrocinador = {
     nombre: string;
     email: string;
     link: string;
+    imagen_url: string;
 }
 
 export type Evento = {
@@ -17,5 +18,5 @@ export type Evento = {
     provincia: string;
     descripcion: string;
     link: string;
-    // imagen: string;      deberia haber un bucket con imagenes
+    imagen_url: string;
 }

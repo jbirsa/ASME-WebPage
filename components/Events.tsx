@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Calendar, Trophy } from "lucide-react"
+import { Evento } from "@/types/db_types"
 
 export default function Events() {
   return (
@@ -14,6 +15,7 @@ export default function Events() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
+          
           <Card className="bg-slate-800/70 border-slate-600 backdrop-blur-sm">
             <CardContent className="p-8">
               <div className="flex items-start space-x-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -20,6 +20,7 @@ import Footer from "@/components/Footer"
 import Events from "@/components/Events"
 import Sponsors from "@/components/Sponsors"
 import PastEvents from "@/components/PastEvents"
+import { Evento, Patrocinador } from "@/types/db_types";
 
 // Definir tipos para los datos
 type TeamMember = {
@@ -31,8 +32,49 @@ type TeamCategories = {
   [key: string]: TeamMember[];
 };
 
+
+const getEvents = async (): Promise<Evento[]> => {
+  try {
+    const res = await fetch("/api/events");
+    if(!res.ok) {
+      throw new Error("Failed to fetch events");
+    }
+    const data = await res.json();
+    console.log("API response:", data);
+    console.log("Events:", data.events); 
+
+    return data.events || [];
+  } catch (error) {
+    throw new Error("Failed to fetch events");
+  }
+}
+
+
+const getSponsors = async (): Promise<Patrocinador[]> => {
+  try {
+    const res = await fetch("/api/sponsors");
+    if(!res.ok) {
+      throw new Error("Failed to fetch sponsors");
+    }
+    const data = await res.json()
+    return data.sponsors || [];
+  } catch (error) {
+    throw new Error("Failed to fetch sponsors");
+  }
+}
+
+
+
+
 export default function ASMEPage() {
   const [activeCategory, setActiveCategory] = useState<string>("Directores");
+  const [events, setEvents] = useState<Evento[]>([]);
+  const [sponsors, setSponsors] = useState<Patrocinador[]>([]);
+
+  useEffect(() => {
+    getEvents().then((data) => setEvents(data));
+    getSponsors().then((data) => setSponsors(data));
+  }, []);
 
   // Datos de miembros organizados por categoría
   const teamMembers: TeamCategories = {
@@ -181,11 +223,11 @@ export default function ASMEPage() {
         </div>
       </section>
 
-      {/* Events Section */}
+      {/* Events proximos */}
       <Events />
 
       {/* Past Events Section */}
-      <PastEvents />
+      <PastEvents events={events} />
 
       {/* Sponsors Section */}
       <Sponsors />

@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { Evento } from "@/types/db_types";
+import { getSupabaseServerClient } from "@/lib/supabaseClient";
 
 
 export async function GET(req: NextRequest) {
@@ -14,14 +15,15 @@ export async function GET(req: NextRequest) {
         const res = data.map((event: Evento) => {
             return {
                 id: event.id,
-                name: event.nombre,
-                type: event.tipo,
-                date: event.fecha,
-                location: event.direccion,
-                description: event.descripcion,
-                link: event.link,
+                nombre: event.nombre,
+                tipo: event.tipo,
+                fecha: event.fecha,
+                direccion: event.direccion,
                 barrio: event.barrio,
                 provincia: event.provincia,
+                descripcion: event.descripcion,
+                link: event.link,
+                imagen_url: event.imagen_url,
             }
         });
         return NextResponse.json({ events: res }, { status: 200, headers: { 'Content-Type': 'application/json' } });

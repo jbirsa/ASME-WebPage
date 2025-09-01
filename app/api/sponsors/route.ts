@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { Patrocinador } from "@/types/db_types";
+import { getSupabaseServerClient } from "@/lib/supabaseClient";
 
 export async function GET(req: NextRequest) {
     
@@ -17,6 +18,7 @@ export async function GET(req: NextRequest) {
                 name: sponsor.nombre,
                 email: sponsor.email,
                 link: sponsor.link,
+                imagen_url: sponsor.imagen_url,
             }
         });
         return NextResponse.json({ sponsors: res }, { status: 200, headers: { 'Content-Type': 'application/json' } });
