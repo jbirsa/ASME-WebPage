@@ -21,6 +21,7 @@ import Events from "@/components/Events"
 import Sponsors from "@/components/Sponsors"
 import PastEvents from "@/components/PastEvents"
 import { Evento, Patrocinador } from "@/types/db_types";
+import Link from "next/link";
 
 // Definir tipos para los datos
 type TeamMember = {
@@ -142,25 +143,20 @@ export default function ASMEPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
+            <Link href="#about">
+              <Button
               size="lg"
               className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-8 py-3"
             >
               Conocer Más
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-[#5f87ab] text-[#5f87ab] hover:bg-[#5f87ab] hover:text-white px-8 py-3 bg-transparent"
-            >
-              Explorar
-            </Button>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section className="relative z-10 py-20 px-6">
+      <section id="about" className="relative z-10 py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">
