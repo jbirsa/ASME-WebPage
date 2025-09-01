@@ -55,15 +55,18 @@ export default function PastEvents( {events} : {events: Evento[]} ) {
           <div className="bg-slate-800/70 border border-slate-600 rounded-2xl overflow-hidden backdrop-blur-sm">
             <div className="grid md:grid-cols-2 gap-0 min-h-[500px]">
               {/* Image Section */}
-              <div className="relative h-64 md:h-full">
-                <Image
-                  src={events[currentIndex].imagen_url}
-                  alt={events[currentIndex].nombre}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority={currentIndex === 0}
-                />
+              <div className="relative h-64 md:h-full">{
+                  events[currentIndex].imagen_url && 
+                  <Image
+                    src={events[currentIndex].imagen_url}
+                    alt={events[currentIndex].nombre}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority={currentIndex === 0}
+                  />
+                }
+
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               </div>

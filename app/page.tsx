@@ -35,7 +35,7 @@ type TeamCategories = {
 
 const getEvents = async (): Promise<Evento[]> => {
   try {
-    const res = await fetch("/api/events");
+    const res = await fetch("/api/events/past");
     if(!res.ok) {
       throw new Error("Failed to fetch events");
     }

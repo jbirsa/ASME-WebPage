@@ -6,7 +6,7 @@ import { getSupabaseServerClient } from "@/lib/supabaseClient";
 export async function GET(req: NextRequest) {
     try {   
         const supabase = getSupabaseServerClient();
-        const { data, error } = await supabase.from('evento').select('*').lt('fecha', new Date().toISOString().split('T')[0]);
+        const { data, error } = await supabase.from('evento').select('*').lt('fecha', new Date().toISOString());
         if(error)
             return NextResponse.json( {error: error}, { status: 500 } );
         if(!data)
@@ -15,14 +15,15 @@ export async function GET(req: NextRequest) {
         const res = data.map((event: Evento) => {
             return {
                 id: event.id,
-                name: event.nombre,
-                type: event.tipo,
-                date: event.fecha,
-                location: event.direccion,
-                description: event.descripcion,
-                link: event.link,
+                nombre: event.nombre,
+                tipo: event.tipo,
+                fecha: event.fecha,
+                direccion: event.direccion,
                 barrio: event.barrio,
                 provincia: event.provincia,
+                descripcion: event.descripcion,
+                link: event.link,
+                imagen_url: event.imagen_url,
             }
         });
         return NextResponse.json({ events: res }, { status: 200, headers: { 'Content-Type': 'application/json' } });
