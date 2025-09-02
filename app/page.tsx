@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
- 
   Users,
   Trophy,
   BookOpen,
@@ -12,14 +11,14 @@ import {
   MapPin,
   Phone,
   Instagram,
-  Linkedin
+  Linkedin,
 } from "lucide-react";
 import { TeamMemberCard } from "@/components/TeamMemberCard";
-import Navbar from "@/components/Navbar"
-import Footer from "@/components/Footer"
-import Events from "@/components/Events"
-import Sponsors from "@/components/Sponsors"
-import PastEvents from "@/components/PastEvents"
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Events from "@/components/Events";
+import Sponsors from "@/components/Sponsors";
+import PastEvents from "@/components/PastEvents";
 import { Evento, Patrocinador } from "@/types/db_types";
 import Link from "next/link";
 
@@ -33,39 +32,31 @@ type TeamCategories = {
   [key: string]: TeamMember[];
 };
 
-
 const getEvents = async (): Promise<Evento[]> => {
   try {
     const res = await fetch("/api/events/past");
-    if(!res.ok) {
+    if (!res.ok) {
       throw new Error("Failed to fetch events");
     }
     const data = await res.json();
-    console.log("API response:", data);
-    console.log("Events:", data.events); 
-
     return data.events || [];
   } catch (error) {
     throw new Error("Failed to fetch events");
   }
-}
-
+};
 
 const getSponsors = async (): Promise<Patrocinador[]> => {
   try {
     const res = await fetch("/api/sponsors");
-    if(!res.ok) {
+    if (!res.ok) {
       throw new Error("Failed to fetch sponsors");
     }
-    const data = await res.json()
+    const data = await res.json();
     return data.sponsors || [];
   } catch (error) {
     throw new Error("Failed to fetch sponsors");
   }
-}
-
-
-
+};
 
 export default function ASMEPage() {
   const [activeCategory, setActiveCategory] = useState<string>("Directores");
@@ -145,11 +136,11 @@ export default function ASMEPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="#about">
               <Button
-              size="lg"
-              className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-8 py-3"
-            >
-              Conocer Más
-            </Button>
+                size="lg"
+                className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-8 py-3"
+              >
+                Conocer Más
+              </Button>
             </Link>
           </div>
         </div>
