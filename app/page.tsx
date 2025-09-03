@@ -329,12 +329,16 @@ export default function ASMEPage() {
             </div>
           </div>
 
-          <Button
-            size="lg"
-            className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-12 py-4"
-          >
-            Únete a ASME
-          </Button>
+          <a
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=asme@itba.edu.ar&su=&body="
+          target="_blank"
+          rel="noopener noreferrer">
+            <Button
+              size="lg"
+              className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-12 py-4">
+              Únete a ASME
+            </Button>
+          </a>
         </div>
       </section>
 
