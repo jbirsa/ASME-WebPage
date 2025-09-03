@@ -10,10 +10,7 @@ import {
   Mail,
   MapPin,
   Phone,
-  Instagram,
-  Linkedin,
 } from "lucide-react";
-import { TeamMemberCard } from "@/components/TeamMemberCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Events from "@/components/Events";
@@ -21,20 +18,25 @@ import Sponsors from "@/components/Sponsors";
 import PastEvents from "@/components/PastEvents";
 import { Evento, Patrocinador } from "@/types/db_types";
 import Link from "next/link";
+import OurTeam from "@/components/OurTeam";
+import NextEvents from "@/components/NextEvents";
 
-// Definir tipos para los datos
-type TeamMember = {
-  name: string;
-  role: string;
-};
-
-type TeamCategories = {
-  [key: string]: TeamMember[];
-};
-
-const getEvents = async (): Promise<Evento[]> => {
+const getPastEvents = async (): Promise<Evento[]> => {
   try {
     const res = await fetch("/api/events/past");
+    if (!res.ok) {
+      throw new Error("Failed to fetch events");
+    }
+    const data = await res.json();
+    return data.events || [];
+  } catch (error) {
+    throw new Error("Failed to fetch events");
+  }
+};
+
+const getNextEvents = async (): Promise<Evento[]> => {
+  try {
+    const res = await fetch("/api/events/future");
     if (!res.ok) {
       throw new Error("Failed to fetch events");
     }
@@ -59,48 +61,15 @@ const getSponsors = async (): Promise<Patrocinador[]> => {
 };
 
 export default function ASMEPage() {
-  const [activeCategory, setActiveCategory] = useState<string>("Directores");
   const [events, setEvents] = useState<Evento[]>([]);
+  const [nextEvents, setNextEvents] = useState<Evento[]>([]);
   const [sponsors, setSponsors] = useState<Patrocinador[]>([]);
 
   useEffect(() => {
-    getEvents().then((data) => setEvents(data));
+    getPastEvents().then((data) => setEvents(data));
+    getNextEvents().then((data) => setNextEvents(data));
     getSponsors().then((data) => setSponsors(data));
   }, []);
-
-  // Datos de miembros organizados por categoría
-  const teamMembers: TeamCategories = {
-    Directores: [
-      { name: "Juan Pérez", role: "Presidente" },
-      { name: "María López", role: "Vicepresidenta" },
-      { name: "Ana Gómez", role: "Secretaria" },
-    ],
-    Fundraising: [
-      { name: "Carlos Rodríguez", role: "Tesorero" },
-      { name: "Luis Martínez", role: "Coordinador Fundraising" },
-      { name: "Sofia Castro", role: "Analista Financiero" },
-    ],
-    Formación: [
-      { name: "Elena Díaz", role: "Directora de Formación" },
-      { name: "Roberto Sánchez", role: "Capacitador Senior" },
-      { name: "Marcos Silva", role: "Instructor Técnico" },
-    ],
-    Competencias: [
-      { name: "Pablo Torres", role: "Director de Competencias" },
-      { name: "Lucía Fernández", role: "Coordinadora de Eventos" },
-      { name: "Diego Morales", role: "Especialista en Robótica" },
-    ],
-    IT: [
-      { name: "Javier López", role: "Desarrollador Web" },
-      { name: "Camila Ruiz", role: "Soporte Técnico" },
-      { name: "Andrés Vega", role: "DevOps Engineer" },
-      { name: "Andrés Vega", role: "DevOps Engineer" },
-    ],
-    "Media y Comunicación": [],
-  };
-
-  // Categorías disponibles
-  const categories = Object.keys(teamMembers);
 
   return (
     <div className="min-h-screen bg-slate-900 text-white relative overflow-hidden">
@@ -211,7 +180,7 @@ export default function ASMEPage() {
       </section>
 
       {/* Events proximos */}
-      <Events />
+      <NextEvents events={nextEvents} />
 
       {/* Past Events Section */}
       <PastEvents events={events} />
@@ -220,63 +189,7 @@ export default function ASMEPage() {
       <Sponsors />
 
       {/* Team Section */}
-      <section id="equipo" className="relative z-10 py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-12 text-[#5f87ab]">
-              Nuestro Equipo
-            </h2>
-
-            {/* Team Categories - Con funcionalidad de filtrado */}
-            <div className="flex flex-wrap justify-center gap-4 mb-16">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  className={`${
-                    activeCategory === category
-                      ? "bg-[#5f87ab] text-white"
-                      : "bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900"
-                  } font-semibold px-6 py-3 rounded-full transition-colors duration-200`}
-                  onClick={() => setActiveCategory(category)}
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Team Members Grid - Filtrado por categoría */}
-          <div className="flex flex-wrap justify-center gap-6">
-            {teamMembers[activeCategory]?.map((member, index) => (
-              <div
-                key={`${activeCategory}-${index}`}
-                className="w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(20%-20px)]"
-              >
-                <TeamMemberCard
-                  name={member.name}
-                  role={member.role}
-                  socialIcons={
-                    <>
-                      <Instagram className="w-5 h-5 text-gray-700 hover:text-[#e3a72f] cursor-pointer transition-colors" />
-                      <Linkedin className="w-5 h-5 text-gray-700 hover:text-[#e3a72f] cursor-pointer transition-colors" />
-                    </>
-                  }
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Mensaje si no hay miembros en la categoría */}
-          {(!teamMembers[activeCategory] ||
-            teamMembers[activeCategory].length === 0) && (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">
-                No hay miembros disponibles para esta categoría.
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
+      <OurTeam/>
 
       {/* Contact Section */}
       <section id="contacto" className="relative z-10 py-20 px-6">

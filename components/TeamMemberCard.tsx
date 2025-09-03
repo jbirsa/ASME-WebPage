@@ -3,22 +3,21 @@ import { User } from "lucide-react";
 import { ReactNode } from "react";
 
 interface TeamMemberCardProps {
-  name: string;
+  nombre: string;
+  apellido: string;
   role: string;
   image?: string;
   socialIcons?: ReactNode;
 }
 
-export function TeamMemberCard({ name, role, image, socialIcons }: TeamMemberCardProps) {
-  const [firstName, lastName] = name.split(' ', 2);
-  
+export function TeamMemberCard({ nombre, apellido, role, image, socialIcons }: TeamMemberCardProps) {
   return (
     <Card className="bg-white text-slate-900 border-0">
       <CardContent className="p-6 text-center">
         {image ? (
           <img 
             src={image} 
-            alt={name} 
+            alt={nombre + ' ' + apellido}
             className="w-20 h-20 rounded-full object-cover mx-auto mb-4" 
           />
         ) : (
@@ -26,8 +25,8 @@ export function TeamMemberCard({ name, role, image, socialIcons }: TeamMemberCar
             <User className="w-10 h-10 text-gray-600" />
           </div>
         )}
-        <h3 className="font-bold text-lg mb-1">{firstName || "Nombre"}</h3>
-        <h3 className="font-bold text-lg mb-1">{lastName || "Completo"}</h3>
+        <h3 className="font-bold text-lg mb-1">{nombre || "Nombre"}</h3>
+        <h3 className="font-bold text-lg mb-1">{apellido || "Completo"}</h3>
         <p className="text-gray-600 text-sm mb-4 h-10">{role || "cargo"}</p>
         <div className="flex justify-center space-x-8 ">
           {socialIcons}
