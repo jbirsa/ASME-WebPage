@@ -24,6 +24,7 @@ export type TeamMember = {
   apellido: string;
   role: string;
   image?: string;
+  mail?: string;
   instagram?: string;
   linkedin?: string;
 };
