@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react"
+import { ChevronLeft, ChevronRight, Calendar, MapPin, Link } from "lucide-react"
 import { Evento } from "@/types/db_types"
 
 
@@ -89,6 +89,14 @@ export default function NextEvents( {events} : {events: Evento[]} ) {
                 <p className="text-gray-300 text-base md:text-lg leading-relaxed">
                   {events[currentIndex].descripcion}
                 </p>
+                <a
+                href={events[currentIndex].link}
+                target="_blank"
+                rel="noopener noreferrer">
+                  <Button size="lg" className="mt-6 bg-[#e3a72f] hover:bg-[#d4961a] text-black px-8 py-3 w-fit">
+                  Inscribirse
+                  </Button>
+                </a>
               </div>
             </div>
           </div>

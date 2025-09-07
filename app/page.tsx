@@ -10,6 +10,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  Instagram,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -20,6 +21,7 @@ import { Evento, Patrocinador } from "@/types/db_types";
 import Link from "next/link";
 import OurTeam from "@/components/OurTeam";
 import NextEvents from "@/components/NextEvents";
+import Image from "next/image";
 
 const getPastEvents = async (): Promise<Evento[]> => {
   try {
@@ -93,9 +95,7 @@ export default function ASMEPage() {
             ITBA • Buenos Aires
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-[#5f87ab] bg-clip-text text-transparent">
-            ASME
-          </h1>
+          <Image className="mb-6 mx-auto"src="/asme_logo_blanco.png" alt="ASME Logo" width={220} height={220} />
 
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto">
             Promoviendo la excelencia en ingeniería mecánica a través de
@@ -198,14 +198,19 @@ export default function ASMEPage() {
             Contacto
           </h2>
           <p className="text-xl text-gray-300 mb-12">
-            ¿Interesado en unirte o colaborar? ¡Contáctanos!
+            ¿Interesado en colaborar? ¡Contáctanos!
           </p>
 
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
-                <Mail className="w-8 h-8 text-slate-900" />
-              </div>
+              <a
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=asme@itba.edu.ar&su=&body="
+              target="_blank"
+              rel="noopener noreferrer">
+                <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
+                  <Mail className="w-8 h-8 text-slate-900" />
+                </div>
+              </a>
               <h3 className="text-lg font-semibold mb-2 text-[#e3a72f]">
                 Email
               </h3>
@@ -213,9 +218,14 @@ export default function ASMEPage() {
             </div>
 
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
-                <MapPin className="w-8 h-8 text-slate-900" />
-              </div>
+               <a
+              href="https://maps.app.goo.gl/WXMedwKRqSLbR8MS8/"
+              target="_blank"
+              rel="noopener noreferrer">
+                <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
+                  <MapPin className="w-8 h-8 text-slate-900" />
+                </div>
+              </a>
               <h3 className="text-lg font-semibold mb-2 text-[#e3a72f]">
                 Ubicación
               </h3>
@@ -223,9 +233,14 @@ export default function ASMEPage() {
             </div>
 
             <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
-                <Phone className="w-8 h-8 text-slate-900" />
-              </div>
+              <a
+              href="https:www.instagram.com/asme.itba/"
+              target="_blank"
+              rel="noopener noreferrer">
+                <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
+                  <Instagram className="w-8 h-8 text-slate-900" />
+                </div>
+              </a>
               <h3 className="text-lg font-semibold mb-2 text-[#e3a72f]">
                 Síguenos
               </h3>
@@ -240,7 +255,7 @@ export default function ASMEPage() {
             <Button
               size="lg"
               className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-12 py-4">
-              Únete a ASME
+              Contáctanos
             </Button>
           </a>
         </div>

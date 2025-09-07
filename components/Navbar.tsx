@@ -37,7 +37,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center space-x-8 mx-auto">
           <a 
             href="#inicio" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
@@ -61,9 +61,11 @@ export default function Navbar() {
           </a>
         </div>
 
+       {/* 
         <Button className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold transition-colors duration-200">
           Únete
         </Button>
+       */}
       </div>
     </nav>
   )
