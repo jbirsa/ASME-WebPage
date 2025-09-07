@@ -3,12 +3,11 @@
 import { useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react"
 import { Evento } from "@/types/db_types"
 
 
-export default function PastEvents( {events} : {events: Evento[]} ) {
+export default function NextEvents( {events} : {events: Evento[]} ) {
   const [currentIndex, setCurrentIndex] = useState(0)
 
   // Validación para array vacío
@@ -16,9 +15,8 @@ export default function PastEvents( {events} : {events: Evento[]} ) {
     return (
       <section className="relative z-10 py-20 px-6 bg-slate-800/30">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Eventos Pasados</h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Próximos Eventos</h2>
           <p className="text-xl text-gray-300">No hay eventos disponibles</p>
-          {/* <p className="text-sm text-gray-400 mt-2">Events length: {events?.length || 0}</p> */}
         </div>
       </section>
     );
@@ -44,9 +42,9 @@ export default function PastEvents( {events} : {events: Evento[]} ) {
     <section className="relative z-10 py-20 px-6 bg-slate-800/30">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Eventos Pasados</h2>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Próximos Eventos</h2>
           <p className="text-xl text-gray-300">
-            Revive los momentos más destacados de nuestros eventos anteriores
+            No te pierdas nuestras actividades y oportunidades de crecimiento profesional
           </p>
         </div>
 

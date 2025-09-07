@@ -1,24 +1,22 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { User } from "lucide-react";
-import { ReactNode } from "react";
+import { User, Mail } from "lucide-react";
 
 interface TeamMemberCardProps {
-  name: string;
+  nombre: string;
+  apellido: string;
   role: string;
+  mail?: string;
   image?: string;
-  socialIcons?: ReactNode;
 }
 
-export function TeamMemberCard({ name, role, image, socialIcons }: TeamMemberCardProps) {
-  const [firstName, lastName] = name.split(' ', 2);
-  
+export function TeamMemberCard({ nombre, apellido, role, image, mail }: TeamMemberCardProps) {
   return (
     <Card className="bg-white text-slate-900 border-0">
-      <CardContent className="p-6 text-center">
+      <CardContent className="p-1 text-center">
         {image ? (
           <img 
             src={image} 
-            alt={name} 
+            alt={nombre + ' ' + apellido}
             className="w-20 h-20 rounded-full object-cover mx-auto mb-4" 
           />
         ) : (
@@ -26,11 +24,21 @@ export function TeamMemberCard({ name, role, image, socialIcons }: TeamMemberCar
             <User className="w-10 h-10 text-gray-600" />
           </div>
         )}
-        <h3 className="font-bold text-lg mb-1">{firstName || "Nombre"}</h3>
-        <h3 className="font-bold text-lg mb-1">{lastName || "Completo"}</h3>
-        <p className="text-gray-600 text-sm mb-4 h-10">{role || "cargo"}</p>
-        <div className="flex justify-center space-x-8 ">
-          {socialIcons}
+        <h3 className="font-bold text-lg">{nombre || "Nombre"}</h3>
+        <h3 className="font-bold text-lg mb-4">{apellido || "Completo"}</h3>
+        <p className="text-gray-600 text-sm mb-6 h-8">{role || "cargo"}</p>
+
+        <div className="flex justify-center space-x-4">
+          {mail && (
+            <a 
+              href={`mailto: ${mail}`}
+              className="text-gray-700 hover:text-[#e3a72f] transition-colors"
+              aria-label={`Enviar email a ${nombre}`}
+              title={mail}
+            >
+              <Mail className="w-8 h-8" />
+            </a>
+          )}
         </div>
       </CardContent>
     </Card>
