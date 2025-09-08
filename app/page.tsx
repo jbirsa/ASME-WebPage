@@ -204,7 +204,7 @@ export default function ASMEPage() {
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div className="flex flex-col items-center">
               <a
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=asme@itba.edu.ar&su=&body="
+              href="mailto:asme@itba.edu.ar?subject=&body="
               target="_blank"
               rel="noopener noreferrer">
                 <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
@@ -234,7 +234,7 @@ export default function ASMEPage() {
 
             <div className="flex flex-col items-center">
               <a
-              href="https:www.instagram.com/asme.itba/"
+              href="https://www.instagram.com/asme.itba/"
               target="_blank"
               rel="noopener noreferrer">
                 <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
@@ -249,7 +249,7 @@ export default function ASMEPage() {
           </div>
 
           <a
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=asme@itba.edu.ar&su=&body="
+          href="mailto:asme@itba.edu.ar?subject=&body="
           target="_blank"
           rel="noopener noreferrer">
             <Button
