@@ -17,6 +17,7 @@ export type Evento = {
   descripcion: string;
   link: string;
   imagen_url: string;
+  pagina_evento: string;
 };
 
 export type TeamMember = {

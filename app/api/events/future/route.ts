@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
                 descripcion: event.descripcion,
                 link: event.link,
                 imagen_url: event.imagen_url,
+                pagina_evento: event.pagina_evento
             }
         });
         return NextResponse.json({ events: res }, { status: 200, headers: { 'Content-Type': 'application/json' } });

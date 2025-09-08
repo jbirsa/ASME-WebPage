@@ -11,7 +11,7 @@ interface TeamMemberCardProps {
 
 export function TeamMemberCard({ nombre, apellido, role, image, mail }: TeamMemberCardProps) {
   return (
-    <Card className="bg-white text-slate-900 border-0">
+    <Card className="bg-slate-800/70 text-slate-900 border-slate-600 backdrop-blur-sm hover:bg-slate-800/90 transition-all duration-300">
       <CardContent className="p-1 text-center">
         {image ? (
           <img 
@@ -24,15 +24,15 @@ export function TeamMemberCard({ nombre, apellido, role, image, mail }: TeamMemb
             <User className="w-10 h-10 text-gray-600" />
           </div>
         )}
-        <h3 className="font-bold text-lg">{nombre || "Nombre"}</h3>
-        <h3 className="font-bold text-lg mb-4">{apellido || "Completo"}</h3>
-        <p className="text-gray-600 text-sm mb-6 h-8">{role || "cargo"}</p>
+        <h3 className="text-lg font-bold text-white">{nombre || "Nombre"}</h3>
+        <h3 className="text-lg font-bold mb-2 text-white">{apellido || "Completo"}</h3>
+        <p className="text-[#e3a72f] text-sm font-medium mb-6 h-8">{role || "cargo"}</p>
 
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center space-x-4 ">
           {mail && (
             <a 
               href={`mailto: ${mail}`}
-              className="text-gray-700 hover:text-[#e3a72f] transition-colors"
+              className="text-[#5f87ab] hover:text-[#e3a72f] transition-colors duration-200"
               aria-label={`Enviar email a ${nombre}`}
               title={mail}
             >
