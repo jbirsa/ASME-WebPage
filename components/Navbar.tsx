@@ -38,27 +38,27 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center space-x-8 mx-auto">
-          <a 
+          <Link
             href="/#inicio" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
           >
             Inicio
-          </a>
-          <a 
+          </Link>
+          <Link
             href="/#eventos" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
           >
             Eventos
-          </a>
-          <a href="/#equipo" className="hover:text-[#e3a72f] transition-colors">
+          </Link>
+          <Link href="/#equipo" className="hover:text-[#e3a72f] transition-colors">
             Equipo
-          </a>
-          <a 
+          </Link>
+          <Link 
             href="/#contacto" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
           >
             Contacto
-          </a>
+          </Link>
         </div>
 
        {/* 

@@ -5,14 +5,8 @@ import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import Link from "next/link"
 import Image from "next/image"
-import { useSearchParams } from "next/navigation"
-
-interface EquilibristaMecanicoPageProps {
-  registrationLink?: string
-}
 
 export default function EquilibristaMecanicoPage() {
-  const searchParams = useSearchParams()
   const registrationLink = "https://docs.google.com/forms/d/e/1FAIpQLScYhdWtIKKIqRMDDSoT8d6w0HhZBWGIE4nip30WjdLyz3IxTg/viewform?usp=dialog"
 
   return (
