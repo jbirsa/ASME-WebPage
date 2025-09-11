@@ -26,7 +26,7 @@ export default function Navbar() {
       <div className="flex items-center justify-between p-4 md:p-6 max-w-7xl mx-auto">
         <div className="flex items-center space-x-2">
           <div className="w-16 h-16 rounded-full relative flex items-center justify-center">
-            <Link href="#inicio" className="hover:opacity-80 transition-opacity duration-200">
+            <Link href="/#inicio" className="hover:opacity-80 transition-opacity duration-200">
               <Image
                 src="/asme_logo_blanco.png"
                 alt="ASME Logo"
@@ -39,22 +39,22 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center space-x-8 mx-auto">
           <a 
-            href="#inicio" 
+            href="/#inicio" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
           >
             Inicio
           </a>
           <a 
-            href="#eventos" 
+            href="/#eventos" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
           >
             Eventos
           </a>
-          <a href="#equipo" className="hover:text-[#e3a72f] transition-colors">
+          <a href="/#equipo" className="hover:text-[#e3a72f] transition-colors">
             Equipo
           </a>
           <a 
-            href="#contacto" 
+            href="/#contacto" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
           >
             Contacto

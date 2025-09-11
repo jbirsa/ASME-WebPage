@@ -7,13 +7,18 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock } from "lucide-react"
 import type { Evento } from "@/types/db_types"
 
-export default function NextEvents({ events }: { events: Evento[] }) {
+export default function NextEvents({
+   id, events, 
+  }: { 
+    id: string;
+    events: Evento[]; 
+  }) {
   const [currentIndex, setCurrentIndex] = useState(0)
 
   // Validación para array vacío
   if (!events || events.length === 0) {
     return (
-      <section className="relative z-10 py-20 px-6 bg-slate-800/30">
+      <section id = {id} className="relative z-10 py-20 px-6 bg-slate-800/30">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Próximos Eventos</h2>
           <p className="text-xl text-gray-300">No hay eventos disponibles</p>

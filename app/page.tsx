@@ -179,11 +179,14 @@ export default function ASMEPage() {
         </div>
       </section>
 
-      {/* Events proximos */}
-      <NextEvents events={nextEvents} />
+      <section id="eventos">
+        {/* Events proximos */}
+        <NextEvents id="eventos" events={nextEvents} />
 
-      {/* Past Events Section */}
-      <PastEvents events={events} />
+        {/* Past Events Section */}
+        <PastEvents events={events} />
+
+      </section>
 
       {/* Sponsors Section */}
       <Sponsors />
