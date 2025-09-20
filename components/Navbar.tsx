@@ -45,6 +45,12 @@ export default function Navbar() {
             Inicio
           </Link>
           <Link
+            href="/mechub" 
+            className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
+          >
+            Mechub
+          </Link>
+          <Link
             href="/#eventos" 
             className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
           >
