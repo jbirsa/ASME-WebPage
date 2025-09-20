@@ -1,7 +1,5 @@
-import { Resend } from "resend"
 import { type NextRequest, NextResponse } from "next/server"
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import nodemailer from "nodemailer"
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,10 +16,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email inválido" }, { status: 400 })
     }
 
-    // Enviar email usando Resend
-    const data = await resend.emails.send({
-      from: "ASME ITBA <onboarding@resend.dev>", // Dominio por defecto de Resend
-      to: ["asme@itba.edu.ar"],
+    // Configurar transporter de Gmail
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER, // Tu email de Gmail
+        pass: process.env.GMAIL_APP_PASSWORD, // Contraseña de aplicación de Gmail
+      },
+    })
+
+    // Configurar el email
+    const mailOptions = {
+      from: `"MecHub ASME" <${process.env.GMAIL_USER}>`,
+      to: "jbirsa@itba.edu.ar",
       subject: `[Contacto Web] Patrocinación - ${name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -46,11 +53,22 @@ export async function POST(request: NextRequest) {
           </div>
         </div>
       `,
-    })
+      replyTo: email, // Para que puedas responder directamente al remitente
+    }
 
-    return NextResponse.json({ message: "Email enviado correctamente"}, { status: 200 })
+    // Enviar el email
+    const info = await transporter.sendMail(mailOptions)
+
+    console.log("Email sent successfully:", info.messageId)
+    return NextResponse.json({ message: "Email enviado correctamente", messageId: info.messageId }, { status: 200 })
   } catch (error) {
     console.error("Error enviando email:", error)
-    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Error interno del servidor",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    )
   }
 }
