@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import Footer from "@/components/Footer"
 import {
   Building2,
   Users,
@@ -548,13 +549,7 @@ export default function MecHubPage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="relative z-10 py-8 px-6 border-t border-slate-700">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-gray-400">© 2024 MecHub by ASME ITBA. Impulsando la innovación en ingeniería mecánica.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
