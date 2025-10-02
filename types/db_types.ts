@@ -10,7 +10,7 @@ export type Evento = {
   id: number;
   nombre: string;
   tipo: string;
-  fecha: Date; // o string y despues convertir ISOString a Date ????!!?!?!?!
+  fecha: string | Date;
   direccion: string;
   barrio: string;
   provincia: string;
