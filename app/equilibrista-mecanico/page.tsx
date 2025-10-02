@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Users, Clock, Target, Zap, ArrowLeft, Download } from "lucide-react"
-import Navbar from "@/components/Navbar"
+import { Users, Clock, Target, Zap, ArrowLeft, Download, ChevronRight } from "lucide-react"
+import MecHubNavbar from "@/components/MecHubNavbar"
 import Footer from "@/components/Footer"
 import Link from "next/link"
 import Image from "next/image"
@@ -18,23 +18,24 @@ export default function EquilibristaMecanicoPage() {
         <div className="stars3"></div>
       </div>
 
-      <Navbar />
+      <MecHubNavbar ctaHref="#inscripcion" ctaLabel="Inscribirse" />
+
+      {/* Breadcrumbs */}
+      <div className="relative z-20 max-w-7xl mx-auto px-6 mt-28">
+        <div className="flex items-center space-x-2 text-sm text-gray-300">
+          <Link href="/" className="hover:text-[#e3a72f] transition-colors duration-200">
+            Inicio
+          </Link>
+          <ChevronRight className="w-4 h-4 text-gray-500" />
+          <span className="text-[#e3a72f] font-medium">Equilibrista Mecánico</span>
+        </div>
+      </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-32 pb-20 px-6">
+      <section className="relative z-10 pt-16 pb-20 px-6">
         <div className="max-w-6xl mx-auto">
-          <Link
-            href="/"
-            className="inline-flex items-center text-[#e3a72f] hover:text-[#d4961a] mb-8 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Volver al inicio
-          </Link>
 
           <div className="text-center mb-16">
-            <div className="inline-block bg-[#5f87ab] text-white px-4 py-2 rounded-full text-sm font-medium mb-8">
-              Competencia ASME ITBA
-            </div>
 
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-[#e3a72f]">Equilibrista Mecánico</h1>
 
@@ -170,7 +171,7 @@ export default function EquilibristaMecanicoPage() {
             </div>
           </div>
 
-          <div className="text-center space-y-6">
+          <div id="inscripcion" className="text-center space-y-6">
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 asChild

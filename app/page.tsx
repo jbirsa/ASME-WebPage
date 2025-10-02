@@ -91,10 +91,6 @@ export default function ASMEPage() {
         className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] text-center px-6 pt-24"
       >
         <div className="max-w-4xl mx-auto">
-          <div className="inline-block bg-[#5f87ab] text-white px-4 py-2 rounded-full text-sm font-medium mb-8">
-            ITBA • Buenos Aires
-          </div>
-
           <Image className="mb-6 mx-auto"src="/asme_logo_blanco.png" alt="ASME Logo" width={220} height={220} />
 
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto">

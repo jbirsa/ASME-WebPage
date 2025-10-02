@@ -4,9 +4,13 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronRight } from "lucide-react"
 
-export default function MecHubNavbar() {
+type MecHubNavbarProps = {
+  ctaHref?: string
+  ctaLabel?: string
+}
+
+export default function MecHubNavbar({ ctaHref = "#cotizar", ctaLabel = "Cotizar" }: MecHubNavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
@@ -33,9 +37,20 @@ export default function MecHubNavbar() {
           </div>
         </div>
 
-        <Button className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold transition-colors duration-200">
-          <Link href="#cotizar">Cotizar</Link>
-        </Button>
+        {ctaHref ? (
+          <Button
+            asChild
+            className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold transition-colors duration-200"
+          >
+            {/^https?:/i.test(ctaHref) ? (
+              <a href={ctaHref} target="_blank" rel="noopener noreferrer">
+                {ctaLabel}
+              </a>
+            ) : (
+              <Link href={ctaHref}>{ctaLabel}</Link>
+            )}
+          </Button>
+        ) : null}
       </div>
     </nav>
   )
