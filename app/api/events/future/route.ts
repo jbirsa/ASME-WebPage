@@ -6,7 +6,7 @@ import { getSupabaseServerClient } from "@/lib/supabaseClient";
 export async function GET(req: NextRequest) {
     try {   
         const supabase = getSupabaseServerClient();
-        const { data, error } = await supabase.from('evento').select('*').gte('fecha', new Date().toISOString());
+        const { data, error } = await supabase.from('evento').select('*').gte('fecha', new Date().toISOString()).order('fecha', { ascending: true });
         if(error)
             return NextResponse.json( {error: error}, { status: 500 } );
         if(!data)

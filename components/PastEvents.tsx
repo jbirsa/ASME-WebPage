@@ -1,8 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { MapPin, Clock } from "lucide-react"
+import { MapPin } from "lucide-react"
 import type { Evento } from "@/types/db_types"
+import { formatEventDate } from "@/lib/date"
 
 export default function PastEvents({ events }: { events: Evento[] }) {
   // Validación para array vacío
@@ -59,7 +60,7 @@ export default function PastEvents({ events }: { events: Evento[] }) {
 
                       {/* Date badge */}
                       <div className="absolute top-4 left-4 bg-[#e3a72f]/90 text-slate-900 px-3 py-1 rounded-full text-sm font-semibold">
-                        {new Date(event.fecha).toLocaleDateString("es-ES", {
+                        {formatEventDate(event.fecha, "es-ES", {
                           day: "numeric",
                           month: "short",
                           year: "numeric",

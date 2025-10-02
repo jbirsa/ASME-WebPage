@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock } from "lucide-react"
 import type { Evento } from "@/types/db_types"
+import { formatEventDate, parseEventDate } from "@/lib/date"
 
 export default function NextEvents({
    id, events, 
@@ -27,6 +28,8 @@ export default function NextEvents({
     )
   }
 
+  const hasMultipleEvents = events.length > 1
+
   const nextEvent = () => {
     setCurrentIndex((prevIndex) => (prevIndex === events.length - 1 ? 0 : prevIndex + 1))
   }
@@ -38,6 +41,26 @@ export default function NextEvents({
   const goToEvent = (index: number) => {
     setCurrentIndex(index)
   }
+
+  const currentEvent = events[currentIndex]
+  const currentEventDate = parseEventDate(currentEvent.fecha)
+  const formattedDate = formatEventDate(currentEvent.fecha, "es-AR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
+
+  const rawDateValue =
+    typeof currentEvent.fecha === "string" ? currentEvent.fecha : currentEvent.fecha?.toString() ?? ""
+  const hasTimeInformation =
+    typeof currentEvent.fecha === "string"
+      ? currentEvent.fecha.includes("T") || currentEvent.fecha.includes(" ")
+      : !Number.isNaN(currentEventDate.getTime()) && (currentEventDate.getHours() !== 0 || currentEventDate.getMinutes() !== 0)
+
+  const formattedTime =
+    hasTimeInformation && !Number.isNaN(currentEventDate.getTime())
+      ? currentEventDate.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
+      : null
 
   return (
     <section className="relative z-10 py-20 px-6 bg-gradient-to-br from-slate-900/40 to-slate-800/60">
@@ -55,10 +78,10 @@ export default function NextEvents({
             <div className="grid md:grid-cols-2 gap-0 min-h-[500px]">
               {/* Image Section */}
               <div className="relative h-64 md:h-full">
-                {events[currentIndex].imagen_url && (
+                {currentEvent.imagen_url && (
                   <Image
-                    src={events[currentIndex].imagen_url || "/placeholder.svg"}
-                    alt={events[currentIndex].nombre}
+                    src={currentEvent.imagen_url || "/placeholder.svg"}
+                    alt={currentEvent.nombre}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -76,30 +99,36 @@ export default function NextEvents({
                   <div className="flex flex-wrap items-center gap-4 text-[#e3a72f] text-sm font-medium mb-4">
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
-                      {new Date(events[currentIndex].fecha).toLocaleDateString()}
+                      {formattedDate || rawDateValue}
                     </div>
+                    {formattedTime ? (
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 mr-2" />
+                        {formattedTime}
+                      </div>
+                    ) : null}
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2" />
-                      {events[currentIndex].direccion}
+                      {currentEvent.direccion}
                     </div>
                   </div>
                 </div>
 
-                <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">{events[currentIndex].nombre}</h3>
+                <h3 className="text-2xl md:text-3xl font-bold mb-4 text-white">{currentEvent.nombre}</h3>
 
                 <p className="text-gray-300 text-base md:text-lg leading-relaxed mb-6">
-                  {events[currentIndex].descripcion}
+                  {currentEvent.descripcion}
                 </p>
 
                 <div className="flex flex-wrap gap-3">
-                  <a href={events[currentIndex].link} target="_blank" rel="noopener noreferrer">
+                  <a href={currentEvent.link} target="_blank" rel="noopener noreferrer">
                     <Button size="lg" className="bg-[#e3a72f] hover:bg-[#d4961a] text-black px-8 py-3">
                       Inscribirse
                     </Button>
                   </a>
 
-                  {events[currentIndex].pagina_evento && (
-                    <Link href={`/${events[currentIndex].pagina_evento}`}>
+                  {currentEvent.pagina_evento && (
+                    <Link href={`/${currentEvent.pagina_evento}`}>
                       <Button size="lg" className="bg-[#f2f1e8] hover:bg-[#e8e7dc] text-black px-8 py-3">
                         Ver Detalles
                       </Button>
@@ -111,21 +140,25 @@ export default function NextEvents({
           </div>
 
           {/* Navigation Buttons */}
-          <Button
-            onClick={prevEvent}
-            className="hover:cursor-pointer absolute left-4 top-1/2 transform -translate-y-1/2 bg-[#e3a72f]/20 hover:bg-[#e3a72f]/40 text-white border border-[#e3a72f]/30 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm"
-            size="icon"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </Button>
+          {hasMultipleEvents ? (
+            <>
+              <Button
+                onClick={prevEvent}
+                className="hover:cursor-pointer absolute left-4 top-1/2 transform -translate-y-1/2 bg-[#e3a72f]/20 hover:bg-[#e3a72f]/40 text-white border border-[#e3a72f]/30 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm"
+                size="icon"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </Button>
 
-          <Button
-            onClick={nextEvent}
-            className="hover:cursor-pointer absolute right-4 top-1/2 transform -translate-y-1/2 bg-[#e3a72f]/20 hover:bg-[#e3a72f]/40 text-white border border-[#e3a72f]/30 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm"
-            size="icon"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </Button>
+              <Button
+                onClick={nextEvent}
+                className="hover:cursor-pointer absolute right-4 top-1/2 transform -translate-y-1/2 bg-[#e3a72f]/20 hover:bg-[#e3a72f]/40 text-white border border-[#e3a72f]/30 rounded-full w-12 h-12 p-0 shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm"
+                size="icon"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </Button>
+            </>
+          ) : null}
         </div>
 
         {/* Event Indicators */}

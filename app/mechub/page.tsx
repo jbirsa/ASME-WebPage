@@ -14,7 +14,6 @@ import {
   Calendar,
   MapPin,
   Mail,
-  Phone,
   Send,
   Instagram,
   X,
@@ -437,52 +436,50 @@ export default function MecHubPage() {
               <h3 className="text-2xl font-bold mb-8 text-[#e3a72f]">Información de Contacto</h3>
 
               <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center">
+                <a
+                  href="mailto:asme@itba.edu.ar?subject=&body="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-4 group"
+                >
+                  <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center transition-transform group-hover:scale-105">
                     <Mail className="w-6 h-6 text-slate-900" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-white">Email</h4>
-                    <p className="text-gray-300">asme@itba.edu.ar</p>
+                    <p className="text-gray-300 group-hover:text-[#d4961a] transition-colors">asme@itba.edu.ar</p>
                   </div>
-                </div>
+                </a>
 
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center">
+                <a
+                  href="https://maps.app.goo.gl/WXMedwKRqSLbR8MS8/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-4 group"
+                >
+                  <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center transition-transform group-hover:scale-105">
                     <MapPin className="w-6 h-6 text-slate-900" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-white">Ubicación</h4>
-                    <p className="text-gray-300">ITBA, Buenos Aires</p>
+                    <p className="text-gray-300 group-hover:text-[#d4961a] transition-colors">ITBA, Buenos Aires</p>
                   </div>
-                </div>
+                </a>
 
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center">
-                    <Phone className="w-6 h-6 text-slate-900" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-white">Horarios</h4>
-                    <p className="text-gray-300">Lun - Vie: 8:00 - 20:00</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center">
+                <a
+                  href="https://www.instagram.com/asme.itba/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-4 group"
+                >
+                  <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center transition-transform group-hover:scale-105">
                     <Instagram className="w-6 h-6 text-slate-900" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-white">Instagram</h4>
-                    <a
-                      href="https://www.instagram.com/asme.itba/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-300 hover:text-[#d4961a] transition-colors"
-                    >
-                      @asme.itba
-                    </a>
+                    <span className="text-gray-300 group-hover:text-[#d4961a] transition-colors">@asme.itba</span>
                   </div>
-                </div>
+                </a>
               </div>
             </div>
 

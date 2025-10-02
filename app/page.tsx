@@ -201,50 +201,50 @@ export default function ASMEPage() {
           </p>
 
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="flex flex-col items-center">
-              <a
+            <a
               href="mailto:asme@itba.edu.ar?subject=&body="
               target="_blank"
-              rel="noopener noreferrer">
-                <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
-                  <Mail className="w-8 h-8 text-slate-900" />
-                </div>
-              </a>
-              <h3 className="text-lg font-semibold mb-2 text-[#e3a72f]">
+              rel="noopener noreferrer"
+              className="flex flex-col items-center group"
+            >
+              <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+                <Mail className="w-8 h-8 text-slate-900" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-[#e3a72f] transition-colors group-hover:text-[#d4961a]">
                 Email
               </h3>
-              <p className="text-gray-300">asme@itba.edu.ar</p>
-            </div>
+              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">asme@itba.edu.ar</p>
+            </a>
 
-            <div className="flex flex-col items-center">
-               <a
+            <a
               href="https://maps.app.goo.gl/WXMedwKRqSLbR8MS8/"
               target="_blank"
-              rel="noopener noreferrer">
-                <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
-                  <MapPin className="w-8 h-8 text-slate-900" />
-                </div>
-              </a>
-              <h3 className="text-lg font-semibold mb-2 text-[#e3a72f]">
+              rel="noopener noreferrer"
+              className="flex flex-col items-center group"
+            >
+              <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+                <MapPin className="w-8 h-8 text-slate-900" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-[#e3a72f] transition-colors group-hover:text-[#d4961a]">
                 Ubicación
               </h3>
-              <p className="text-gray-300">ITBA, Buenos Aires</p>
-            </div>
+              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">ITBA, Buenos Aires</p>
+            </a>
 
-            <div className="flex flex-col items-center">
-              <a
+            <a
               href="https://www.instagram.com/asme.itba/"
               target="_blank"
-              rel="noopener noreferrer">
-                <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4">
-                  <Instagram className="w-8 h-8 text-slate-900" />
-                </div>
-              </a>
-              <h3 className="text-lg font-semibold mb-2 text-[#e3a72f]">
+              rel="noopener noreferrer"
+              className="flex flex-col items-center group"
+            >
+              <div className="w-16 h-16 bg-[#e3a72f] rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+                <Instagram className="w-8 h-8 text-slate-900" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-[#e3a72f] transition-colors group-hover:text-[#d4961a]">
                 Síguenos
               </h3>
-              <p className="text-gray-300">@asme_itba</p>
-            </div>
+              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">@asme_itba</p>
+            </a>
           </div>
 
           <a
