@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock } from "lucide-react"
 import type { Evento } from "@/types/db_types"
 import { formatEventDate, parseEventDate } from "@/lib/date"
+import AOS from "aos"
+import "aos/dist/aos.css"
+import { useEffect } from "react"
 
 export default function NextEvents({
    id, events, 
@@ -15,6 +18,14 @@ export default function NextEvents({
     events: Evento[]; 
   }) {
   const [currentIndex, setCurrentIndex] = useState(0)
+
+      useEffect(() => {
+      AOS.init({
+        duration: 800,
+        easing: "ease-out-cubic",
+        once: true,
+      })
+    }, [])
 
   // Validación para array vacío
   if (!events || events.length === 0) {
@@ -26,7 +37,7 @@ export default function NextEvents({
         </div>
       </section>
     )
-  }
+  } 
 
   const hasMultipleEvents = events.length > 1
 
@@ -66,14 +77,14 @@ export default function NextEvents({
     <section className="relative z-10 py-20 px-6 bg-gradient-to-br from-slate-900/40 to-slate-800/60">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Próximos Eventos</h2>
-          <p className="text-xl text-gray-300">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]" data-aos="fade-up">Próximos Eventos</h2>
+          <p className="text-xl text-gray-300" data-aos="fade-up" data-aos-delay="150">
             No te pierdas nuestras actividades y oportunidades de crecimiento profesional
           </p>
         </div>
 
         {/* Main Event Display */}
-        <div className="relative mb-12">
+        <div className="relative mb-12" data-aos="fade-up" data-aos-delay="300">
           <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 border border-slate-500/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-2xl">
             <div className="grid md:grid-cols-2 gap-0 min-h-[500px]">
               {/* Image Section */}

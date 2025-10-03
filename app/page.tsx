@@ -22,6 +22,7 @@ import Link from "next/link";
 import OurTeam from "@/components/OurTeam";
 import NextEvents from "@/components/NextEvents";
 import Image from "next/image";
+import AOS from "aos"
 
 const getPastEvents = async (): Promise<Evento[]> => {
   try {
@@ -71,10 +72,17 @@ export default function ASMEPage() {
     getPastEvents().then((data) => setEvents(data));
     getNextEvents().then((data) => setNextEvents(data));
     getSponsors().then((data) => setSponsors(data));
+     AOS.init({
+        offset: 240,
+        duration: 800,
+        easing: "ease-out-cubic",
+        once: true,
+      })
   }, []);
+  
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-slate-900 text-white relative overflow-hidden" data-aos-anchor-placement="top-bottom">
       {/* Background particles/stars effect */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="stars"></div>
@@ -88,10 +96,11 @@ export default function ASMEPage() {
       {/* Hero Section */}
       <section
         id="inicio"
-        className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] text-center px-6 pt-24"
+        className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] text-center px-6 pt-16"
+        data-aos="fade-up"
       >
         <div className="max-w-4xl mx-auto">
-          <Image className="mb-6 mx-auto"src="/asme_logo_blanco.png" alt="ASME Logo" width={220} height={220} />
+          <Image className="mb-6 mx-auto"src="/asme_logo_blanco.png" alt="ASME Logo" width={300} height={300} />
 
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto">
             Promoviendo la excelencia en ingeniería mecánica a través de
@@ -112,7 +121,7 @@ export default function ASMEPage() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="relative z-10 py-20 px-6">
+      <section id="about" className="relative z-10 py-20 px-6" data-aos="fade-up">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">
@@ -126,7 +135,7 @@ export default function ASMEPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="0">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <BookOpen className="w-8 h-8 text-white" />
@@ -142,7 +151,7 @@ export default function ASMEPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="150">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Trophy className="w-8 h-8 text-white" />
@@ -157,7 +166,7 @@ export default function ASMEPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="300">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-8 h-8 text-white" />

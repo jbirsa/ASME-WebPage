@@ -20,11 +20,13 @@ import {
   X,
   Info,
   CheckCircle,
+  ChevronRight,
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import MecHubNavbar from "@/components/MecHubNavbar"
 import Link from "next/link"
-import { ChevronRight } from "lucide-react"
+import AOS from "aos"
+import "aos/dist/aos.css"
 
 export default function MecHubPage() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -128,12 +130,20 @@ export default function MecHubPage() {
   }
 
   useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: "ease-out-cubic",
+      once: true,
+    })
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10)
     }
 
     window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
   }, [])
 
   return (
@@ -160,21 +170,25 @@ export default function MecHubPage() {
 
       {/* Hero section */}
       <section className="relative z-10 flex flex-col items-center justify-center min-h-[85vh] text-center px-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto" data-aos="fade-up">
 
-          <div className="mb-8 mt-4">
+          <div className="mb-8 mt-4" data-aos="fade-up" data-aos-delay="100">
             <h1 className="text-6xl md:text-8xl font-black mb-4 bg-gradient-to-br from-white via-[#5f87ab] to-[#e3a72f] bg-clip-text text-transparent">
               MecHub
             </h1>
             <div className="w-32 h-1 bg-gradient-to-r from-[#5f87ab] to-[#e3a72f] mx-auto rounded-full"></div>
           </div>
 
-          <p className="text-2xl md:text-3xl text-gray-200 mb-8 max-w-3xl mx-auto font-light leading-relaxed">
+          <p
+            className="text-2xl md:text-3xl text-gray-200 mb-8 max-w-3xl mx-auto font-light leading-relaxed"
+            data-aos="fade-up"
+            data-aos-delay="150"
+          >
             El primer <span className="text-[#e3a72f] font-semibold">coworking especializado</span> en ingeniería
             mecánica donde las ideas cobran vida
           </p>
 
-          <div className="flex flex-col items-center gap-6 mb-12">
+          <div className="flex flex-col items-center gap-6 mb-12" data-aos="fade-up" data-aos-delay="200">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
@@ -197,7 +211,7 @@ export default function MecHubPage() {
       {/* What is MecHub Section */}
       <section id="que-es" className="relative z-10 py-20 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">¿Qué es MecHub?</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               MecHub es el primer espacio de coworking especializado en ingeniería mecánica del ITBA. Un lugar donde
@@ -206,7 +220,7 @@ export default function MecHubPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="0">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Building2 className="w-8 h-8 text-white" />
@@ -219,7 +233,7 @@ export default function MecHubPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="150">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-8 h-8 text-white" />
@@ -232,7 +246,7 @@ export default function MecHubPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="300">
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Calendar className="w-8 h-8 text-white" />
@@ -248,19 +262,19 @@ export default function MecHubPage() {
 
           {/* Features Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg">
+            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg" data-aos="fade-up" data-aos-delay="0">
               <Wifi className="w-6 h-6 text-[#e3a72f]" />
               <span className="text-gray-300">WiFi de alta velocidad</span>
             </div>
-            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg">
+            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg" data-aos="fade-up" data-aos-delay="100">
               <Coffee className="w-6 h-6 text-[#e3a72f]" />
               <span className="text-gray-300">Café y snacks</span>
             </div>
-            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg">
+            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg" data-aos="fade-up" data-aos-delay="200">
               <Building2 className="w-6 h-6 text-[#e3a72f]" />
               <span className="text-gray-300">Laboratorios equipados</span>
             </div>
-            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg">
+            <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg" data-aos="fade-up" data-aos-delay="300">
               <MapPin className="w-6 h-6 text-[#e3a72f]" />
               <span className="text-gray-300">Ubicación privilegiada</span>
             </div>
@@ -270,7 +284,7 @@ export default function MecHubPage() {
 
       <section id="cotizar" className="relative z-10 py-20 px-6 bg-slate-800/30">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Cotiza tu Espacio</h2>
             <p className="text-xl text-gray-300">
               Encuentra el espacio perfecto para tu proyecto. Desde escritorios individuales hasta oficinas completas.
@@ -278,7 +292,11 @@ export default function MecHubPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <Card className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col">
+            <Card
+              className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col"
+              data-aos="fade-up"
+              data-aos-delay="0"
+            >
               <CardContent className="p-10 text-center flex-1 flex flex-col justify-between">
                 <div>
                   <h3 className="text-2xl font-bold mb-6 text-[#e3a72f]">Escritorio Individual</h3>
@@ -300,7 +318,11 @@ export default function MecHubPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col">
+            <Card
+              className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col"
+              data-aos="fade-up"
+              data-aos-delay="150"
+            >
               <CardContent className="p-10 text-center flex-1 flex flex-col justify-between">
                 <div>
                   <h3 className="text-2xl font-bold mb-6 text-[#e3a72f]">Oficina Privada</h3>
@@ -322,7 +344,11 @@ export default function MecHubPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col">
+            <Card
+              className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col"
+              data-aos="fade-up"
+              data-aos-delay="300"
+            >
               <CardContent className="p-10 text-center flex-1 flex flex-col justify-between">
                 <div>
                   <h3 className="text-2xl font-bold mb-6 text-[#e3a72f]">Espacio para Eventos</h3>
@@ -348,7 +374,7 @@ export default function MecHubPage() {
       </section>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-aos="fade-up">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeModal}></div>
           <div className="relative bg-slate-800 rounded-lg p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto border border-slate-600">
             <div className="flex justify-between items-center mb-6">
@@ -396,7 +422,7 @@ export default function MecHubPage() {
       )}
 
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-aos="fade-up">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowSuccessModal(false)}
@@ -424,7 +450,7 @@ export default function MecHubPage() {
       {/* Contact Form Section */}
       <section id="contacto" className="relative z-10 py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Contactanos</h2>
             <p className="text-xl text-gray-300">
               ¿Tienes alguna pregunta o quieres colaborar con nosotros? ¡Nos encantaría escucharte!
@@ -433,7 +459,7 @@ export default function MecHubPage() {
 
           <div className="grid md:grid-cols-2 gap-12">
             {/* Contact Info */}
-            <div>
+            <div data-aos="fade-right">
               <h3 className="text-2xl font-bold mb-8 text-[#e3a72f]">Información de Contacto</h3>
 
               <div className="space-y-6">
@@ -442,6 +468,8 @@ export default function MecHubPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-4 group"
+                  data-aos="fade-up"
+                  data-aos-delay="0"
                 >
                   <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center transition-transform group-hover:scale-105">
                     <Mail className="w-6 h-6 text-slate-900" />
@@ -457,6 +485,8 @@ export default function MecHubPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-4 group"
+                  data-aos="fade-up"
+                  data-aos-delay="100"
                 >
                   <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center transition-transform group-hover:scale-105">
                     <MapPin className="w-6 h-6 text-slate-900" />
@@ -472,6 +502,8 @@ export default function MecHubPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-start gap-4 group"
+                  data-aos="fade-up"
+                  data-aos-delay="200"
                 >
                   <div className="w-12 h-12 bg-[#e3a72f] rounded-full flex items-center justify-center transition-transform group-hover:scale-105">
                     <Instagram className="w-6 h-6 text-slate-900" />
@@ -485,7 +517,7 @@ export default function MecHubPage() {
             </div>
 
             {/* Contact Form */}
-            <div>
+            <div data-aos="fade-left">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
