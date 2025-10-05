@@ -22,7 +22,7 @@ import Link from "next/link";
 import OurTeam from "@/components/OurTeam";
 import NextEvents from "@/components/NextEvents";
 import Image from "next/image";
-import AOS from "aos"
+import AOS from "aos";
 
 const getPastEvents = async (): Promise<Evento[]> => {
   try {
@@ -72,17 +72,19 @@ export default function ASMEPage() {
     getPastEvents().then((data) => setEvents(data));
     getNextEvents().then((data) => setNextEvents(data));
     getSponsors().then((data) => setSponsors(data));
-     AOS.init({
-        offset: 240,
-        duration: 800,
-        easing: "ease-out-cubic",
-        once: true,
-      })
+    AOS.init({
+      offset: 240,
+      duration: 800,
+      easing: "ease-out-cubic",
+      once: true,
+    });
   }, []);
-  
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white relative overflow-hidden" data-aos-anchor-placement="top-bottom">
+    <div
+      className="min-h-screen bg-slate-900 text-white relative overflow-hidden"
+      data-aos-anchor-placement="top-bottom"
+    >
       {/* Background particles/stars effect */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="stars"></div>
@@ -100,7 +102,13 @@ export default function ASMEPage() {
         data-aos="fade-up"
       >
         <div className="max-w-4xl mx-auto">
-          <Image className="mb-6 mx-auto"src="/asme_logo_blanco.png" alt="ASME Logo" width={300} height={300} />
+          <Image
+            className="mb-6 mx-auto"
+            src="/asme_logo_blanco.png"
+            alt="ASME Logo"
+            width={300}
+            height={300}
+          />
 
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto">
             Promoviendo la excelencia en ingeniería mecánica a través de
@@ -121,21 +129,35 @@ export default function ASMEPage() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="relative z-10 py-20 px-6" data-aos="fade-up">
+      <section
+        id="about"
+        className="relative z-10 py-20 px-6"
+        data-aos="fade-up"
+      >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">
               ¿Qué es ASME?
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Somos la organización estudiantil líder en ingeniería mecánica del
-              ITBA, dedicada a conectar estudiantes con la industria y fomentar
-              el desarrollo profesional.
+              <b>ASME (American Society of Mechanical Engineers)</b> es una
+              organización internacional sin fines de lucro que promueve el
+              avance de la ingeniería mediante normas, publicaciones,
+              conferencias y competencias. <br/>
+              La sección estudiantil <b>ASME ITBA</b>,
+              única en Argentina, forma parte de esta red global y desarrolla
+              actividades académicas y recreativas dentro del ITBA, fomentando
+              el crecimiento profesional y la participación estudiantil en
+              ingeniería.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="0">
+            <Card
+              className="bg-slate-800/50 border-slate-700 backdrop-blur-sm"
+              data-aos="zoom-in"
+              data-aos-delay="0"
+            >
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <BookOpen className="w-8 h-8 text-white" />
@@ -151,7 +173,11 @@ export default function ASMEPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="150">
+            <Card
+              className="bg-slate-800/50 border-slate-700 backdrop-blur-sm"
+              data-aos="zoom-in"
+              data-aos-delay="150"
+            >
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Trophy className="w-8 h-8 text-white" />
@@ -166,7 +192,11 @@ export default function ASMEPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm" data-aos="zoom-in" data-aos-delay="300">
+            <Card
+              className="bg-slate-800/50 border-slate-700 backdrop-blur-sm"
+              data-aos="zoom-in"
+              data-aos-delay="300"
+            >
               <CardContent className="p-8 text-center">
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-8 h-8 text-white" />
@@ -176,7 +206,8 @@ export default function ASMEPage() {
                 </h3>
                 <p className="text-gray-300">
                   Conexiones con profesionales, alumni y empresas líderes del
-                  sector para impulsar tu carrera profesional.
+                  sector para impulsar tu carrera profesional.<br/>
+                  Participación en conferencias internacionales.
                 </p>
               </CardContent>
             </Card>
@@ -190,14 +221,13 @@ export default function ASMEPage() {
 
         {/* Past Events Section */}
         <PastEvents events={events} />
-
       </section>
 
       {/* Sponsors Section */}
       <Sponsors />
 
       {/* Team Section */}
-      <OurTeam/>
+      <OurTeam />
 
       {/* Contact Section */}
       <section id="contacto" className="relative z-10 py-20 px-6">
@@ -222,7 +252,9 @@ export default function ASMEPage() {
               <h3 className="text-lg font-semibold mb-2 text-[#e3a72f] transition-colors group-hover:text-[#d4961a]">
                 Email
               </h3>
-              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">asme@itba.edu.ar</p>
+              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">
+                asme@itba.edu.ar
+              </p>
             </a>
 
             <a
@@ -237,7 +269,9 @@ export default function ASMEPage() {
               <h3 className="text-lg font-semibold mb-2 text-[#e3a72f] transition-colors group-hover:text-[#d4961a]">
                 Ubicación
               </h3>
-              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">ITBA, Buenos Aires</p>
+              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">
+                ITBA, Buenos Aires
+              </p>
             </a>
 
             <a
@@ -252,17 +286,21 @@ export default function ASMEPage() {
               <h3 className="text-lg font-semibold mb-2 text-[#e3a72f] transition-colors group-hover:text-[#d4961a]">
                 Síguenos
               </h3>
-              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">@asme_itba</p>
+              <p className="text-gray-300 transition-colors group-hover:text-[#d4961a]">
+                @asme_itba
+              </p>
             </a>
           </div>
 
           <a
-          href="mailto:asme@itba.edu.ar?subject=&body="
-          target="_blank"
-          rel="noopener noreferrer">
+            href="mailto:asme@itba.edu.ar?subject=&body="
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button
               size="lg"
-              className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-12 py-4">
+              className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-12 py-4"
+            >
               Contáctanos
             </Button>
           </a>
