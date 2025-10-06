@@ -20,6 +20,9 @@ import {
   X,
   Info,
   CheckCircle,
+  Medal,
+  Award,
+  Crown,
   ChevronRight,
 } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -85,47 +88,59 @@ export default function MecHubPage() {
     setModalPlan("")
   }
 
+  // Detalle de beneficios por plan de sponsoreo MecHub
   const planDetails = {
-    individual: {
-      title: "Escritorio Individual",
+    silver: {
+      title: "Silver",
       features: [
-        "Escritorio dedicado con silla ergonómica",
-        "WiFi de alta velocidad (500 Mbps)",
-        "Acceso a áreas comunes 24/7",
-        "Café, té y snacks ilimitados",
-        "Casillero personal con llave",
-        "Acceso a impresora y escáner",
-        "Sala de descanso con sofás",
-        "Cocina completamente equipada",
+        "Entrega de folletería y merchandising a participantes del evento",
+        "Inclusión del logo en redes sociales y en el evento principal (MecHub)",
+        "Stand pequeño en el área de exhibición",
+        "Cursos o workshops para empleados (a coordinar)",
+        "Actualizaciones en redes de la asociación",
       ],
     },
-    privada: {
-      title: "Oficina Privada",
+    gold: {
+      title: "Gold",
       features: [
-        "Oficina privada para hasta 4 personas",
-        "Sala de reuniones incluida (2 horas/día)",
-        "Acceso completo a laboratorios de ingeniería",
-        "Soporte técnico especializado",
-        "Pizarra inteligente y proyector",
-        "Sistema de videoconferencia profesional",
-        "Almacenamiento seguro para equipos",
-        "Servicio de limpieza diario",
-        "Acceso prioritario a eventos",
+        "Todo lo incluido en Silver",
+        "Acceso a perfiles (CVs) de participantes del evento (con su consentimiento)",
+        "Publicación de un post dedicado en redes sociales de la asociación",
+        "Stand con capacidad para demostraciones y exhibición de objetos",
+        "Charlas/entrevistas y notas exclusivas de la empresa",
       ],
     },
-    eventos: {
-      title: "Espacio para Eventos",
+    platinum: {
+      title: "Platinum",
       features: [
-        "Auditorio moderno para hasta 50 personas",
-        "Equipos audiovisuales de última generación",
-        "Sistema de sonido profesional",
-        "Catering disponible (costo adicional)",
-        "Soporte técnico completo durante el evento",
-        "Transmisión en vivo disponible",
-        "Estacionamiento gratuito para asistentes",
-        "Servicio de seguridad",
-        "Decoración personalizable",
+        "Todo lo incluido en Gold",
+        "Nombre de las salas del MecHub",
+        "Aparición destacada en banners y señalética del evento",
+        "Subir updates a redes de la empresa (cross-posting)",
+        "Acceso prioritario a CVs y networking con participantes",
       ],
+    },
+  }
+
+  // Metadatos visuales por plan para mejorar la estética de las cards
+  const planMeta: Record<
+    "silver" | "gold" | "platinum",
+    { icon: React.ElementType; ring: string; bg: string }
+  > = {
+    silver: {
+      icon: Medal,
+      ring: "from-slate-500 to-slate-300",
+      bg: "from-slate-700/20 to-slate-500/10",
+    },
+    gold: {
+      icon: Award,
+      ring: "from-amber-400 to-yellow-600",
+      bg: "from-amber-700/20 to-yellow-500/10",
+    },
+    platinum: {
+      icon: Crown,
+      ring: "from-violet-400 to-fuchsia-500",
+      bg: "from-fuchsia-700/20 to-violet-500/10",
     },
   }
 
@@ -184,8 +199,8 @@ export default function MecHubPage() {
             data-aos="fade-up"
             data-aos-delay="150"
           >
-            El primer <span className="text-[#e3a72f] font-semibold">coworking especializado</span> en ingeniería
-            mecánica donde las ideas cobran vida
+            La feria que conecta <span className="text-[#e3a72f] font-semibold">empresas y estudiantes</span> de
+            ingeniería para mostrar tecnología, compartir experiencias y abrir oportunidades laborales.
           </p>
 
           <div className="flex flex-col items-center gap-6 mb-12" data-aos="fade-up" data-aos-delay="200">
@@ -194,14 +209,14 @@ export default function MecHubPage() {
                 size="lg"
                 className="bg-gradient-to-r from-[#e3a72f] to-[#d4961a] hover:from-[#d4961a] hover:to-[#c8851a] text-slate-900 font-bold px-10 py-4 text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
               >
-                <a href="#cotizar">Reservar Espacio</a>
+                <a href="#planes">Planes de Sponsoreo</a>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="border-2 border-[#5f87ab] text-[#5f87ab] hover:bg-[#5f87ab] hover:text-white px-10 py-4 text-lg bg-transparent backdrop-blur-sm"
               >
-                <a href="#que-es">Descubrir Más</a>
+                <a href="#que-es">Descubrir MecHub</a>
               </Button>
             </div>
           </div>
@@ -214,8 +229,9 @@ export default function MecHubPage() {
           <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">¿Qué es MecHub?</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              MecHub es el primer espacio de coworking especializado en ingeniería mecánica del ITBA. Un lugar donde
-              estudiantes, profesionales y empresas se conectan para desarrollar proyectos innovadores.
+              En el marco de fomentar el acercamiento entre empresas y estudiantes, organizamos el MecHub en la sede
+              Tecnológico del ITBA: una feria que reúne a estudiantes de todas las carreras interesados en los sectores
+              automotriz, aeroespacial, agropecuario, energías y materiales.
             </p>
           </div>
 
@@ -225,11 +241,8 @@ export default function MecHubPage() {
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Building2 className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-[#e3a72f]">Espacios Flexibles</h3>
-                <p className="text-gray-300">
-                  Oficinas privadas, espacios compartidos y salas de reuniones equipadas con la última tecnología para
-                  proyectos de ingeniería.
-                </p>
+                <h3 className="text-2xl font-bold mb-4 text-[#e3a72f]">Experiencia Interactiva</h3>
+                <p className="text-gray-300">Charlas, demos de producto y actividades para conocer cómo es trabajar en cada sector.</p>
               </CardContent>
             </Card>
 
@@ -238,11 +251,8 @@ export default function MecHubPage() {
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Users className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-[#e3a72f]">Comunidad Especializada</h3>
-                <p className="text-gray-300">
-                  Conecta con ingenieros mecánicos, startups tecnológicas y empresas del sector en un ambiente
-                  colaborativo único.
-                </p>
+                <h3 className="text-2xl font-bold mb-4 text-[#e3a72f]">Conexión Empresa–Alumno</h3>
+                <p className="text-gray-300">Espacio para contar la historia de la empresa y su propuesta de valor a futuros talentos.</p>
               </CardContent>
             </Card>
 
@@ -251,124 +261,102 @@ export default function MecHubPage() {
                 <div className="w-16 h-16 bg-[#5f87ab] rounded-full flex items-center justify-center mx-auto mb-6">
                   <Calendar className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-[#e3a72f]">Eventos y Workshops</h3>
-                <p className="text-gray-300">
-                  Participa en charlas técnicas, workshops de innovación y eventos de networking especializados en
-                  ingeniería mecánica.
-                </p>
+                <h3 className="text-2xl font-bold mb-4 text-[#e3a72f]">Sectores</h3>
+                <p className="text-gray-300">Automotriz, aeroespacial, agro, energías (renovables y convencionales) y materiales.</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Features Grid */}
+          {/* Beneficios destacados para sponsors */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg" data-aos="fade-up" data-aos-delay="0">
               <Wifi className="w-6 h-6 text-[#e3a72f]" />
-              <span className="text-gray-300">WiFi de alta velocidad</span>
+              <span className="text-gray-300">Visibilidad en evento y redes</span>
             </div>
             <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg" data-aos="fade-up" data-aos-delay="100">
               <Coffee className="w-6 h-6 text-[#e3a72f]" />
-              <span className="text-gray-300">Café y snacks</span>
+              <span className="text-gray-300">Acceso a talento y networking</span>
             </div>
             <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg" data-aos="fade-up" data-aos-delay="200">
               <Building2 className="w-6 h-6 text-[#e3a72f]" />
-              <span className="text-gray-300">Laboratorios equipados</span>
+              <span className="text-gray-300">Espacios de exhibición y demos</span>
             </div>
             <div className="flex items-center space-x-3 bg-slate-800/30 p-4 rounded-lg" data-aos="fade-up" data-aos-delay="300">
               <MapPin className="w-6 h-6 text-[#e3a72f]" />
-              <span className="text-gray-300">Ubicación privilegiada</span>
+              <span className="text-gray-300">Presencia de marca en el ITBA</span>
             </div>
           </div>
         </div>
       </section>
-
-      <section id="cotizar" className="relative z-10 py-20 px-6 bg-slate-800/30">
-        <div className="max-w-4xl mx-auto">
+      {/* Planes de Sponsoreo */}
+      <section id="planes" className="relative z-10 py-20 px-6 bg-slate-800/30">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16" data-aos="fade-up">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Cotiza tu Espacio</h2>
-            <p className="text-xl text-gray-300">
-              Encuentra el espacio perfecto para tu proyecto. Desde escritorios individuales hasta oficinas completas.
-            </p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#5f87ab]">Planes de Sponsoreo</h2>
+            <p className="text-xl text-gray-300">Elegí el plan que mejor se adapte a tus objetivos</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <Card
-              className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col"
-              data-aos="fade-up"
-              data-aos-delay="0"
-            >
-              <CardContent className="p-10 text-center flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold mb-6 text-[#e3a72f]">Escritorio Individual</h3>
-                  <p className="text-gray-300 mb-8 text-lg">Espacio personal dedicado</p>
-                  <ul className="text-left text-gray-300 space-y-3 mb-12">
-                    <li>• Escritorio dedicado</li>
-                    <li>• WiFi de alta velocidad</li>
-                    <li>• Acceso a áreas comunes</li>
-                  </ul>
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full border-[#e3a72f] text-[#e3a72f] hover:bg-[#e3a72f] hover:text-slate-900 bg-transparent py-3"
-                  onClick={() => openModal("individual")}
+            {([
+              { key: "silver", price: "USD 300–500" },
+              { key: "gold", price: "USD 800–1300" },
+              { key: "platinum", price: "USD 1300+" },
+            ] as const).map((plan, idx) => {
+              const Icon = planMeta[plan.key].icon
+              return (
+                <Card
+                  key={plan.key}
+                  className="relative overflow-hidden bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[520px] flex flex-col hover:border-[#e3a72f]/60 transition-all duration-200"
+                  data-aos="fade-up"
+                  data-aos-delay={`${idx * 150}`}
                 >
-                  <Info className="w-4 h-4 mr-2" />
-                  Ver más información
-                </Button>
-              </CardContent>
-            </Card>
+                  {/* soft background gradient */}
+                  <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${planMeta[plan.key].bg}`} />
+                  <CardContent className="p-10 text-center flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className={`mx-auto mb-5 w-16 h-16 rounded-full p-[2px] bg-gradient-to-br ${planMeta[plan.key].ring}`}>
+                        <div className="w-full h-full rounded-full bg-slate-900/90 flex items-center justify-center">
+                          <Icon className="w-8 h-8 text-white" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold mb-1 text-white">{planDetails[plan.key].title}</h3>
+                      <p className="text-sm tracking-wide text-gray-400 mb-6 uppercase">{plan.price}</p>
+                      <ul className="text-left text-gray-300 space-y-3 mb-8">
+                        {planDetails[plan.key].features.map((f, i) => (
+                          <li key={i} className="flex items-start gap-3 leading-relaxed">
+                            <CheckCircle className="w-5 h-5 text-[#e3a72f] mt-0.5 flex-shrink-0" />
+                            <span>{f}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full border-[#e3a72f] text-[#e3a72f] hover:bg-[#e3a72f] hover:text-slate-900 bg-transparent py-3"
+                      onClick={() => openModal(plan.key)}
+                    >
+                      <Info className="w-4 h-4 mr-2" />
+                      Quiero este plan
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
 
-            <Card
-              className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col"
-              data-aos="fade-up"
-              data-aos-delay="150"
-            >
-              <CardContent className="p-10 text-center flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold mb-6 text-[#e3a72f]">Oficina Privada</h3>
-                  <p className="text-gray-300 mb-8 text-lg">Para equipos pequeños</p>
-                  <ul className="text-left text-gray-300 space-y-3 mb-12">
-                    <li>• Oficina privada para 4 personas</li>
-                    <li>• Sala de reuniones incluida</li>
-                    <li>• Acceso a laboratorios</li>
-                  </ul>
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full border-[#e3a72f] text-[#e3a72f] hover:bg-[#e3a72f] hover:text-slate-900 bg-transparent py-3"
-                  onClick={() => openModal("privada")}
-                >
-                  <Info className="w-4 h-4 mr-2" />
-                  Ver más información
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card
-              className="bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[400px] flex flex-col"
-              data-aos="fade-up"
-              data-aos-delay="300"
-            >
-              <CardContent className="p-10 text-center flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold mb-6 text-[#e3a72f]">Espacio para Eventos</h3>
-                  <p className="text-gray-300 mb-8 text-lg">Auditorio completo</p>
-                  <ul className="text-left text-gray-300 space-y-3 mb-12">
-                    <li>• Auditorio para 50 personas</li>
-                    <li>• Equipos audiovisuales</li>
-                    <li>• Catering disponible</li>
-                  </ul>
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full border-[#e3a72f] text-[#e3a72f] hover:bg-[#e3a72f] hover:text-slate-900 bg-transparent py-3"
-                  onClick={() => openModal("eventos")}
-                >
-                  <Info className="w-4 h-4 mr-2" />
-                  Ver más información
-                </Button>
-              </CardContent>
-            </Card>
+          {/* Ideas y beneficios adicionales */}
+          <div className="max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold mb-6 text-[#e3a72f] text-center">Ideas y beneficios adicionales</h3>
+            <ul className="grid md:grid-cols-2 gap-3 text-gray-300">
+              <li>• Patrocinio de competencias y contacto con ganadores</li>
+              <li>• Comentarios y difusión de lo que hacen las empresas en RRSS</li>
+              <li>• Naming de salas</li>
+              <li>• Acceso a LinkedIn de alumnos (a coordinar)</li>
+              <li>• Charlas comerciales (posible exclusividad por rubro)</li>
+              <li>• Mini stands en eventos</li>
+              <li>• Merchandising</li>
+              <li>• Presencia en banners de ASME</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -392,7 +380,7 @@ export default function MecHubPage() {
             </div>
 
             <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-white mb-4">Incluye:</h4>
+              <h4 className="text-lg font-semibold text-white mb-4">Beneficios:</h4>
               <ul className="space-y-3">
                 {planDetails[modalPlan as keyof typeof planDetails]?.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-3 text-gray-300">
@@ -403,9 +391,7 @@ export default function MecHubPage() {
               </ul>
 
               <div className="mt-8 pt-6 border-t border-slate-600">
-                <p className="text-gray-400 text-sm mb-4">
-                  ¿Interesado en este plan? Contáctanos para más información sobre precios y disponibilidad.
-                </p>
+                <p className="text-gray-400 text-sm mb-4">¿Interesados en sponsorear el MecHub? Escribinos y coordinamos los próximos pasos.</p>
                 <Button
                   className="w-full bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold"
                   onClick={() => {
@@ -413,7 +399,7 @@ export default function MecHubPage() {
                     document.getElementById("contacto")?.scrollIntoView({ behavior: "smooth" })
                   }}
                 >
-                  Contactar para Cotización
+                  Contactar al equipo
                 </Button>
               </div>
             </div>

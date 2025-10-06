@@ -10,7 +10,7 @@ type MecHubNavbarProps = {
   ctaLabel?: string
 }
 
-export default function MecHubNavbar({ ctaHref = "#cotizar", ctaLabel = "Cotizar" }: MecHubNavbarProps) {
+export default function MecHubNavbar({ ctaHref = "#planes", ctaLabel = "Quiero Sponsorear" }: MecHubNavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
