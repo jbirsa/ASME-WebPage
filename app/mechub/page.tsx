@@ -37,7 +37,6 @@ const planConfig: Record<
   PlanKey,
   {
     title: string
-    price: string
     icon: React.ElementType
     ring: string
     cardBg: string
