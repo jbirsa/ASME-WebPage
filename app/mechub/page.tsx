@@ -447,21 +447,6 @@ export default function MecHubPage() {
               </div>
             </div>
           </div>
-
-          {/* Ideas y beneficios adicionales */}
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold mb-6 text-[#e3a72f] text-center">Ideas y beneficios adicionales</h3>
-            <ul className="grid md:grid-cols-2 gap-3 text-gray-300">
-              <li>• Patrocinio de competencias y contacto con ganadores</li>
-              <li>• Comentarios y difusión de lo que hacen las empresas en RRSS</li>
-              <li>• Naming de salas</li>
-              <li>• Acceso a LinkedIn de alumnos (a coordinar)</li>
-              <li>• Charlas comerciales (posible exclusividad por rubro)</li>
-              <li>• Mini stands en eventos</li>
-              <li>• Merchandising</li>
-              <li>• Presencia en banners de ASME</li>
-            </ul>
-          </div>
         </div>
       </section>
 
