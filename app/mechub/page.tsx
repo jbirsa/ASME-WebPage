@@ -1,12 +1,11 @@
 "use client"
 
-import type React from "react"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import Footer from "@/components/Footer"
+import React from "react"
 import {
   Building2,
   Users,
@@ -31,10 +30,110 @@ import Link from "next/link"
 import AOS from "aos"
 import "aos/dist/aos.css"
 
+const planKeys = ["silver", "gold", "platinum"] as const
+type PlanKey = (typeof planKeys)[number]
+
+const planConfig: Record<
+  PlanKey,
+  {
+    title: string
+    price: string
+    icon: React.ElementType
+    ring: string
+    cardBg: string
+    tableBg: string
+    tableText: string
+    tableCellBg: string
+  }
+> = {
+  silver: {
+    title: "Silver",
+    icon: Medal,
+    ring: "from-slate-500 to-slate-300",
+    cardBg: "from-slate-700/20 to-slate-500/10",
+    tableBg: "bg-gradient-to-r from-slate-300/80 to-slate-500/80",
+    tableText: "text-slate-900",
+    tableCellBg: "bg-slate-500/15",
+  },
+  gold: {
+    title: "Gold",
+    icon: Award,
+    ring: "from-amber-400 to-yellow-600",
+    cardBg: "from-amber-700/20 to-yellow-500/10",
+    tableBg: "bg-gradient-to-r from-amber-300/80 to-amber-500/80",
+    tableText: "text-slate-900",
+    tableCellBg: "bg-amber-400/15",
+  },
+  platinum: {
+    title: "Platinum",
+    icon: Crown,
+    ring: "from-violet-400 to-fuchsia-500",
+    cardBg: "from-fuchsia-700/20 to-violet-500/10",
+    tableBg: "bg-gradient-to-r from-violet-400/80 to-fuchsia-500/80",
+    tableText: "text-white",
+    tableCellBg: "bg-fuchsia-500/15",
+  },
+}
+
+const benefitMatrix: {
+  label: string
+  availability: Record<PlanKey, "yes" | "no" | "na">
+}[] = [
+  {
+    label: "Entrega de folletería y merchandising a participantes del evento",
+    availability: { silver: "yes", gold: "yes", platinum: "yes" },
+  },
+  {
+    label: "Inclusión del logo en redes sociales y en el evento principal (MecHub)",
+    availability: { silver: "yes", gold: "yes", platinum: "yes" },
+  },
+  {
+    label: "Acceso a perfiles (CVs) de participantes del evento (con su consentimiento)",
+    availability: { silver: "no", gold: "yes", platinum: "yes" },
+  },
+  {
+    label: "Presentación y charla individual en la zona principal del evento",
+    availability: { silver: "no", gold: "no", platinum: "yes" },
+  },
+  {
+    label: "Publicación de un post dedicado a la empresa en las redes sociales de la asociación",
+    availability: { silver: "no", gold: "no", platinum: "yes" },
+  },
+  {
+    label: "Stand con capacidad para demostraciones y exhibición de objetos de gran escala",
+    availability: { silver: "no", gold: "no", platinum: "yes" },
+  },
+  {
+    label: "Stand pequeño en el área de exhibición",
+    availability: { silver: "yes", gold: "yes", platinum: "na" },
+  },
+]
+
+const highlightMap: Record<PlanKey, number[]> = {
+  silver: [0, 1, 6],
+  gold: [0, 1, 2],
+  platinum: [3, 4, 5],
+}
+
+const planFeatures: Record<PlanKey, { features: string[]; highlights: string[] }> = planKeys.reduce(
+  (acc, planKey) => {
+    const features = benefitMatrix
+      .filter((benefit) => benefit.availability[planKey] === "yes")
+      .map((benefit) => benefit.label)
+
+    const highlights = highlightMap[planKey].map((index) => benefitMatrix[index].label)
+
+    acc[planKey] = { features, highlights }
+    return acc
+  },
+  {} as Record<PlanKey, { features: string[]; highlights: string[] }>,
+)
+
+const cardAnimationDelays = [300, 600, 900] as const
+
 export default function MecHubPage() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -42,8 +141,17 @@ export default function MecHubPage() {
   })
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalPlan, setModalPlan] = useState<string>("")
+  const [modalPlan, setModalPlan] = useState<PlanKey | "">("")
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+
+  const activePlanConfig = modalPlan ? planConfig[modalPlan] : null
+  const modalHighlights = modalPlan ? planFeatures[modalPlan].highlights : []
+  const modalFeatures = modalPlan ? planFeatures[modalPlan].features : []
+  const orderedModalFeatures = modalPlan
+    ? [...modalHighlights, ...modalFeatures.filter((feature) => !modalHighlights.includes(feature))]
+    : []
+  const modalHighlightsSet = new Set(modalHighlights)
+  const ModalIcon = activePlanConfig?.icon
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,7 +186,7 @@ export default function MecHubPage() {
     })
   }
 
-  const openModal = (plan: string) => {
+  const openModal = (plan: PlanKey) => {
     setModalPlan(plan)
     setIsModalOpen(true)
   }
@@ -86,62 +194,6 @@ export default function MecHubPage() {
   const closeModal = () => {
     setIsModalOpen(false)
     setModalPlan("")
-  }
-
-  // Detalle de beneficios por plan de sponsoreo MecHub
-  const planDetails = {
-    silver: {
-      title: "Silver",
-      features: [
-        "Entrega de folletería y merchandising a participantes del evento",
-        "Inclusión del logo en redes sociales y en el evento principal (MecHub)",
-        "Stand pequeño en el área de exhibición",
-        "Cursos o workshops para empleados (a coordinar)",
-        "Actualizaciones en redes de la asociación",
-      ],
-    },
-    gold: {
-      title: "Gold",
-      features: [
-        "Todo lo incluido en Silver",
-        "Acceso a perfiles (CVs) de participantes del evento (con su consentimiento)",
-        "Publicación de un post dedicado en redes sociales de la asociación",
-        "Stand con capacidad para demostraciones y exhibición de objetos",
-        "Charlas/entrevistas y notas exclusivas de la empresa",
-      ],
-    },
-    platinum: {
-      title: "Platinum",
-      features: [
-        "Todo lo incluido en Gold",
-        "Nombre de las salas del MecHub",
-        "Aparición destacada en banners y señalética del evento",
-        "Subir updates a redes de la empresa (cross-posting)",
-        "Acceso prioritario a CVs y networking con participantes",
-      ],
-    },
-  }
-
-  // Metadatos visuales por plan para mejorar la estética de las cards
-  const planMeta: Record<
-    "silver" | "gold" | "platinum",
-    { icon: React.ElementType; ring: string; bg: string }
-  > = {
-    silver: {
-      icon: Medal,
-      ring: "from-slate-500 to-slate-300",
-      bg: "from-slate-700/20 to-slate-500/10",
-    },
-    gold: {
-      icon: Award,
-      ring: "from-amber-400 to-yellow-600",
-      bg: "from-amber-700/20 to-yellow-500/10",
-    },
-    platinum: {
-      icon: Crown,
-      ring: "from-violet-400 to-fuchsia-500",
-      bg: "from-fuchsia-700/20 to-violet-500/10",
-    },
   }
 
   useEffect(() => {
@@ -296,52 +348,105 @@ export default function MecHubPage() {
             <p className="text-xl text-gray-300">Elegí el plan que mejor se adapte a tus objetivos</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            {([
-              { key: "silver", price: "USD 300–500" },
-              { key: "gold", price: "USD 800–1300" },
-              { key: "platinum", price: "USD 1300+" },
-            ] as const).map((plan, idx) => {
-              const Icon = planMeta[plan.key].icon
+          <div className="md:hidden space-y-8 mb-16">
+            {planKeys.map((planKey, idx) => {
+              const config = planConfig[planKey]
+              const Icon = config.icon
+              const highlightFeatures = planFeatures[planKey].highlights
+              const remainingBenefits = planFeatures[planKey].features.length - highlightFeatures.length
+
               return (
                 <Card
-                  key={plan.key}
-                  className="relative overflow-hidden bg-slate-800/70 border-slate-600 backdrop-blur-sm min-h-[520px] flex flex-col hover:border-[#e3a72f]/60 transition-all duration-200"
+                  key={planKey}
+                  className="relative overflow-hidden bg-slate-800/70 border-slate-600 backdrop-blur-sm flex flex-col hover:border-[#e3a72f]/60 transition-all duration-200"
                   data-aos="fade-up"
-                  data-aos-delay={`${idx * 150}`}
+                  data-aos-delay={cardAnimationDelays[idx]}
                 >
-                  {/* soft background gradient */}
-                  <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${planMeta[plan.key].bg}`} />
+                  <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${config.cardBg}`} />
                   <CardContent className="p-10 text-center flex-1 flex flex-col justify-between">
                     <div>
-                      <div className={`mx-auto mb-5 w-16 h-16 rounded-full p-[2px] bg-gradient-to-br ${planMeta[plan.key].ring}`}>
+                      <div className={`mx-auto mb-5 w-16 h-16 rounded-full p-[2px] bg-gradient-to-br ${config.ring}`}>
                         <div className="w-full h-full rounded-full bg-slate-900/90 flex items-center justify-center">
                           <Icon className="w-8 h-8 text-white" />
                         </div>
                       </div>
-                      <h3 className="text-2xl font-bold mb-1 text-white">{planDetails[plan.key].title}</h3>
-                      <p className="text-sm tracking-wide text-gray-400 mb-6 uppercase">{plan.price}</p>
-                      <ul className="text-left text-gray-300 space-y-3 mb-8">
-                        {planDetails[plan.key].features.map((f, i) => (
-                          <li key={i} className="flex items-start gap-3 leading-relaxed">
+                      <h3 className="text-2xl font-bold mb-1 text-white">{config.title}</h3>
+                      <ul className="grid gap-3 text-left text-gray-300 sm:grid-cols-2">
+                        {highlightFeatures.map((feature) => (
+                          <li key={feature} className="flex items-start gap-3 leading-relaxed">
                             <CheckCircle className="w-5 h-5 text-[#e3a72f] mt-0.5 flex-shrink-0" />
-                            <span>{f}</span>
+                            <span>{feature}</span>
                           </li>
                         ))}
                       </ul>
+                      {remainingBenefits > 0 && (
+                        <p className="text-xs text-gray-400 mt-4">
+                          + {remainingBenefits} beneficio{remainingBenefits > 1 ? "s" : ""} adicional{remainingBenefits > 1 ? "es" : ""}
+                        </p>
+                      )}
                     </div>
                     <Button
                       variant="outline"
-                      className="w-full border-[#e3a72f] text-[#e3a72f] hover:bg-[#e3a72f] hover:text-slate-900 bg-transparent py-3"
-                      onClick={() => openModal(plan.key)}
+                      className="mt-8 w-full border-[#e3a72f] text-[#e3a72f] hover:bg-[#e3a72f] hover:text-slate-900 bg-transparent py-3"
+                      onClick={() => openModal(planKey)}
                     >
                       <Info className="w-4 h-4 mr-2" />
-                      Quiero este plan
+                      Ver beneficios completos
                     </Button>
                   </CardContent>
                 </Card>
               )
             })}
+          </div>
+
+          <div className="hidden md:block mb-16" data-aos="fade-up">
+            <div className="overflow-x-auto rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur-sm">
+              <div className="grid grid-cols-[1.15fr_repeat(3,0.85fr)] w-full">
+                <div className="px-4 py-5 text-sm font-semibold uppercase tracking-wide text-gray-300 border-b border-slate-800/60">
+                  Beneficio
+                </div>
+                {planKeys.map((planKey, idx) => (
+                  <div
+                    key={`header-${planKey}`}
+                    className={`px-4 py-5 text-center text-sm font-semibold uppercase tracking-wide border-b border-l border-slate-800/60 ${planConfig[planKey].tableBg} ${planConfig[planKey].tableText}`}
+                    data-aos="fade-up"
+                    data-aos-delay={cardAnimationDelays[idx]}
+                  >
+                    <div className="text-lg">{planConfig[planKey].title}</div>
+
+                  </div>
+                ))}
+
+                {benefitMatrix.map((benefit, rowIndex) => (
+                  <React.Fragment key={benefit.label}>
+                    <div
+                      className={`px-4 py-4 text-sm text-gray-200 border-b border-slate-800/60 ${
+                        rowIndex % 2 === 0 ? "bg-slate-900/70" : "bg-slate-900/50"
+                      }`}
+                    >
+                      {benefit.label}
+                    </div>
+
+                    {planKeys.map((planKey, idx) => {
+                      const status = benefit.availability[planKey]
+
+                      return (
+                        <div
+                          key={`${benefit.label}-${planKey}`}
+                          className={`px-4 py-4 border-b border-l border-slate-800/60 flex items-center justify-center ${planConfig[planKey].tableCellBg}`}
+                          data-aos="fade-up"
+                          data-aos-delay={cardAnimationDelays[idx]}
+                        >
+                          {status === "yes" && <CheckCircle className="w-5 h-5 text-emerald-400" />}
+                          {status === "no" && <X className="w-5 h-5 text-rose-400" />}
+                          {status === "na" && <span className="text-gray-500 text-lg leading-none">–</span>}
+                        </div>
+                      )
+                    })}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Ideas y beneficios adicionales */}
@@ -364,34 +469,55 @@ export default function MecHubPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" data-aos="fade-up">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={closeModal}></div>
-          <div className="relative bg-slate-800 rounded-lg p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto border border-slate-600">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-[#e3a72f]">
-                {planDetails[modalPlan as keyof typeof planDetails]?.title}
+          <div className="relative w-full max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl border border-slate-600 bg-slate-900/80 shadow-2xl">
+            {activePlanConfig ? (
+              <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${activePlanConfig.cardBg}`} />
+            ) : null}
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={closeModal}
+              aria-label="Cerrar modal"
+              className="absolute right-4 top-4 h-10 w-10 rounded-full border border-white/10 bg-slate-900/60 text-gray-200 hover:text-slate-900 hover:bg-white/90"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+
+            <div className="px-8 pb-10 pt-14 text-center">
+              {activePlanConfig && ModalIcon ? (
+                <div className={`mx-auto mb-6 w-16 h-16 rounded-full p-[2px] bg-gradient-to-br ${activePlanConfig.ring}`}>
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-900/85">
+                    <ModalIcon className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+              ) : null}
+
+              <h3 className="text-3xl font-bold text-white">
+                {activePlanConfig ? activePlanConfig.title : ""}
               </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={closeModal}
-                className="text-gray-400 hover:text-slate-900 hover:bg-gray-200 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
 
-            <div className="space-y-4">
-              <h4 className="text-lg font-semibold text-white mb-4">Beneficios:</h4>
-              <ul className="space-y-3">
-                {planDetails[modalPlan as keyof typeof planDetails]?.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-3 text-gray-300">
-                    <div className="w-2 h-2 bg-[#e3a72f] rounded-full mt-2 flex-shrink-0"></div>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-8 text-left">
+                <h4 className="mb-4 text-center text-lg font-semibold text-white">Beneficios completos</h4>
+                <ul className="space-y-4">
+                  {orderedModalFeatures.map((feature) => {
+                    const isHighlight = modalHighlightsSet.has(feature)
+                    return (
+                      <li key={feature} className={`flex items-start gap-3 ${isHighlight ? "text-white" : "text-gray-200"}`}>
+                        <CheckCircle
+                          className={`mt-1 h-5 w-5 flex-shrink-0 ${"text-[#e3a72f]"}`}
+                        />
+                        <span className="text-gray-300">{feature}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
 
-              <div className="mt-8 pt-6 border-t border-slate-600">
-                <p className="text-gray-400 text-sm mb-4">¿Interesados en sponsorear el MecHub? Escribinos y coordinamos los próximos pasos.</p>
+              <div className="mt-10 border-t border-white/10 pt-6 text-center">
+                <p className="mb-4 text-sm text-gray-200">
+                  ¿Interesados en sponsorear el MecHub? Escribinos y coordinamos los próximos pasos.
+                </p>
                 <Button
                   className="w-full bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold"
                   onClick={() => {
