@@ -83,58 +83,77 @@ export default function Navbar() {
           <button 
             className="md:hidden text-white p-2 focus:outline-none"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-nav"
           >
-            {isMenuOpen ? (
-              <X size={24} className="text-white" />
-            ) : (
               <Menu size={24} className="text-white" />
-            )}
           </button>
         </div>
       </nav>
 
       {/* Menú desplegable para móvil */}
       <div 
-        className={`fixed inset-0 bg-slate-900/95 backdrop-blur-md z-40 md:hidden transition-transform duration-300 ease-in-out transform ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
-        } pt-24`}
+        className={`fixed inset-0 z-100 md:hidden transition-opacity duration-200 ${
+          isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
       >
-        <div className="flex flex-col items-center space-y-6 p-6">
-          <Link
-            href="/#inicio" 
-            className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
-            onClick={handleLinkClick}
+        <div 
+          className="absolute inset-0 bg-transparent"
+          onClick={() => setIsMenuOpen(false)}
+          aria-hidden="true"
+        />
+
+        <div
+          id="mobile-nav"
+          className={`absolute right-0 top-0 bottom-0 w-[100vw] max-w-sm rounded-none rounded-l-2xl bg-transparent shadow-2xl backdrop-blur-md transition-transform duration-300 ease-out ${
+            isMenuOpen ? "translate-x-0" : "translate-x-6"
+          }`}
+        >
+          <button
+            type="button"
+            aria-label="Cerrar menú"
+            onClick={() => setIsMenuOpen(false)}
+            className="absolute right-4 top-6 text-white transition-opacity hover:opacity-80 px-3 py-8"
           >
-            Inicio
-          </Link>
-          <Link
-            href="/mechub" 
-            className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
-            onClick={handleLinkClick}
-          >
-            Mechub
-          </Link>
-          <Link
-            href="/#eventos" 
-            className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
-            onClick={handleLinkClick}
-          >
-            Eventos
-          </Link>
-          <Link 
-            href="/#equipo" 
-            className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
-            onClick={handleLinkClick}
-          >
-            Equipo
-          </Link>
-          <Link 
-            href="/#contacto" 
-            className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
-            onClick={handleLinkClick}
-          >
-            Contacto
-          </Link>
+            <X size={24} />
+          </button>
+          <div className="flex h-full flex-col items-center justify-center space-y-6 text-center text-white">
+            <Link
+              href="/#inicio" 
+              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
+              onClick={handleLinkClick}
+            >
+              Inicio
+            </Link>
+            <Link
+              href="/mechub" 
+              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
+              onClick={handleLinkClick}
+            >
+              Mechub
+            </Link>
+            <Link
+              href="/#eventos" 
+              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
+              onClick={handleLinkClick}
+            >
+              Eventos
+            </Link>
+            <Link 
+              href="/#equipo" 
+              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
+              onClick={handleLinkClick}
+            >
+              Equipo
+            </Link>
+            <Link 
+              href="/#contacto" 
+              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
+              onClick={handleLinkClick}
+            >
+              Contacto
+            </Link>
+          </div>
         </div>
       </div>
     </>

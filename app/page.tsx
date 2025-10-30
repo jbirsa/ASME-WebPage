@@ -140,13 +140,8 @@ export default function ASMEPage() {
               ¿Qué es ASME?
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              <b>ASME (American Society of Mechanical Engineers)</b> es una
-              organización internacional sin fines de lucro que promueve el
-              avance de la ingeniería mediante normas, publicaciones,
-              conferencias y competencias. <br/>
-              La sección estudiantil <b>ASME ITBA</b>,
-              única en Argentina, forma parte de esta red global y desarrolla
-              actividades académicas y recreativas dentro del ITBA, fomentando
+              La sección estudiantil <b>ASME ITBA</b> es una organización sin fines de lucro que promueve el avance de la ingeniería, a su vez 
+              desarrolla actividades académicas y recreativas dentro del ITBA, fomentando
               el crecimiento profesional y la participación estudiantil en
               ingeniería.
             </p>
