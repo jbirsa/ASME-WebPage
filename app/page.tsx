@@ -219,7 +219,7 @@ export default function ASMEPage() {
       </section>
 
       {/* Sponsors Section */}
-      <Sponsors />
+      {/*<Sponsors />*/}
 
       {/* Team Section */}
       <OurTeam />
