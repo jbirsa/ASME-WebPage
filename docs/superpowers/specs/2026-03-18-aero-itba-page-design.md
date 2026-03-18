@@ -11,21 +11,32 @@ This is not a standard informational page. It is an **interactive experience** �
 - **Framework**: Next.js App Router (existing)
 - **Animation Engine**: Framer Motion (`useScroll`, `useTransform`, `motion` components)
   - Replaces AOS for this page only — other pages keep AOS
-- **Styling**: Tailwind CSS (existing) + custom CSS for animations
+- **Styling**: Tailwind CSS (existing) + dedicated `app/aero/aero.css` for custom keyframe animations (radar sweep, flag wave, globe rotation, shimmer, particle trail)
 - **Icons**: lucide-react (existing)
 - **No other new dependencies**
+
+## CSS Isolation
+
+- Custom animations and keyframes live in `app/aero/aero.css`, imported by `app/aero/page.tsx`
+- The `/aero` route overrides `scroll-behavior: auto` on `html` to prevent the global `scroll-behavior: smooth` (from `globals.css`) from interfering with Framer Motion's scroll-mapped animations. Applied via a `useEffect` that sets and restores the style on mount/unmount.
 
 ## Route & Navigation
 
 - **Route**: `/aero` — new directory `app/aero/page.tsx` with its own `layout.tsx`
+- **Layout pattern**: Follows the existing codebase convention — `layout.tsx` is a **server component** that only exports metadata. `page.tsx` is `"use client"` and imports `<Navbar />` directly (same pattern as `app/page.tsx`).
 - **Navbar**: Modify the existing `Navbar.tsx` to add an "AERO" link as the last nav item
   - Always gold (#e3a72f), not just on hover
   - Bold weight (font-weight: 700) + letter-spacing (1.5px)
   - Subtle glow via text-shadow: `0 0 12px rgba(227,167,47,0.4)`
-  - Hover: intensified glow + scale(1.05) + shimmer animation
+  - Hover: intensified glow + `transform: scale(1.05)` (transform-only, no layout shift on adjacent items) + shimmer animation
+  - Shimmer: a `@keyframes shimmer` that translates a semi-transparent gradient overlay left-to-right across the text on hover (similar to a skeleton loading shimmer but gold-tinted)
   - Lucide `Plane` icon next to text
   - Also added to mobile menu with same golden treatment
 - **Layout**: Uses the main Navbar (same as homepage), not MecHubNavbar
+- **SEO Metadata** (in `layout.tsx`):
+  - Title: "AERO ITBA — Design Build Fly"
+  - Description: "Equipo de estudiantes del ITBA compitiendo en la AIAA Design-Build-Fly en Wichita, Kansas 2026"
+  - OpenGraph image: placeholder, to be replaced with real hero image
 
 ## Color Palette
 
@@ -57,7 +68,7 @@ Full-viewport sticky video where frames advance as the user scrolls.
 - Logo + tagline visible at scroll 0%, fade out by ~20% scroll progress
 - Additional text overlays can appear at keyframe scroll points (future enhancement)
 
-**Mobile fallback:** Static hero image with autoplay muted video below. Scroll-mapping is desktop-only (detected via `window.matchMedia` or Tailwind breakpoint).
+**Mobile fallback:** Static hero image with autoplay muted video below. Scroll-mapping is desktop-only, detected via `window.matchMedia('(min-width: 768px)')` at runtime (JS-based, since the scroll-mapping involves JS hooks).
 
 **Media:** Placeholder div with gradient background until real video is added to `/public`.
 
@@ -96,6 +107,7 @@ The BWB aircraft showcase with scroll-triggered annotation lines on a blueprint 
 - "3x capacidad de carga" — right side
 - "Blended Wing Body" — bottom
 - Each annotation: dot → line → text, animated with Framer Motion `pathLength` (0→1) synced to scroll offset
+- Annotation lines are SVG `<path>` elements with `pathLength="1"` attribute, absolutely positioned over the blueprint grid. The SVG overlay covers the full section viewport.
 
 **Stats bar at bottom:**
 - Three stat counters: "3x Capacidad", "BWB Configuración", "RC Control Remoto"
@@ -131,6 +143,8 @@ Mission-control aesthetic with live countdown and scramble-to-reveal text.
 
 **Entry animation:** Numbers scramble (random digits cycling) for ~1 second before settling on real values. Triggered on `useInView`.
 
+**Post-competition state:** After the competition date passes, the countdown switches to display "Competencia finalizada" with a static badge. The section remains as a historical record.
+
 ### Section 5: Progreso — Horizontal Scroll Timeline
 
 Vertical scroll drives horizontal movement through a build progress timeline.
@@ -139,6 +153,7 @@ Vertical scroll drives horizontal movement through a build progress timeline.
 - Container height: `300vh`
 - Sticky inner with `overflow: hidden`
 - Inner flex row of milestone cards, translated horizontally via `useTransform(scrollYProgress, [0,1], [0, -totalWidth])`
+- `totalWidth` is measured dynamically via `useRef` on the flex container (`scrollWidth - clientWidth`), recalculated on window resize via a `ResizeObserver`
 
 **Timeline:**
 - Horizontal line through the middle, drawing itself as user scrolls (SVG line with animated `strokeDashoffset`)
@@ -147,7 +162,7 @@ Vertical scroll drives horizontal movement through a build progress timeline.
 **Cards:**
 - Each card: image/video thumbnail placeholder + date label + short description
 - As a card passes through viewport center: scales up (1 → 1.05), gains full opacity, border brightens
-- Video cards show a play icon overlay — click opens a modal/lightbox
+- Video cards show a play icon overlay — click opens a `VideoLightbox.tsx` modal (custom component, no external dependency — a full-screen overlay with the video element and a close button)
 - The flight video card ("VIDEAZO VOLANDO") gets VIP treatment: golden border, slightly larger, pulsing glow animation
 - Future milestone (Wichita 2026): dashed border, dimmed opacity, "coming soon"
 
@@ -196,7 +211,7 @@ Clean, powerful closing section with Instagram link.
 
 **Interactions:**
 - Instagram button: magnetic hover effect (button follows cursor slightly within a radius before snapping back)
-- Background: faint particle trail that follows mouse position (canvas or CSS, lightweight)
+- Background: faint particle trail that follows mouse position — canvas-based with `requestAnimationFrame`, max 25 particles, fading opacity. Desktop-only (hidden on touch devices).
 
 ## Component Architecture
 
@@ -216,6 +231,8 @@ components/aero/
   MagneticButton.tsx  — reusable magnetic hover effect button
   NumberScramble.tsx  — number scramble-to-reveal animation
   AnimatedCounter.tsx — count-up number animation
+  VideoLightbox.tsx   — full-screen video modal overlay
+  constants.ts        — shared constants (competition date, external links)
 ```
 
 ## File Changes Summary
@@ -223,6 +240,8 @@ components/aero/
 **New files:**
 - `app/aero/layout.tsx`
 - `app/aero/page.tsx`
+- `app/aero/aero.css`
+- `components/aero/constants.ts`
 - `components/aero/ScrollVideo.tsx`
 - `components/aero/CinematicText.tsx`
 - `components/aero/BlueprintPlane.tsx`
@@ -233,6 +252,7 @@ components/aero/
 - `components/aero/MagneticButton.tsx`
 - `components/aero/NumberScramble.tsx`
 - `components/aero/AnimatedCounter.tsx`
+- `components/aero/VideoLightbox.tsx`
 
 **Modified files:**
 - `components/Navbar.tsx` — add golden "AERO" link to desktop and mobile nav
@@ -255,6 +275,14 @@ components/aero/
 - Horizontal scroll timeline: only visible cards rendered (intersection observer)
 - Mobile: disable scroll-mapped video (fallback to static), reduce animation complexity
 
+## Accessibility
+
+- **`prefers-reduced-motion`**: When enabled, all scroll-mapped animations degrade to simple fade-in-on-viewport-enter. The scroll-mapped video shows a static frame instead. Horizontal scroll timeline becomes a standard vertical list.
+- Scroll progress indicator: `aria-label="Progreso de scroll"`
+- All placeholder images: descriptive `alt` text
+- Video lightbox: focus trap, Escape to close
+- Instagram CTA button: proper `aria-label` and `rel="noopener noreferrer"` on external link
+
 ## Competition Date
 
-April 2026 — exact date TBD. Countdown timer should accept a configurable target date constant at the top of the MissionBriefing component.
+April 2026 — exact date TBD. Stored in `components/aero/constants.ts` as a shared constant, used by both MissionBriefing (countdown) and ProgressTimeline (future milestone state).
