@@ -8,6 +8,7 @@ import BlueprintPlane from "@/components/aero/BlueprintPlane";
 import MissionBriefing from "@/components/aero/MissionBriefing";
 import ProgressTimeline from "@/components/aero/ProgressTimeline";
 import BigStatement from "@/components/aero/BigStatement";
+import InstagramCTA from "@/components/aero/InstagramCTA";
 import "./aero.css";
 
 export default function AeroPage() {
@@ -29,6 +30,7 @@ export default function AeroPage() {
       <MissionBriefing />
       <ProgressTimeline />
       <BigStatement />
+      <InstagramCTA />
     </div>
   );
 }
