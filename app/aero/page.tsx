@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import ScrollVideo from "@/components/aero/ScrollVideo";
 import CinematicText from "@/components/aero/CinematicText";
+import BlueprintPlane from "@/components/aero/BlueprintPlane";
 import "./aero.css";
 
 export default function AeroPage() {
@@ -21,6 +22,7 @@ export default function AeroPage() {
       <Navbar />
       <ScrollVideo />
       <CinematicText />
+      <BlueprintPlane />
     </div>
   );
 }
