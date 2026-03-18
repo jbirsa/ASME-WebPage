@@ -7,6 +7,7 @@ import CinematicText from "@/components/aero/CinematicText";
 import BlueprintPlane from "@/components/aero/BlueprintPlane";
 import MissionBriefing from "@/components/aero/MissionBriefing";
 import ProgressTimeline from "@/components/aero/ProgressTimeline";
+import BigStatement from "@/components/aero/BigStatement";
 import "./aero.css";
 
 export default function AeroPage() {
@@ -27,6 +28,7 @@ export default function AeroPage() {
       <BlueprintPlane />
       <MissionBriefing />
       <ProgressTimeline />
+      <BigStatement />
     </div>
   );
 }
