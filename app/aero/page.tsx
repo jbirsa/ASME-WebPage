@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import ScrollVideo from "@/components/aero/ScrollVideo";
 import CinematicText from "@/components/aero/CinematicText";
 import BlueprintPlane from "@/components/aero/BlueprintPlane";
+import MissionBriefing from "@/components/aero/MissionBriefing";
 import "./aero.css";
 
 export default function AeroPage() {
@@ -23,6 +24,7 @@ export default function AeroPage() {
       <ScrollVideo />
       <CinematicText />
       <BlueprintPlane />
+      <MissionBriefing />
     </div>
   );
 }
