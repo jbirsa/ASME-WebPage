@@ -6,6 +6,7 @@ import ScrollVideo from "@/components/aero/ScrollVideo";
 import CinematicText from "@/components/aero/CinematicText";
 import BlueprintPlane from "@/components/aero/BlueprintPlane";
 import MissionBriefing from "@/components/aero/MissionBriefing";
+import ProgressTimeline from "@/components/aero/ProgressTimeline";
 import "./aero.css";
 
 export default function AeroPage() {
@@ -25,6 +26,7 @@ export default function AeroPage() {
       <CinematicText />
       <BlueprintPlane />
       <MissionBriefing />
+      <ProgressTimeline />
     </div>
   );
 }
