@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import ScrollVideo from "@/components/aero/ScrollVideo";
+import CinematicText from "@/components/aero/CinematicText";
 import "./aero.css";
 
 export default function AeroPage() {
@@ -19,6 +20,7 @@ export default function AeroPage() {
     <div className="min-h-screen bg-[#0a0a1a] text-white">
       <Navbar />
       <ScrollVideo />
+      <CinematicText />
     </div>
   );
 }
