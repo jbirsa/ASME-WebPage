@@ -128,6 +128,7 @@ export default function InstagramCTA() {
         <MagneticButton
           href={LINKS.instagram}
           className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-gradient-to-r from-[#e3a72f] to-[#d4972a] rounded-lg text-[#0a0a1a] font-bold text-sm hover:shadow-[0_0_30px_rgba(227,167,47,0.4)] transition-shadow"
+          ariaLabel="Seguinos en Instagram @aero.itba"
         >
           <Instagram className="w-5 h-5" />
           @aero.itba

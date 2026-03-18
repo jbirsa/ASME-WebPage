@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { usePrefersReducedMotion } from "./hooks";
 
 const LINES = [
   {
@@ -25,6 +26,7 @@ const LINES = [
 ];
 
 export default function CinematicText() {
+  const prefersReduced = usePrefersReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -34,6 +36,36 @@ export default function CinematicText() {
   // Photo appears after all text
   const photoOpacity = useTransform(scrollYProgress, [0.7, 0.85], [0, 0.4]);
   const photoScale = useTransform(scrollYProgress, [0.7, 1], [1.1, 1.2]);
+
+  if (prefersReduced) {
+    return (
+      <section className="relative py-20 flex items-center justify-center overflow-hidden">
+        {/* Ambient background gradients */}
+        <div className="absolute w-[300px] h-[300px] rounded-full bg-[#e3a72f]/5 blur-[100px] top-[20%] left-[10%]" />
+        <div className="absolute w-[250px] h-[250px] rounded-full bg-[#5f87ab]/5 blur-[100px] bottom-[20%] right-[15%]" />
+
+        {/* Team photo background (static) */}
+        <div className="absolute inset-0 bg-gray-800/50" style={{ opacity: 0.4 }}>
+          <div className="w-full h-full bg-gradient-to-b from-transparent via-[#0a0a1a]/60 to-[#0a0a1a] flex items-center justify-center">
+            <span className="text-gray-700 text-sm tracking-widest uppercase">
+              Team Photo
+            </span>
+          </div>
+        </div>
+
+        {/* Text lines — all visible */}
+        <div className="relative z-10 text-center px-6 max-w-3xl">
+          {LINES.map((line, i) => (
+            <p key={i} className="text-2xl md:text-4xl font-light leading-relaxed mb-4" style={{ opacity: 1 }}>
+              <span className="text-gray-600">{line.prefix}</span>
+              <span className={`font-semibold ${line.highlightColor}`}>{line.highlight}</span>
+              <span className="text-gray-600">{line.suffix}</span>
+            </p>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={containerRef} className="relative" style={{ height: "250vh" }}>

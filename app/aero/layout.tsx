@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   icons: {
     icon: [{ url: "/asme_logo.png", type: "image/png" }],
   },
+  openGraph: {
+    title: "AERO ITBA — Design Build Fly",
+    description:
+      "Equipo de estudiantes del ITBA compitiendo en la AIAA Design-Build-Fly en Wichita, Kansas 2026",
+    type: "website",
+  },
 };
 
 export default function AeroLayout({

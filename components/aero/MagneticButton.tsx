@@ -8,6 +8,7 @@ interface MagneticButtonProps {
   href: string;
   className?: string;
   strength?: number;
+  ariaLabel?: string;
 }
 
 export default function MagneticButton({
@@ -15,6 +16,7 @@ export default function MagneticButton({
   href,
   className = "",
   strength = 0.3,
+  ariaLabel,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -46,7 +48,7 @@ export default function MagneticButton({
       onMouseLeave={handleMouseLeave}
       animate={{ x: position.x, y: position.y }}
       transition={{ type: "spring", stiffness: 300, damping: 15, mass: 0.2 }}
-      aria-label={typeof children === "string" ? children : undefined}
+      aria-label={ariaLabel}
     >
       {children}
     </motion.a>

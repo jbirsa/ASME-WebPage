@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import AnimatedCounter from "./AnimatedCounter";
+import { usePrefersReducedMotion } from "./hooks";
 
 // Coordinates in viewBox units (0-100)
 const ANNOTATIONS = [
@@ -45,6 +46,7 @@ const STATS = [
 ];
 
 export default function BlueprintPlane() {
+  const prefersReduced = usePrefersReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -52,6 +54,66 @@ export default function BlueprintPlane() {
   });
 
   const planeRotation = useTransform(scrollYProgress, [0, 1], [0, 3]);
+
+  if (prefersReduced) {
+    return (
+      <section className="relative py-16 overflow-hidden">
+        {/* Blueprint grid background */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(95,135,171,0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(95,135,171,0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+          }}
+        />
+
+        {/* Plane silhouette */}
+        <div className="relative flex justify-center mb-12">
+          <div
+            className="w-[300px] md:w-[400px] h-[180px] md:h-[240px] border border-[#e3a72f]/30 bg-gradient-to-b from-[#e3a72f]/10 to-[#e3a72f]/3 flex items-end justify-center pb-6"
+            style={{ clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
+          >
+            <span className="text-[#e3a72f]/30 text-[10px] tracking-[3px] uppercase">
+              BWB Profile
+            </span>
+          </div>
+        </div>
+
+        {/* Annotations — all visible */}
+        <div className="relative flex flex-wrap justify-center gap-6 mb-12 px-8">
+          {ANNOTATIONS.map((ann) => (
+            <div key={ann.id} className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: ann.color }} />
+              <span className="text-[11px] font-semibold whitespace-nowrap" style={{ color: ann.color }}>
+                {ann.label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats bar */}
+        <div className="flex justify-center gap-12 md:gap-20">
+          {STATS.map((stat) => (
+            <div key={stat.label} className="text-center">
+              <div className="text-[#e3a72f] text-3xl md:text-4xl font-extrabold">
+                {stat.display ? (
+                  stat.display
+                ) : (
+                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+                )}
+              </div>
+              <div className="text-gray-600 text-[10px] md:text-xs uppercase tracking-[1px] mt-1">
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section ref={containerRef} className="relative" style={{ height: "300vh" }}>
