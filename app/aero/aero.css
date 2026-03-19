@@ -1,59 +1,93 @@
-/* Radar sweep for mission briefing */
-@keyframes radar-sweep {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+@import "tailwindcss";
+
+:root {
+  --dark: #141414;
+  --dark-elevated: #1A1A1A;
+  --light: #F5F5F7;
+  --light-alt: #F4F4F6;
+  --text-on-dark: #F5F5F7;
+  --text-on-light: #141414;
+  --muted-on-dark: #8A8A8A;
+  --muted-on-light: #6A6A6A;
+  --accent: #5f87ab;
+  --accent-hover: #145fa2;
+  --gold: #CCAB76;
 }
 
-/* Flag wave for big statement */
-@keyframes flag-wave {
-  0%, 100% {
-    transform: scaleX(1);
-  }
-  50% {
-    transform: scaleX(1.02);
-  }
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
 }
 
-/* Globe rotation for big statement */
-@keyframes globe-rotate {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+body {
+  background-color: var(--dark);
+  color: var(--text-on-dark);
+  font-family: var(--font-raleway), sans-serif;
+  overflow-x: hidden;
 }
 
-/* Pulse glow for featured timeline card */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(227, 167, 47, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(227, 167, 47, 0.6);
-  }
+/* Green top bar - always visible */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--accent);
+  z-index: 9999;
 }
 
-/* Scroll indicator bounce */
-@keyframes scroll-bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(6px);
-  }
+/* Typography utilities */
+.text-display {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
 }
 
-/* Propeller spin for logo */
-@keyframes propeller-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.text-headline {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text-label {
+  font-family: var(--font-raleway), sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.text-body {
+  font-family: var(--font-raleway), sans-serif;
+  font-weight: 400;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+/* Section backgrounds */
+.section-dark {
+  background-color: var(--dark);
+  color: var(--text-on-dark);
+}
+
+.section-light {
+  background-color: var(--light);
+  color: var(--text-on-light);
+}
+
+/* Placeholder image styling */
+.placeholder-dark {
+  background-color: var(--dark-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.placeholder-light {
+  background-color: #E8E8E4;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
