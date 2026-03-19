@@ -50,11 +50,12 @@ export default function PlaneModel({ wireframe }: PlaneModelProps) {
       <mesh geometry={geometry}>
         <meshStandardMaterial
           ref={solidMatRef}
-          color="#2a2a2a"
-          metalness={0.3}
-          roughness={0.7}
+          color="#8a9bae"
+          metalness={0.4}
+          roughness={0.5}
           transparent
           opacity={1}
+          envMapIntensity={0.5}
         />
       </mesh>
 

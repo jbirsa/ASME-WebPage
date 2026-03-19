@@ -2,7 +2,7 @@
 
 import { useState, useCallback, Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Environment } from "@react-three/drei";
 import PlaneModel from "./PlaneModel";
 import Hotspot from "./Hotspot";
 import { HOTSPOTS } from "./planeData";
@@ -28,9 +28,11 @@ function Scene() {
   return (
     <>
       {/* Lighting */}
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[5, 5, 5]} intensity={0.8} />
-      <directionalLight position={[-3, 3, -3]} intensity={0.3} />
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[5, 8, 5]} intensity={1.5} />
+      <directionalLight position={[-5, 3, -3]} intensity={0.6} />
+      <directionalLight position={[0, -2, 5]} intensity={0.3} />
+      <hemisphereLight args={["#b1c5d8", "#1a1a2e", 0.6]} />
 
       {/* Plane model — click empty space to dismiss tooltip */}
       <group onClick={handleCanvasClick}>
@@ -47,6 +49,9 @@ function Scene() {
           onHover={handleHotspotHover}
         />
       ))}
+
+      {/* Environment for reflections */}
+      <Environment preset="city" environmentIntensity={0.3} />
 
       {/* Controls */}
       <OrbitControls
