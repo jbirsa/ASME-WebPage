@@ -26,8 +26,8 @@ export default function PlaneModel({ wireframe }: PlaneModelProps) {
   // Center the geometry and fix orientation
   geometry.computeBoundingBox();
   geometry.center();
-  // Rotate so the plane sits flat with nose forward (toward camera)
-  geometry.rotateX(-Math.PI / 2);
+  // Rotate so the plane sits flat (wings spread on XZ, Y up) with nose toward +Z
+  geometry.rotateX(Math.PI / 2);
   geometry.rotateZ(Math.PI);
 
   // Animate material transitions
