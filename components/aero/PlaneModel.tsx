@@ -1,7 +1,9 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import * as THREE from "three";
 
 interface PlaneModelProps {
@@ -9,64 +11,22 @@ interface PlaneModelProps {
 }
 
 export default function PlaneModel({ wireframe }: PlaneModelProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
   const solidMatRef = useRef<THREE.MeshStandardMaterial>(null);
   const wireMatRef = useRef<THREE.MeshBasicMaterial>(null);
-
-  // Target opacities for transition
   const transitionState = useRef({ solidOpacity: 1, wireOpacity: 0 });
 
-  const geometry = useMemo(() => {
-    // BWB planform outline (top-down, x = span, z = chord)
-    const shape = new THREE.Shape();
+  const gltf = useLoader(GLTFLoader, "/aero-content/condor-opt.glb", (loader) => {
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.7/");
+    loader.setDRACOLoader(dracoLoader);
+  });
 
-    // Start at nose (center leading edge)
-    shape.moveTo(0, -1.0); // nose tip
-
-    // Right side: swept leading edge to wingtip
-    shape.quadraticCurveTo(0.8, -0.9, 1.5, -0.3); // swept leading edge
-    shape.lineTo(2.0, -0.1); // wingtip leading edge
-    shape.lineTo(2.0, 0.1); // wingtip (narrow chord)
-    shape.lineTo(1.5, 0.4); // trailing edge sweep back
-
-    // Elevon cutout hint at trailing edge
-    shape.lineTo(1.2, 0.5);
-    shape.lineTo(0.3, 0.8); // center trailing edge
-
-    // Mirror left side
-    shape.lineTo(-0.3, 0.8);
-    shape.lineTo(-1.2, 0.5);
-    shape.lineTo(-1.5, 0.4);
-    shape.lineTo(-2.0, 0.1);
-    shape.lineTo(-2.0, -0.1);
-    shape.lineTo(-1.5, -0.3);
-    shape.quadraticCurveTo(-0.8, -0.9, 0, -1.0); // back to nose
-
-    // Extrude with depth (y-axis becomes thickness)
-    const extrudeSettings: THREE.ExtrudeGeometryOptions = {
-      depth: 0.25,
-      bevelEnabled: true,
-      bevelThickness: 0.08,
-      bevelSize: 0.08,
-      bevelSegments: 4,
-      curveSegments: 24,
-    };
-
-    const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-
-    // Rotate so the planform lies flat (XZ plane) with Y as up
-    geo.rotateX(-Math.PI / 2);
-    // Center vertically
-    geo.translate(0, 0.125, 0);
-
-    geo.computeVertexNormals();
-    return geo;
-  }, []);
+  const geometry = (gltf.scene.children[0] as THREE.Mesh).geometry;
 
   // Animate material transitions
   useFrame((_, delta) => {
     const target = transitionState.current;
-    const speed = 5; // lerp speed
+    const speed = 5;
 
     if (wireframe) {
       target.solidOpacity = THREE.MathUtils.lerp(target.solidOpacity, 0.15, delta * speed);
@@ -87,7 +47,7 @@ export default function PlaneModel({ wireframe }: PlaneModelProps) {
   return (
     <group>
       {/* Solid mesh */}
-      <mesh ref={meshRef} geometry={geometry}>
+      <mesh geometry={geometry}>
         <meshStandardMaterial
           ref={solidMatRef}
           color="#2a2a2a"
