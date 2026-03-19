@@ -21,7 +21,14 @@ export default function PlaneModel({ wireframe }: PlaneModelProps) {
     loader.setDRACOLoader(dracoLoader);
   });
 
-  const geometry = (gltf.scene.children[0] as THREE.Mesh).geometry;
+  const geometry = (gltf.scene.children[0] as THREE.Mesh).geometry.clone();
+
+  // Center the geometry and fix orientation
+  geometry.computeBoundingBox();
+  geometry.center();
+  // Rotate so the plane sits flat with nose forward (toward camera)
+  geometry.rotateX(-Math.PI / 2);
+  geometry.rotateZ(Math.PI);
 
   // Animate material transitions
   useFrame((_, delta) => {

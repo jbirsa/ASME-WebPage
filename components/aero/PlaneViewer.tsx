@@ -101,7 +101,7 @@ export default function PlaneViewer() {
 
       <Suspense fallback={<LoadingFallback />}>
         <Canvas
-          camera={{ position: [4, 3, 4], fov: 45 }}
+          camera={{ position: [0, 3, 6], fov: 45 }}
           style={{ background: "#141414" }}
           gl={{ antialias: true, alpha: false }}
         >
