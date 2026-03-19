@@ -1,36 +1,27 @@
-"use client";
-
-import { useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import ScrollVideo from "@/components/aero/ScrollVideo";
-import CinematicText from "@/components/aero/CinematicText";
-import BlueprintPlane from "@/components/aero/BlueprintPlane";
-import MissionBriefing from "@/components/aero/MissionBriefing";
-import ProgressTimeline from "@/components/aero/ProgressTimeline";
-import BigStatement from "@/components/aero/BigStatement";
-import InstagramCTA from "@/components/aero/InstagramCTA";
-import "./aero.css";
+import Navigation from "@/components/aero/Navigation";
+import Hero from "@/components/aero/Hero";
+import AeroIntro from "@/components/aero/AeroIntro";
+import Stats from "@/components/aero/Stats";
+import ProductShowcase from "@/components/aero/ProductShowcase";
+import PlaneBlueprint from "@/components/aero/PlaneBlueprint";
+import Features from "@/components/aero/Features";
+import CaseStudy from "@/components/aero/CaseStudy";
+import CTA from "@/components/aero/CTA";
+import Footer from "@/components/aero/Footer";
 
 export default function AeroPage() {
-  useEffect(() => {
-    const html = document.documentElement;
-    const prev = html.style.scrollBehavior;
-    html.style.scrollBehavior = "auto";
-    return () => {
-      html.style.scrollBehavior = prev;
-    };
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[#0a0a1a] text-white">
-      <Navbar />
-      <ScrollVideo />
-      <CinematicText />
-      <BlueprintPlane />
-      <MissionBriefing />
-      <ProgressTimeline />
-      <BigStatement />
-      <InstagramCTA />
-    </div>
+    <main>
+      <Navigation />
+      <Hero />
+      <AeroIntro />
+      <Stats />
+      <ProductShowcase />
+      <PlaneBlueprint />
+      <Features />
+      <CaseStudy />
+      <CTA />
+      <Footer />
+    </main>
   );
 }

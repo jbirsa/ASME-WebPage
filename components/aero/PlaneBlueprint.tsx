@@ -13,33 +13,33 @@ const SPECS = [
   { value: "BWB", unit: "", label: "Blended Wing Body" },
   { value: "C/F", unit: "", label: "Fibra de carbono + Balsa" },
   { value: "4", unit: "ch", label: "Servos elevones" },
-  { value: "LiPo", unit: "", label: "Bateria alta descarga" },
+  { value: "LiPo", unit: "", label: "Batería alta descarga" },
   { value: "3", unit: "x", label: "Capacidad vs. convencional" },
 ];
 
 const PROCESS = [
   {
     step: "01",
-    title: "Diseno",
-    desc: "Simulacion aerodinamica CFD y optimizacion estructural FEA. Iteraciones en XFLR5 y SolidWorks.",
+    title: "Diseño",
+    desc: "Simulación aerodinámica CFD y optimización estructural FEA. Iteraciones en XFLR5 y SolidWorks.",
     image: "/aeroContent2.jpg",
   },
   {
     step: "02",
     title: "Laminado",
-    desc: "Layup de fibra de carbono sobre nucleo de balsa. Curado bajo vacio para union estructural optima.",
+    desc: "Layup de fibra de carbono sobre núcleo de balsa. Curado bajo vacío para unión estructural óptima.",
     image: "/aeroContent3.jpg",
   },
   {
     step: "03",
     title: "Ensamblaje",
-    desc: "Corte CNC de costillas y largueros. Ensamblaje manual con precision en el taller.",
+    desc: "Corte CNC de costillas y largueros. Ensamblaje manual con precisión en el taller.",
     image: "/aeroContent4.jpg",
   },
   {
     step: "04",
     title: "Vuelo",
-    desc: "Pruebas de vuelo iterativas. Ajuste de CG, trimado y calibracion de controles.",
+    desc: "Pruebas de vuelo iterativas. Ajuste de CG, trimado y calibración de controles.",
     image: "/aeroContent1.jpg",
   },
 ];
@@ -51,6 +51,8 @@ export default function PlaneBlueprint() {
   const processCardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const videoSectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoSrc = "/aeroFly3.mp4";
+
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -130,10 +132,10 @@ export default function PlaneBlueprint() {
   return (
     <section ref={sectionRef} id="blueprint" className="relative">
       {/* ─────────────────── TITLE ─────────────────── */}
-      <div className="bg-[#050505] pt-32 pb-16 md:pb-24">
+      <div className="bg-[#050505] pt-20 md:pt-32 pb-16 md:pb-24">
         <div ref={titleRef} className="max-w-[1200px] mx-auto px-6 text-center">
           <span className="font-mono text-accent text-xs tracking-[0.3em] uppercase block mb-5">
-            Ingenieria de vuelo
+            Ingeniería de vuelo
           </span>
           <h2
             className="font-montserrat font-black text-white leading-[1.1] tracking-tight"
@@ -141,7 +143,7 @@ export default function PlaneBlueprint() {
           >
             Cada componente,{" "}
             <br className="hidden sm:block" />
-            <span className="text-accent">disenado con precision.</span>
+            <span className="text-accent">diseñado con precisión.</span>
           </h2>
         </div>
       </div>
@@ -163,40 +165,46 @@ export default function PlaneBlueprint() {
         </div>
       </div>
 
-      {/* ─────────────────── MOBILE: Stacked Feature Cards ─────────────────── */}
-      <div className="md:hidden bg-[#050505] px-6 pb-20 space-y-20">
-        <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-8">
-          <img
-            src="/aeroContent2.jpg"
-            alt="BWB Aircraft"
-            className="w-full h-full object-cover"
+      {/* ─────────────────── MOBILE: 3D Viewer + Feature Cards ─────────────────── */}
+      <div className="md:hidden bg-[#050505] px-4 pb-16">
+        {/* 3D viewer on mobile */}
+        <div className="mb-10">
+          <PlaneViewerDynamic
+            fallback={
+              <div className="w-full aspect-square rounded-lg overflow-hidden relative">
+                <img
+                  src="/aeroContent2.jpg"
+                  alt="BWB Aircraft"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            }
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-          <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-accent/40 rounded-tl-lg" />
-          <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-accent/40 rounded-tr-lg" />
-          <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-accent/40 rounded-bl-lg" />
-          <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-accent/40 rounded-br-lg" />
         </div>
-        {HOTSPOTS.map((h, i) => (
-          <div key={h.id}>
-            <span className="font-mono text-accent text-[11px] tracking-[0.3em] uppercase">
-              {h.subtitle}
-            </span>
-            <h3 className="font-montserrat font-black text-white text-2xl mt-2 leading-[1.1]">
-              {h.title}
-            </h3>
-            <p className="font-raleway text-white/50 mt-3 leading-relaxed text-sm">
-              {h.description}
-            </p>
-            <div className="mt-4 inline-flex">
-              <div className="px-3 py-1.5 rounded border border-accent/30 bg-accent/[0.06]">
-                <span className="font-mono text-accent text-xs">
-                  {h.badge}
-                </span>
+
+        {/* Feature cards */}
+        <div className="space-y-8">
+          {HOTSPOTS.map((h) => (
+            <div key={h.id} className="border border-white/[0.08] rounded-lg p-5 bg-white/[0.02]">
+              <span className="font-mono text-accent text-[11px] tracking-[0.3em] uppercase">
+                {h.subtitle}
+              </span>
+              <h3 className="font-montserrat font-black text-white text-xl mt-2 leading-[1.1]">
+                {h.title}
+              </h3>
+              <p className="font-raleway text-white/60 mt-3 leading-relaxed text-sm">
+                {h.description}
+              </p>
+              <div className="mt-4 inline-flex">
+                <div className="px-3 py-1.5 rounded border border-accent/30 bg-accent/[0.06]">
+                  <span className="font-mono text-accent text-xs">
+                    {h.badge}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* ─────────────────── SPECS GRID ─────────────────── */}
@@ -210,7 +218,7 @@ export default function PlaneBlueprint() {
               className="font-montserrat font-black text-white leading-[1.1]"
               style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}
             >
-              Los numeros.
+              Los números.
             </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
@@ -232,7 +240,7 @@ export default function PlaneBlueprint() {
                     </span>
                   )}
                 </div>
-                <p className="font-raleway text-white/40 text-xs md:text-sm mt-2">
+                <p className="font-raleway text-white/50 text-xs md:text-sm mt-2">
                   {spec.label}
                 </p>
               </div>
@@ -281,7 +289,7 @@ export default function PlaneBlueprint() {
                   <h4 className="font-montserrat font-bold text-white text-lg">
                     {p.title}
                   </h4>
-                  <p className="font-raleway text-white/40 text-sm mt-2 leading-relaxed">
+                  <p className="font-raleway text-white/50 text-sm mt-2 leading-relaxed">
                     {p.desc}
                   </p>
                 </div>
@@ -302,21 +310,22 @@ export default function PlaneBlueprint() {
               className="font-montserrat font-black text-white leading-[1.1]"
               style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}
             >
-              Y despues... vuela.
+              Y después... vuela.
             </h2>
           </div>
 
           <div
             ref={videoSectionRef}
-            className="relative rounded-xl overflow-hidden aspect-video"
+            className="relative rounded-xl overflow-hidden bg-black aspect-[9/16] sm:aspect-[4/3] md:aspect-video"
           >
             <video
               ref={videoRef}
-              src="/aeroFly.mp4"
+              src={videoSrc}
               muted
               loop
               playsInline
-              className="w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ objectPosition: "center 40%" }}
             />
             {/* Corner brackets */}
             <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-accent/50 rounded-tl-xl pointer-events-none" />

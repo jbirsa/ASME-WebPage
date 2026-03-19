@@ -1,86 +1,51 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect, Suspense } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Environment, Grid } from "@react-three/drei";
 import * as THREE from "three";
 import PlaneModel from "./PlaneModel";
 import Hotspot from "./Hotspot";
 import { HOTSPOTS, type HotspotData } from "./planeData";
 
-// Projects a 3D position to 2D screen coordinates
-function useScreenPosition(
-  position: [number, number, number] | null,
-  canvasRef: React.RefObject<HTMLDivElement | null>
-) {
-  const [screenPos, setScreenPos] = useState<{ x: number; y: number } | null>(null);
+/** Animated 3D blueprint grid on the ground plane */
+function BlueprintGrid({ visible }: { visible: boolean }) {
+  const matRef = useRef<THREE.MeshBasicMaterial>(null);
 
-  return { screenPos, setScreenPos };
-}
-
-interface SceneProps {
-  onHotspotActivate: (data: HotspotData | null, screenPos: { x: number; y: number } | null) => void;
-  canvasRef: React.RefObject<HTMLDivElement | null>;
-}
-
-function HotspotProjector({
-  data,
-  isActive,
-  onProject,
-}: {
-  data: HotspotData;
-  isActive: boolean;
-  onProject: (pos: { x: number; y: number }) => void;
-}) {
-  const { camera, gl } = useThree();
-
-  useEffect(() => {
-    if (!isActive) return;
-    const vec = new THREE.Vector3(...data.position);
-    vec.project(camera);
-    const rect = gl.domElement.getBoundingClientRect();
-    const x = ((vec.x + 1) / 2) * rect.width;
-    const y = ((-vec.y + 1) / 2) * rect.height;
-    onProject({ x, y });
+  useFrame((_, delta) => {
+    if (!matRef.current) return;
+    const target = visible ? 1 : 0;
+    matRef.current.opacity = THREE.MathUtils.lerp(matRef.current.opacity, target, delta * 4);
   });
 
-  return null;
+  return (
+    <Grid
+      position={[0, -0.5, 0]}
+      args={[20, 20]}
+      cellSize={0.5}
+      cellThickness={0.6}
+      cellColor="#4a90c4"
+      sectionSize={2}
+      sectionThickness={1.2}
+      sectionColor="#4a90c4"
+      fadeDistance={15}
+      fadeStrength={2}
+      infiniteGrid
+    />
+  );
 }
 
-function Scene({ onHotspotActivate, canvasRef }: SceneProps) {
-  const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
-  const [hoveredHotspot, setHoveredHotspot] = useState<string | null>(null);
-
-  const visibleHotspot = activeHotspot || hoveredHotspot;
-  const isWireframe = visibleHotspot !== null;
-
-  const handleHotspotClick = useCallback(
-    (id: string) => {
-      setActiveHotspot((prev) => (prev === id ? null : id));
-    },
-    []
-  );
-
-  const handleHotspotHover = useCallback((id: string | null) => {
-    setHoveredHotspot(id);
-  }, []);
-
-  const handleCanvasClick = useCallback(() => {
-    setActiveHotspot(null);
-    onHotspotActivate(null, null);
-  }, [onHotspotActivate]);
-
-  // When active hotspot changes, notify parent
-  useEffect(() => {
-    if (!visibleHotspot) {
-      onHotspotActivate(null, null);
-    }
-  }, [visibleHotspot, onHotspotActivate]);
-
-  const activeData = visibleHotspot
-    ? HOTSPOTS.find((h) => h.id === visibleHotspot) || null
-    : null;
-
+function Scene({
+  blueprintMode,
+  activeHotspotId,
+  onHotspotClick,
+  compact,
+}: {
+  blueprintMode: boolean;
+  activeHotspotId: string | null;
+  onHotspotClick: (id: string) => void;
+  compact: boolean;
+}) {
   return (
     <>
       {/* Lighting */}
@@ -88,32 +53,25 @@ function Scene({ onHotspotActivate, canvasRef }: SceneProps) {
       <directionalLight position={[5, 8, 5]} intensity={1.5} />
       <directionalLight position={[-5, 3, -3]} intensity={0.6} />
       <directionalLight position={[0, -2, 5]} intensity={0.3} />
-      <hemisphereLight args={["#b1c5d8", "#1a1a2e", 0.6]} />
+      <hemisphereLight args={["#8bb5d6", "#0f1a2e", 0.7]} />
+
+      {/* 3D Blueprint grid */}
+      <BlueprintGrid visible={blueprintMode} />
 
       {/* Plane model */}
-      <group onClick={handleCanvasClick}>
-        <PlaneModel wireframe={isWireframe} />
-      </group>
+      <PlaneModel wireframe={blueprintMode} />
 
       {/* Hotspots */}
       {HOTSPOTS.map((hotspot) => (
         <Hotspot
           key={hotspot.id}
           data={hotspot}
-          isActive={visibleHotspot === hotspot.id}
-          onClick={handleHotspotClick}
-          onHover={handleHotspotHover}
+          isActive={activeHotspotId === hotspot.id}
+          blueprintMode={blueprintMode}
+          compact={compact}
+          onClick={onHotspotClick}
         />
       ))}
-
-      {/* Project active hotspot position to screen */}
-      {activeData && (
-        <HotspotProjector
-          data={activeData}
-          isActive
-          onProject={(pos) => onHotspotActivate(activeData, pos)}
-        />
-      )}
 
       {/* Environment for reflections */}
       <Environment preset="city" environmentIntensity={0.3} />
@@ -124,7 +82,7 @@ function Scene({ onHotspotActivate, canvasRef }: SceneProps) {
         maxDistance={10}
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 2}
-        autoRotate
+        autoRotate={!blueprintMode}
         autoRotateSpeed={0.5}
         enablePan={false}
       />
@@ -143,188 +101,230 @@ function LoadingFallback() {
   );
 }
 
-interface TooltipInfo {
-  data: HotspotData;
-  dotPos: { x: number; y: number };
-}
-
 export default function PlaneViewer() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [tooltip, setTooltip] = useState<TooltipInfo | null>(null);
+  const [blueprintMode, setBlueprintMode] = useState(false);
+  const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleHotspotActivate = useCallback(
-    (data: HotspotData | null, screenPos: { x: number; y: number } | null) => {
-      if (data && screenPos) {
-        setTooltip({ data, dotPos: screenPos });
-      } else {
-        setTooltip(null);
-      }
-    },
-    []
-  );
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-  // Calculate tooltip card position (to the right of the container)
-  const getTooltipStyle = (): React.CSSProperties => {
-    if (!tooltip || !containerRef.current) return { display: "none" };
+  const activeData = activeHotspotId
+    ? HOTSPOTS.find((h) => h.id === activeHotspotId) || null
+    : null;
 
-    const rect = containerRef.current.getBoundingClientRect();
-    const dotX = tooltip.dotPos.x;
-    const dotY = tooltip.dotPos.y;
+  const hotspotClickedRef = useRef(false);
 
-    // Place card to the right side of the canvas
-    const cardX = rect.width - 20;
-    const cardY = Math.max(20, Math.min(dotY - 60, rect.height - 220));
+  const handleHotspotClick = useCallback((id: string) => {
+    hotspotClickedRef.current = true;
+    setBlueprintMode(true);
+    setActiveHotspotId((prev) => (prev === id ? null : id));
+  }, []);
 
-    return {
-      position: "absolute" as const,
-      right: 20,
-      top: cardY,
-      width: 260,
-      zIndex: 20,
-      animation: "fadeIn 0.3s ease-out",
-    };
-  };
+  // Track drag vs click — only exit blueprint on real clicks, not drag-end
+  const pointerDownPos = useRef<{ x: number; y: number } | null>(null);
 
-  // SVG line from dot to card
-  const getLinePath = () => {
-    if (!tooltip || !containerRef.current) return null;
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    pointerDownPos.current = { x: e.clientX, y: e.clientY };
+  }, []);
 
-    const rect = containerRef.current.getBoundingClientRect();
-    const dotX = tooltip.dotPos.x;
-    const dotY = tooltip.dotPos.y;
-    const cardX = rect.width - 280;
-    const cardY = Math.max(20, Math.min(tooltip.dotPos.y - 60, rect.height - 220)) + 40;
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (!blueprintMode) { pointerDownPos.current = null; return; }
+    const down = pointerDownPos.current;
+    pointerDownPos.current = null;
+    if (!down) return;
+    const dx = e.clientX - down.x;
+    const dy = e.clientY - down.y;
+    // If mouse moved more than 5px, it was a drag — ignore
+    if (dx * dx + dy * dy > 25) return;
+    // If a hotspot was just clicked, don't exit
+    if (hotspotClickedRef.current) {
+      hotspotClickedRef.current = false;
+      return;
+    }
+    // Real click — exit blueprint mode
+    setBlueprintMode(false);
+    setActiveHotspotId(null);
+  }, [blueprintMode]);
 
-    return (
-      <svg
-        className="absolute inset-0 pointer-events-none z-10"
-        width="100%"
-        height="100%"
-      >
-        <line
-          x1={dotX}
-          y1={dotY}
-          x2={cardX}
-          y2={cardY}
-          stroke="#5f87ab"
-          strokeWidth={1}
-          strokeDasharray="4 3"
-          opacity={0.5}
-        />
-        <circle cx={dotX} cy={dotY} r={4} fill="#5f87ab" opacity={0.6} />
-      </svg>
-    );
-  };
+  // Mobile: spec panel rendered below the viewer
+  const specPanel = blueprintMode && activeData ? (
+    <div
+      className="mt-4 md:hidden"
+      style={{ animation: "fadeIn 0.3s ease-out" }}
+    >
+      <div className="border border-[rgba(74,144,196,0.3)] rounded-lg bg-[rgba(8,16,24,0.94)] p-4">
+        <span className="font-mono text-[11px] tracking-[0.3em] uppercase text-[#4a90c4] block">
+          {activeData.subtitle}
+        </span>
+        <h4 className="font-montserrat font-extrabold text-[#F5F5F7] text-base mt-1.5 leading-tight">
+          {activeData.title}
+        </h4>
+        <p className="font-raleway text-[13px] text-[#a1a1a6] leading-relaxed mt-2">
+          {activeData.description}
+        </p>
+        <div className="mt-3">
+          <span className="font-mono text-[11px] text-[#4a90c4] border border-[rgba(74,144,196,0.3)] rounded px-2.5 py-1 tracking-wide">
+            {activeData.badge}
+          </span>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   return (
-    <div ref={containerRef} className="relative w-full aspect-[4/3] rounded-lg overflow-hidden">
-      {/* Blueprint grid background */}
+    <div>
+    <div ref={containerRef} onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} className="relative w-full aspect-square md:aspect-[4/3] rounded-lg overflow-hidden">
+      {/* Blueprint grid CSS background — visible behind transparent canvas */}
       <div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 transition-all duration-700"
         style={{
+          backgroundColor: blueprintMode ? "#0a1520" : "#141414",
           backgroundImage: `
-            linear-gradient(rgba(95,135,171,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(95,135,171,0.04) 1px, transparent 1px)
+            linear-gradient(rgba(74,144,196,${blueprintMode ? 0.12 : 0.03}) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(74,144,196,${blueprintMode ? 0.12 : 0.03}) 1px, transparent 1px),
+            linear-gradient(rgba(74,144,196,${blueprintMode ? 0.06 : 0}) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(74,144,196,${blueprintMode ? 0.06 : 0}) 1px, transparent 1px)
           `,
-          backgroundSize: "60px 60px",
+          backgroundSize: "120px 120px, 120px 120px, 24px 24px, 24px 24px",
         }}
       />
 
       {/* Corner brackets */}
-      <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-accent/40 z-10 rounded-tl-lg pointer-events-none" />
-      <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-accent/40 z-10 rounded-tr-lg pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-accent/40 z-10 rounded-bl-lg pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-accent/40 z-10 rounded-br-lg pointer-events-none" />
+      <div className="absolute top-0 left-0 w-6 h-6 md:w-10 md:h-10 border-t-2 border-l-2 border-accent/50 z-10 rounded-tl-lg pointer-events-none" />
+      <div className="absolute top-0 right-0 w-6 h-6 md:w-10 md:h-10 border-t-2 border-r-2 border-accent/50 z-10 rounded-tr-lg pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-6 h-6 md:w-10 md:h-10 border-b-2 border-l-2 border-accent/50 z-10 rounded-bl-lg pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-6 h-6 md:w-10 md:h-10 border-b-2 border-r-2 border-accent/50 z-10 rounded-br-lg pointer-events-none" />
 
       <Suspense fallback={<LoadingFallback />}>
         <Canvas
           camera={{ position: [0, 3, 6], fov: 45 }}
-          style={{ background: "#141414" }}
-          gl={{ antialias: true, alpha: false }}
+          gl={{ antialias: true, alpha: true }}
+          style={{ background: "transparent" }}
         >
           <Scene
-            onHotspotActivate={handleHotspotActivate}
-            canvasRef={containerRef}
+            blueprintMode={blueprintMode}
+            activeHotspotId={activeHotspotId}
+            onHotspotClick={handleHotspotClick}
+            compact={isMobile}
           />
         </Canvas>
       </Suspense>
 
-      {/* Connecting line from hotspot to card */}
-      {tooltip && getLinePath()}
-
-      {/* Side tooltip card */}
-      {tooltip && (
-        <div style={getTooltipStyle()}>
+      {/* Blueprint mode spec panel (desktop only — mobile panel is below viewer) */}
+      {blueprintMode && activeData && (
+        <div
+          className="absolute top-4 right-4 z-20 w-72 hidden md:block"
+          style={{ animation: "fadeIn 0.3s ease-out" }}
+        >
           <div
             style={{
-              background: "rgba(26, 26, 26, 0.95)",
-              backdropFilter: "blur(12px)",
-              border: "1px solid rgba(95,135,171,0.3)",
+              background: "rgba(8, 16, 24, 0.94)",
+              backdropFilter: "blur(16px)",
+              border: "1px solid rgba(74,144,196,0.4)",
               borderRadius: 8,
-              padding: "16px 20px",
+              padding: "18px 22px",
+              position: "relative",
             }}
           >
-            {/* Corner brackets */}
-            <div style={{ position: "absolute", top: -1, left: -1, width: 12, height: 12, borderTop: "2px solid #5f87ab", borderLeft: "2px solid #5f87ab", borderTopLeftRadius: 8 }} />
-            <div style={{ position: "absolute", top: -1, right: -1, width: 12, height: 12, borderTop: "2px solid #5f87ab", borderRight: "2px solid #5f87ab", borderTopRightRadius: 8 }} />
-            <div style={{ position: "absolute", bottom: -1, left: -1, width: 12, height: 12, borderBottom: "2px solid #5f87ab", borderLeft: "2px solid #5f87ab", borderBottomLeftRadius: 8 }} />
-            <div style={{ position: "absolute", bottom: -1, right: -1, width: 12, height: 12, borderBottom: "2px solid #5f87ab", borderRight: "2px solid #5f87ab", borderBottomRightRadius: 8 }} />
+            {/* Corner accents */}
+            <div style={{ position: "absolute", top: -1, left: -1, width: 14, height: 14, borderTop: "2px solid #4a90c4", borderLeft: "2px solid #4a90c4", borderTopLeftRadius: 8 }} />
+            <div style={{ position: "absolute", top: -1, right: -1, width: 14, height: 14, borderTop: "2px solid #4a90c4", borderRight: "2px solid #4a90c4", borderTopRightRadius: 8 }} />
+            <div style={{ position: "absolute", bottom: -1, left: -1, width: 14, height: 14, borderBottom: "2px solid #4a90c4", borderLeft: "2px solid #4a90c4", borderBottomLeftRadius: 8 }} />
+            <div style={{ position: "absolute", bottom: -1, right: -1, width: 14, height: 14, borderBottom: "2px solid #4a90c4", borderRight: "2px solid #4a90c4", borderBottomRightRadius: 8 }} />
 
-            <span style={{
-              fontFamily: "var(--font-montserrat), sans-serif",
-              fontSize: 10,
-              letterSpacing: "0.3em",
-              textTransform: "uppercase",
-              color: "#5f87ab",
-              display: "block",
-            }}>
-              {tooltip.data.subtitle}
+            <span
+              style={{
+                fontFamily: "var(--font-montserrat), sans-serif",
+                fontSize: 11,
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                color: "#4a90c4",
+                display: "block",
+              }}
+            >
+              {activeData.subtitle}
             </span>
 
-            <h4 style={{
-              fontFamily: "var(--font-montserrat), sans-serif",
-              fontWeight: 800,
-              fontSize: 16,
-              color: "#F5F5F7",
-              margin: "6px 0 8px",
-              lineHeight: 1.1,
-            }}>
-              {tooltip.data.title}
+            <h4
+              style={{
+                fontFamily: "var(--font-montserrat), sans-serif",
+                fontWeight: 800,
+                fontSize: 18,
+                color: "#F5F5F7",
+                margin: "8px 0 10px",
+                lineHeight: 1.15,
+              }}
+            >
+              {activeData.title}
             </h4>
 
-            <p style={{
-              fontFamily: "var(--font-raleway), sans-serif",
-              fontSize: 12,
-              color: "#a1a1a6",
-              lineHeight: 1.5,
-              margin: 0,
-            }}>
-              {tooltip.data.description}
+            <p
+              style={{
+                fontFamily: "var(--font-raleway), sans-serif",
+                fontSize: 13,
+                color: "#a1a1a6",
+                lineHeight: 1.55,
+                margin: 0,
+              }}
+            >
+              {activeData.description}
             </p>
 
-            <div style={{ marginTop: 10 }}>
-              <span style={{
-                fontFamily: "monospace",
-                fontSize: 10,
-                color: "#5f87ab",
-                border: "1px solid rgba(95,135,171,0.3)",
-                borderRadius: 4,
-                padding: "3px 8px",
-                letterSpacing: "0.05em",
-              }}>
-                {tooltip.data.badge}
+            <div style={{ marginTop: 12 }}>
+              <span
+                style={{
+                  fontFamily: "monospace",
+                  fontSize: 11,
+                  color: "#4a90c4",
+                  border: "1px solid rgba(74,144,196,0.3)",
+                  borderRadius: 4,
+                  padding: "4px 10px",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {activeData.badge}
               </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Interaction hint */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
-        <span className="font-mono text-white/20 text-[10px] tracking-wider">
-          Arrastra para rotar · Click en los puntos para explorar
-        </span>
-      </div>
+      {/* Blueprint mode indicator (desktop only) */}
+      {blueprintMode && (
+        <div className="absolute top-4 left-4 z-20 pointer-events-none hidden md:block">
+          <span className="font-mono text-accent text-xs tracking-[0.25em] uppercase opacity-70">
+            Blueprint Mode
+          </span>
+        </div>
+      )}
+
+      {/* Exit hint in blueprint mode (desktop only) */}
+      {blueprintMode && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none hidden md:block">
+          <span className="font-mono text-accent/40 text-[11px] tracking-wider">
+            Click afuera para salir
+          </span>
+        </div>
+      )}
+
+      {/* Normal mode hint */}
+      {!blueprintMode && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+          <span className="font-mono text-white/25 text-[10px] md:text-[11px] tracking-wider text-center block">
+            <span className="hidden md:inline">Arrastra para rotar · Click en los puntos para explorar</span>
+            <span className="md:hidden">Toca los puntos para explorar</span>
+          </span>
+        </div>
+      )}
+    </div>
+    {/* Mobile: spec panel below the viewer */}
+    {specPanel}
     </div>
   );
 }

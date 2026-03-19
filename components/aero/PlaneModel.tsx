@@ -27,8 +27,7 @@ export default function PlaneModel({ wireframe }: PlaneModelProps) {
   geometry.computeBoundingBox();
   geometry.center();
   // Rotate so the plane sits flat (wings spread on XZ, Y up) with nose toward +Z
-  geometry.rotateX(Math.PI / 2);
-  geometry.rotateZ(Math.PI);
+  geometry.rotateX(-Math.PI / 2);
 
   // Animate material transitions
   useFrame((_, delta) => {
@@ -70,7 +69,7 @@ export default function PlaneModel({ wireframe }: PlaneModelProps) {
       <mesh geometry={geometry}>
         <meshBasicMaterial
           ref={wireMatRef}
-          color="#5f87ab"
+          color="#4a90c4"
           wireframe
           transparent
           opacity={0}

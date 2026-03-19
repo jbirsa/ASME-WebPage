@@ -177,10 +177,7 @@
   }
 }
 
-/* Smooth scrolling for navigation */
-html {
-  scroll-behavior: smooth;
-}
+/* Smooth scrolling is set via data-scroll-behavior="smooth" on <html> in layout.tsx */
 
 /* Sponsor carousel animations */
 @keyframes scrollLeft {
