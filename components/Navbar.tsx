@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Menu, X } from "lucide-react" // Importamos iconos
+import { Menu, X, Plane } from "lucide-react" // Importamos iconos
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -71,11 +71,22 @@ export default function Navbar() {
             >
               Equipo
             </Link>
-            <Link 
-              href="/#contacto" 
+            <Link
+              href="/#contacto"
               className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
             >
               Contacto
+            </Link>
+            <Link
+              href="/aero"
+              className="text-[#e3a72f] font-bold tracking-[1.5px] transition-all duration-300 hover:scale-105 flex items-center gap-1.5 relative group"
+              style={{ textShadow: "0 0 12px rgba(227,167,47,0.4)" }}
+            >
+              <span className="relative">
+                AERO
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%] bg-[position:-200%_center] group-hover:animate-[shimmer_1.5s_ease-in-out] pointer-events-none" />
+              </span>
+              <Plane className="w-4 h-4" />
             </Link>
           </div>
 
@@ -146,12 +157,21 @@ export default function Navbar() {
             >
               Equipo
             </Link>
-            <Link 
-              href="/#contacto" 
+            <Link
+              href="/#contacto"
               className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
               onClick={handleLinkClick}
             >
               Contacto
+            </Link>
+            <Link
+              href="/aero"
+              className="text-2xl font-bold text-[#e3a72f] tracking-[1.5px] flex items-center gap-2 hover:scale-105 transition-all duration-300"
+              style={{ textShadow: "0 0 12px rgba(227,167,47,0.4)" }}
+              onClick={handleLinkClick}
+            >
+              AERO
+              <Plane className="w-5 h-5" />
             </Link>
           </div>
         </div>

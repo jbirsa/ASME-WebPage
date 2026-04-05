@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --dark: #141414;
+  --dark-elevated: #1A1A1A;
+  --light: #F5F5F7;
+  --light-alt: #F4F4F6;
+  --text-on-dark: #F5F5F7;
+  --text-on-light: #141414;
+  --muted-on-dark: #8A8A8A;
+  --muted-on-light: #6A6A6A;
+  --accent: #2b6cb0;
+  --accent-hover: #1e5a9e;
+  --gold: #CCAB76;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+}
+
+body {
+  background-color: var(--dark);
+  color: var(--text-on-dark);
+  font-family: var(--font-raleway), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Green top bar - always visible */
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--accent);
+  z-index: 9999;
+}
+
+/* Typography utilities */
+.text-display {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.text-headline {
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.text-label {
+  font-family: var(--font-raleway), sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.text-body {
+  font-family: var(--font-raleway), sans-serif;
+  font-weight: 400;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+/* Section backgrounds */
+.section-dark {
+  background-color: var(--dark);
+  color: var(--text-on-dark);
+}
+
+.section-light {
+  background-color: var(--light);
+  color: var(--text-on-light);
+}
+
+/* Placeholder image styling */
+.placeholder-dark {
+  background-color: var(--dark-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.placeholder-light {
+  background-color: #E8E8E4;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
