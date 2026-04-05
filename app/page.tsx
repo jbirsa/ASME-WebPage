@@ -103,11 +103,12 @@ export default function ASMEPage() {
       >
         <div className="max-w-4xl mx-auto">
           <Image
-            className="mb-6 mx-auto"
+            className="mb-6 mx-auto h-auto w-[220px] md:w-[300px]"
             src="/asme_logo_blanco.png"
             alt="ASME Logo"
             width={300}
             height={300}
+            loading="eager"
           />
 
           <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto">

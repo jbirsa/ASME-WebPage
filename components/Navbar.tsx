@@ -33,12 +33,17 @@ export default function Navbar() {
       }`}>
         <div className="flex items-center justify-between p-4 md:p-6 max-w-7xl mx-auto">
           <div className="flex items-center space-x-2">
-            <div className="w-16 h-16 rounded-full relative flex items-center justify-center">
-              <Link href="/#inicio" className="hover:opacity-80 transition-opacity duration-200">
+            <div className="flex items-center justify-center">
+              <Link
+                href="/#inicio"
+                className="relative block h-16 w-16 rounded-full transition-opacity duration-200 hover:opacity-80"
+              >
                 <Image
                   src="/asme_logo_blanco.png"
                   alt="ASME Logo"
                   fill
+                  sizes="64px"
+                  loading="eager"
                   style={{ objectFit: "contain" }}
                 />
               </Link>

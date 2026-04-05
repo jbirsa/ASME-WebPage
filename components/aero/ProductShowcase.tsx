@@ -76,7 +76,7 @@ export default function ProductShowcase() {
       <div className="absolute inset-0">
         <div ref={imageRef} className="absolute inset-0">
           <img
-            src="/team2"
+            src="/aeroContent7.JPG"
             alt="Equipo AERO ITBA con el avión"
             className="w-full h-full object-cover object-top"
           />
