@@ -4,11 +4,15 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Menu, X, Plane } from "lucide-react" // Importamos iconos
+import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false) // Estado para el menú móvil
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,9 +23,35 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  useEffect(() => {
+    const syncAuthState = () => {
+      setIsAuthenticated(Boolean(getAuthToken()))
+    }
+
+    syncAuthState()
+    window.addEventListener("storage", syncAuthState)
+
+    return () => {
+      window.removeEventListener("storage", syncAuthState)
+    }
+  }, [])
+
   // Cerrar menú al hacer clic en un enlace
   const handleLinkClick = () => {
     setIsMenuOpen(false)
+  }
+
+  const handleAuthAction = () => {
+    setIsMenuOpen(false)
+
+    if (isAuthenticated) {
+      clearAuthToken()
+      setIsAuthenticated(false)
+      router.replace("/login")
+      return
+    }
+
+    router.push("/login")
   }
 
   return (
@@ -60,6 +90,12 @@ export default function Navbar() {
               Mechub
             </Link>
             <Link
+              href="/cursos"
+              className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
+            >
+              Cursos
+            </Link>
+            <Link
               href="/#eventos" 
               className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
             >
@@ -88,6 +124,15 @@ export default function Navbar() {
               </span>
               <Plane className="w-4 h-4" />
             </Link>
+          </div>
+
+          <div className="hidden md:flex items-center">
+            <Button
+              className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold"
+              onClick={handleAuthAction}
+            >
+              {isAuthenticated ? "Cerrar sesion" : "Login"}
+            </Button>
           </div>
 
           {/* Botón de menú móvil (visible solo en móvil) */}
@@ -144,6 +189,13 @@ export default function Navbar() {
               Mechub
             </Link>
             <Link
+              href="/cursos"
+              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
+              onClick={handleLinkClick}
+            >
+              Cursos
+            </Link>
+            <Link
               href="/#eventos" 
               className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
               onClick={handleLinkClick}
@@ -164,6 +216,12 @@ export default function Navbar() {
             >
               Contacto
             </Link>
+            <Button
+              className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-8 mt-2"
+              onClick={handleAuthAction}
+            >
+              {isAuthenticated ? "Cerrar sesion" : "Login"}
+            </Button>
             <Link
               href="/aero"
               className="text-2xl font-bold text-[#e3a72f] tracking-[1.5px] flex items-center gap-2 hover:scale-105 transition-all duration-300"
