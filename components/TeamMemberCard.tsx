@@ -11,27 +11,29 @@ interface TeamMemberCardProps {
 
 export function TeamMemberCard({ nombre, apellido, role, image, mail }: TeamMemberCardProps) {
   return (
-    <Card className="bg-slate-800/70 text-slate-900 border-slate-600 backdrop-blur-sm hover:bg-slate-800/90 transition-all duration-300">
-      <CardContent className="p-4">
-        <div className="flex md:flex-col items-center md:items-center gap-4 md:gap-0">
+    <Card className="h-full w-full min-h-[190px] md:min-h-[320px] bg-slate-800/70 text-slate-900 border-slate-600 backdrop-blur-sm hover:bg-slate-800/90 transition-all duration-300">
+      <CardContent className="h-full p-5">
+        <div className="flex h-full md:flex-col items-center md:items-center gap-4 md:gap-0">
           <div className="flex-shrink-0">
             {image ? (
               <img 
                 src={image} 
                 alt={nombre + ' ' + apellido}
-                className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover md:mx-auto md:mb-4" 
+                className="w-34 h-34 md:w-36 md:h-36 rounded-full object-cover md:mx-auto md:mb-5" 
               />
             ) : (
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-300 rounded-full flex items-center justify-center md:mx-auto md:mb-4">
-                <User className="w-8 h-8 md:w-10 md:h-10 text-gray-600" />
+              <div className="w-32 h-32 md:w-36 md:h-36 bg-gray-300 rounded-full flex items-center justify-center md:mx-auto md:mb-5">
+                <User className="w-10 h-10 md:w-12 md:h-12 text-gray-600" />
               </div>
             )}
           </div>
 
-          <div className="flex-1 text-left md:text-center">
-            <h3 className="text-base md:text-lg font-bold text-white">{nombre || "Nombre"}</h3>
-            <h3 className="text-base md:text-lg font-bold mb-1 md:mb-2 text-white">{apellido || "Completo"}</h3>
-            <p className="text-[#e3a72f] text-xs md:text-sm font-medium mb-2 md:mb-6 md:h-8">{role || "cargo"}</p>
+          <div className="flex h-full flex-1 flex-col justify-between text-left md:text-center">
+            <div>
+              <h3 className="text-base md:text-lg font-bold text-white">{nombre || "Nombre"}</h3>
+              <h3 className="text-base md:text-lg font-bold mb-1 md:mb-3 text-white">{apellido || "Completo"}</h3>
+              <p className="text-[#e3a72f] text-xs md:text-sm font-medium mb-2 md:mb-8 md:h-8">{role || "cargo"}</p>
+            </div>
 
             <div className="flex justify-start md:justify-center space-x-4">
               {mail && (

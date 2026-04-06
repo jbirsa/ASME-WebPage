@@ -3,6 +3,63 @@ import { Button } from "./ui/button";
 import { TeamMember } from "@/types/db_types";
 import { TeamMemberCard } from "./TeamMemberCard";
 
+const DEPARTMENT_ORDER = [
+  "directores",
+  "competencias",
+  "fundraising",
+  "media y comunicacion",
+  "formacion",
+  "ti",
+];
+
+const normalizeText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const getDepartmentPriority = (department: string) => {
+  const normalizedDepartment = normalizeText(department);
+  const priority = DEPARTMENT_ORDER.indexOf(normalizedDepartment);
+  return priority === -1 ? Number.MAX_SAFE_INTEGER : priority;
+};
+
+const getRolePriority = (member: TeamMember) => {
+  const normalizedRole = normalizeText(member.role);
+  const normalizedDepartment = normalizeText(member.departamento);
+
+  if (normalizedDepartment === "directores") {
+    if (normalizedRole.includes("vice") && normalizedRole.includes("chair")) {
+      return 1;
+    }
+
+    if (normalizedRole.includes("chair")) {
+      return 0;
+    }
+
+    if (normalizedRole.includes("secret")) {
+      return 2;
+    }
+
+    if (normalizedRole.includes("tesor") || normalizedRole.includes("treasur")) {
+      return 3;
+    }
+
+    return 4;
+  }
+
+  if (normalizedRole.includes("head") || normalizedRole.includes("lider")) {
+    return 0;
+  }
+
+  if (normalizedRole.includes("miembro") || normalizedRole.includes("member")) {
+    return 1;
+  }
+
+  return 2;
+};
+
 const getTeamMembers = async (): Promise<TeamMember[]> => {
   try {
     const res = await fetch("/api/members");
@@ -26,10 +83,20 @@ export default function OurTeam() {
       .catch((error) => console.error(error));
   }, []);
 
-  const categories = useMemo(
-    () => Array.from(new Set(teamMembers.map((member) => member.departamento))),
-    [teamMembers],
-  );
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(
+      new Set(teamMembers.map((member) => member.departamento)),
+    );
+
+    return uniqueCategories.sort((a, b) => {
+      const priorityDiff = getDepartmentPriority(a) - getDepartmentPriority(b);
+      if (priorityDiff !== 0) {
+        return priorityDiff;
+      }
+
+      return a.localeCompare(b, "es");
+    });
+  }, [teamMembers]);
 
   useEffect(() => {
     if (categories.length === 0) {
@@ -46,12 +113,21 @@ export default function OurTeam() {
       ? teamMembers.filter((member) => member.departamento === activeCategory)
       : teamMembers.slice();
 
-    const getPriority = (member: TeamMember) => {
-      const role = member.role?.toLowerCase() ?? "";
-      return role.includes("head") ? 0 : 1;
-    };
+    return members.sort((a, b) => {
+      const departmentPriorityDiff =
+        getDepartmentPriority(a.departamento) -
+        getDepartmentPriority(b.departamento);
+      if (departmentPriorityDiff !== 0) {
+        return departmentPriorityDiff;
+      }
 
-    return members.sort((a, b) => getPriority(a) - getPriority(b));
+      const rolePriorityDiff = getRolePriority(a) - getRolePriority(b);
+      if (rolePriorityDiff !== 0) {
+        return rolePriorityDiff;
+      }
+
+      return a.id - b.id;
+    });
   }, [activeCategory, teamMembers]);
 
   return (
@@ -82,10 +158,10 @@ export default function OurTeam() {
 
         {/* Team Members Grid - Filtrado por categoría */}
         <div className="flex flex-wrap justify-center gap-6">
-          {filteredMembers.map((member, index) => (
+          {filteredMembers.map((member) => (
             <div
-              key={`${activeCategory}-${index}`}
-              className="w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(20%-20px)]"
+              key={member.id}
+              className="flex w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(20%-20px)]"
             >
               <TeamMemberCard
                 nombre={member.nombre}
