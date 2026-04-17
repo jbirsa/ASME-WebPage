@@ -99,7 +99,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://www.dbfuw.com/"
+                  href="https://www.aiaa.org/dbf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-raleway text-white/60 hover:text-white text-sm transition-colors"
@@ -109,7 +109,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="https://www.dbfuw.com/the-competition"
+                  href="https://7ffac911-d3fa-4a62-aebe-b0d26d4780f1.filesusr.com/ugd/9b69a1_2ea68d7933034cfca8536e5dd576b5eb.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-raleway text-white/60 hover:text-white text-sm transition-colors"

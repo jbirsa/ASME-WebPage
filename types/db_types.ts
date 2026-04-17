@@ -21,6 +21,7 @@ export type Evento = {
 };
 
 export type TeamMember = {
+  id: number;
   nombre: string;
   apellido: string;
   role: string;

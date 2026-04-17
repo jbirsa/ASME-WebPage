@@ -4,7 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const supabase = getSupabaseServerClient();
-    const { data, error } = await supabase.from("members").select("*");
+    const { data, error } = await supabase
+      .from("members")
+      .select("*")
+      .order("id", { ascending: true });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

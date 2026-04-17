@@ -24,6 +24,7 @@ import {
   Crown,
   ChevronRight,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import MecHubNavbar from "@/components/MecHubNavbar"
 import Link from "next/link"
@@ -37,7 +38,7 @@ const planConfig: Record<
   PlanKey,
   {
     title: string
-    icon: React.ElementType
+    icon: LucideIcon
     ring: string
     cardBg: string
     tableBg: string
