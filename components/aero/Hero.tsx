@@ -355,6 +355,14 @@ export default function Hero() {
           }}
         />
 
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 56% 32% at 50% 45%, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 42%, rgba(0,0,0,0.22) 65%, transparent 100%)",
+          }}
+        />
+
         {/* Hero Content */}
         <div
           ref={contentRef}
@@ -377,7 +385,7 @@ export default function Hero() {
 
           <p
             ref={subtitleRef}
-            className="font-raleway text-white/70 max-w-xl leading-relaxed"
+            className="font-raleway text-white/85 max-w-xl leading-relaxed"
             style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
           >
             Diseñamos, construimos y volamos.

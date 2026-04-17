@@ -4,6 +4,7 @@ import AeroIntro from "@/components/aero/AeroIntro";
 import Stats from "@/components/aero/Stats";
 import ProductShowcase from "@/components/aero/ProductShowcase";
 import PlaneBlueprint from "@/components/aero/PlaneBlueprint";
+import SponsorsCarousel from "@/components/aero/SponsorsCarousel";
 import Features from "@/components/aero/Features";
 import CaseStudy from "@/components/aero/CaseStudy";
 import CTA from "@/components/aero/CTA";
@@ -18,6 +19,7 @@ export default function AeroPage() {
       <Stats />
       <ProductShowcase />
       <PlaneBlueprint />
+      <SponsorsCarousel />
       <Features />
       <CaseStudy />
       <CTA />
