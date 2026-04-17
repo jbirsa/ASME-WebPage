@@ -225,7 +225,7 @@ export default function Features() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <a
-                  href="https://www.dbfuw.com/"
+                  href="https://www.aiaa.org/dbf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-montserrat font-semibold text-sm bg-accent hover:bg-accent/80 text-white px-5 py-2 rounded-sm transition-all duration-300"
@@ -233,7 +233,7 @@ export default function Features() {
                   Sitio de la competencia
                 </a>
                 <a
-                  href="https://www.dbfuw.com/the-competition"
+                  href="https://7ffac911-d3fa-4a62-aebe-b0d26d4780f1.filesusr.com/ugd/9b69a1_2ea68d7933034cfca8536e5dd576b5eb.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-montserrat font-semibold text-sm border border-white/30 hover:border-white/60 text-white px-5 py-2 rounded-sm transition-all duration-300"

@@ -151,7 +151,7 @@ export default function CTA() {
 
                 {/* Competition link */}
                 <a
-                  href="https://www.dbfuw.com/"
+                  href="https://www.aiaa.org/dbf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-4 p-4 bg-white/5 border border-white/10 hover:border-accent/30 transition-all duration-300"
