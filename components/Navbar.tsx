@@ -101,24 +101,6 @@ export default function Navbar() {
               Cursos
             </Link>
             <Link
-              href="/#eventos" 
-              className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
-            >
-              Eventos
-            </Link>
-            <Link 
-              href="/#equipo" 
-              className="hover:text-[#e3a72f] transition-colors"
-            >
-              Equipo
-            </Link>
-            <Link
-              href="/#contacto"
-              className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
-            >
-              Contacto
-            </Link>
-            <Link
               href="/aero"
               className="text-[#e3a72f] font-bold tracking-[1.5px] transition-all duration-300 hover:scale-105 flex items-center gap-1.5 relative group"
               style={{ textShadow: "0 0 12px rgba(227,167,47,0.4)" }}
@@ -199,27 +181,6 @@ export default function Navbar() {
               onClick={handleLinkClick}
             >
               Cursos
-            </Link>
-            <Link
-              href="/#eventos" 
-              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
-              onClick={handleLinkClick}
-            >
-              Eventos
-            </Link>
-            <Link 
-              href="/#equipo" 
-              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
-              onClick={handleLinkClick}
-            >
-              Equipo
-            </Link>
-            <Link
-              href="/#contacto"
-              className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
-              onClick={handleLinkClick}
-            >
-              Contacto
             </Link>
             <Button
               className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-8 mt-2"

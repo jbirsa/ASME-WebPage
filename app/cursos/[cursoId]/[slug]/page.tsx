@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 
-import Navbar from "@/components/Navbar"
+import LearningShell from "@/components/learning/LearningShell"
 import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
 import { toSlug } from "@/lib/slug"
 import type { Clase, Curso, MiCurso } from "@/types/learning"
@@ -29,6 +29,8 @@ function normalizeUrl(url: string) {
   if (/^https?:\/\//i.test(url)) return url
   return `https://${url}`
 }
+
+const panelClassName = "rounded-2xl border border-white/10 bg-[#0d1726]"
 
 export default function CursoDetallePage() {
   const router = useRouter()
@@ -163,122 +165,132 @@ export default function CursoDetallePage() {
 
   const renderClassItem = (classItem: Clase, index: number) => {
     return (
-      <article
-        key={classItem.claseId}
-        className="border-2 border-[#c9a227] rounded-2xl bg-[#0f172a]/80 backdrop-blur-sm p-4 md:p-6 space-y-4"
-      >
-        <h2 className="text-xl md:text-2xl font-semibold text-[#e8e8e8] break-words [overflow-wrap:anywhere]">
-          Clase {index + 1}: {classItem.titulo}
-        </h2>
+      <article key={classItem.claseId} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-500">
+            Clase {index + 1}
+          </span>
+          <h2 className="text-lg font-semibold text-white break-words [overflow-wrap:anywhere]">{classItem.titulo}</h2>
+        </div>
 
-        <p className="text-[#c8ced8] break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
+        <p className="mt-4 text-sm leading-7 text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
           {classItem.descripcion || "Esta clase todavia no tiene descripcion cargada."}
         </p>
 
-        {classItem.videoUrl ? (
-          <a
-            href={normalizeUrl(classItem.videoUrl)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex border-2 border-[#c9a227] rounded-lg text-[#e8e8e8] px-4 py-2 text-sm font-medium hover:bg-[#c9a227]/10 transition-colors"
-          >
-            Ver clase
-          </a>
-        ) : (
-          <span className="inline-flex border-2 border-[#505050] rounded-lg text-[#707070] px-4 py-2 text-sm font-medium cursor-not-allowed">
-            URL pendiente
-          </span>
-        )}
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xs uppercase tracking-[0.18em] text-slate-500">Orden {classItem.orden ?? index + 1}</span>
+
+          {classItem.videoUrl ? (
+            <a
+              href={normalizeUrl(classItem.videoUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-4 py-2 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
+            >
+              Ver clase
+            </a>
+          ) : (
+            <span className="inline-flex rounded-2xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-500">
+              URL pendiente
+            </span>
+          )}
+        </div>
       </article>
     )
   }
 
+  const courseTitle = course?.nombre || "Detalle del curso"
+  const pageActions = course ? (
+    isEnrolled ? (
+      <Link
+        href="/mis-cursos"
+        className="inline-flex items-center justify-center rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-5 py-2.5 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
+      >
+        Ver en mis cursos
+      </Link>
+    ) : (
+      <button
+        onClick={handleEnroll}
+        disabled={isEnrolling}
+        className="inline-flex items-center justify-center rounded-2xl bg-[#e3a72f] px-5 py-2.5 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a] disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {isEnrolling ? "Inscribiendo..." : "Inscribirme"}
+      </button>
+    )
+  ) : null
+
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#1a2744_0%,#0f172a_70%)]" />
-        <div className="stars"></div>
-        <div className="stars2"></div>
-        <div className="stars3"></div>
-      </div>
+    <LearningShell
+      title={courseTitle}
+      breadcrumbs={[
+        { label: "Campus", href: "/cursos" },
+        { label: "Catalogo", href: "/cursos" },
+        { label: courseTitle },
+      ]}
+      actions={pageActions}
+    >
+      {errorMessage ? (
+        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-4 text-sm text-rose-200">{errorMessage}</div>
+      ) : null}
 
-      <Navbar />
-
-      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-14">
-        <nav className="mb-8 text-sm text-[#a0a0a0] flex items-center gap-2">
-          <Link href="/cursos" className="hover:text-[#c9a227] transition-colors">
-            Cursos
+      {isLoading ? (
+        <div className={`${panelClassName} px-6 py-16 text-center text-slate-400`}>Cargando curso...</div>
+      ) : !course ? (
+        <div className={`${panelClassName} px-6 py-16 text-center`}>
+          <p className="text-lg font-medium text-white">No se encontro el curso.</p>
+          <p className="mt-3 text-sm text-slate-400">Volve al catalogo para continuar navegando el portal.</p>
+          <Link
+            href="/cursos"
+            className="mt-6 inline-flex rounded-2xl bg-[#e3a72f] px-6 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a]"
+          >
+            Volver al catalogo
           </Link>
-          <span>/</span>
-          <span className="text-[#c9a227]">{course?.nombre || "Detalle"}</span>
-        </nav>
-
-        {errorMessage ? (
-          <div className="mb-6 text-sm text-rose-300 border border-rose-500/40 bg-rose-500/10 rounded-xl px-4 py-3">
-            {errorMessage}
-          </div>
-        ) : null}
-
-        {isLoading ? (
-          <p className="text-[#a0a0a0] text-center py-12">Cargando curso...</p>
-        ) : !course ? (
-          <div className="text-center py-12">
-            <p className="text-[#a0a0a0] mb-6">No se encontro el curso.</p>
-            <Link
-              href="/cursos"
-              className="inline-block bg-[#c9a227] text-[#0f172a] rounded-lg px-8 py-3 font-medium hover:bg-[#b8931f] transition-colors"
-            >
-              Volver al catalogo
-            </Link>
-          </div>
-        ) : (
-          <>
-            <header className="mb-10">
-              <h1 className="text-4xl md:text-5xl font-serif italic text-[#e8e8e8] break-words [overflow-wrap:anywhere]">
-                {course.nombre}
-              </h1>
-              <p className="mt-4 text-[#c8ced8] leading-relaxed break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
-                {course.descripcion || "Este curso todavia no tiene descripcion cargada."}
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                {isEnrolled ? (
-                  <Link
-                    href="/mis-cursos"
-                    className="inline-flex bg-[#c9a227] text-[#0f172a] rounded-lg px-6 py-2.5 font-medium hover:bg-[#b8931f] transition-colors"
-                  >
-                    Ver en mis cursos
-                  </Link>
-                ) : (
-                  <button
-                    onClick={handleEnroll}
-                    disabled={isEnrolling}
-                    className="inline-flex bg-[#c9a227] text-[#0f172a] rounded-lg px-6 py-2.5 font-medium hover:bg-[#b8931f] transition-colors disabled:opacity-70"
-                  >
-                    {isEnrolling ? "Inscribiendo..." : "Inscribirme"}
-                  </button>
-                )}
-              </div>
-            </header>
-
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <section className={`${panelClassName} overflow-hidden`}>
             {course.imagenUrl ? (
-              <div className="mb-8 border-2 border-[#c9a227] rounded-2xl overflow-hidden bg-[#1a2744]">
-                <img src={course.imagenUrl} alt={`Imagen de ${course.nombre}`} className="w-full h-72 object-cover" />
+              <div className="overflow-hidden bg-[#13233a]">
+                <img src={course.imagenUrl} alt={`Imagen de ${course.nombre}`} className="h-64 w-full object-cover" />
               </div>
             ) : null}
 
-            <section className="space-y-4">
-              {sortedClasses.length > 0 ? (
+            <div className="p-6">
+              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+                <span>Curso #{course.cursoId}</span>
+                <span>{course.estado || "activo"}</span>
+                <span>{isEnrolled ? "Inscripto" : "Disponible"}</span>
+                <span>{sortedClasses.length} clases</span>
+              </div>
+
+              <p className="mt-5 text-sm leading-7 text-slate-300 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+                {course.descripcion || "Este curso todavia no tiene descripcion cargada."}
+              </p>
+            </div>
+          </section>
+
+          <section className={`${panelClassName} p-6`}>
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+              <h2 className="text-xl font-semibold text-white">Clases del curso</h2>
+              <span className="text-xs uppercase tracking-[0.18em] text-slate-500">{sortedClasses.length} clases</span>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {!isEnrolled ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-10 text-center text-slate-400">
+                  Inscribite para desbloquear las clases de este curso.
+                </div>
+              ) : sortedClasses.length > 0 ? (
                 sortedClasses.map((classItem, index) => renderClassItem(classItem, index))
               ) : (
-                <div className="border-2 border-[#c9a227] rounded-2xl bg-[#0f172a]/80 backdrop-blur-sm p-8 text-center">
-                  <p className="text-[#a0a0a0]">Este curso aun no tiene clases publicadas.</p>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-10 text-center text-slate-400">
+                  Este curso aun no tiene clases publicadas.
                 </div>
               )}
-            </section>
-          </>
-        )}
-      </main>
-    </div>
+            </div>
+          </section>
+        </div>
+      )}
+    </LearningShell>
   )
 }

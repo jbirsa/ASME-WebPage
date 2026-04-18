@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
-import Navbar from "@/components/Navbar"
+import LearningShell from "@/components/learning/LearningShell"
 import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
 import { toSlug } from "@/lib/slug"
 import type { MiCurso } from "@/types/learning"
@@ -28,6 +28,8 @@ function getAuthHeaders(token: string) {
 function formatEstado(estado: string) {
   return estado.replace(/_/g, " ")
 }
+
+const panelClassName = "rounded-2xl border border-white/10 bg-[#0d1726]"
 
 export default function MisCursosPage() {
   const router = useRouter()
@@ -80,126 +82,83 @@ export default function MisCursosPage() {
   }, [router])
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#1a2744_0%,#0f172a_70%)]" />
-        <div className="stars"></div>
-        <div className="stars2"></div>
-        <div className="stars3"></div>
-      </div>
+    <LearningShell
+      title="Mis cursos"
+      breadcrumbs={[{ label: "Campus", href: "/cursos" }, { label: "Mis cursos" }]}
+      actions={
+        <Link
+          href="/cursos"
+          className="inline-flex items-center justify-center rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-5 py-2.5 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
+        >
+          Explorar catalogo
+        </Link>
+      }
+    >
+      {errorMessage ? (
+        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-4 text-sm text-rose-200">{errorMessage}</div>
+      ) : null}
 
-      <Navbar />
-
-      <main className="relative z-10 max-w-7xl mx-auto px-6 pt-32 pb-14">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-serif italic text-[#e8e8e8] mb-4">Mis cursos</h1>
-          <p className="text-[#a0a0a0] text-lg max-w-2xl mx-auto">
-            Continua tu recorrido con tus clases disponibles y materiales de cada curso.
-          </p>
+      {isLoading ? (
+        <div className={`${panelClassName} px-6 py-16 text-center text-slate-400`}>Cargando tus cursos...</div>
+      ) : courses.length === 0 ? (
+        <div className={`${panelClassName} px-6 py-16 text-center`}>
+          <p className="text-lg font-medium text-white">Todavia no estas inscripto en ningun curso.</p>
+          <p className="mt-3 text-sm text-slate-400">Sumate desde el catalogo para empezar a construir tu recorrido.</p>
           <Link
             href="/cursos"
-            className="inline-flex mt-6 border-2 border-[#c9a227] rounded-lg text-[#e8e8e8] px-6 py-2 text-sm font-medium hover:bg-[#c9a227]/10 transition-colors"
+            className="mt-6 inline-flex rounded-2xl bg-[#e3a72f] px-6 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a]"
           >
             Ir al catalogo
           </Link>
         </div>
+      ) : (
+        <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {courses.map((course) => {
+            const courseHref = `/cursos/${course.cursoId}/${toSlug(course.nombre)}`
+            const totalCourseClasses = course.clases?.length ?? 0
 
-        {errorMessage ? (
-          <div className="mb-6 text-sm text-rose-300 border border-rose-500/40 bg-rose-500/10 rounded-xl px-4 py-3 max-w-2xl mx-auto text-center">
-            {errorMessage}
-          </div>
-        ) : null}
-
-        {isLoading ? (
-          <p className="text-[#a0a0a0] text-center">Cargando tus cursos...</p>
-        ) : courses.length === 0 ? (
-          <div className="text-center">
-            <p className="text-[#a0a0a0] mb-6">Todavia no estas inscripto en ningun curso.</p>
-            <Link
-              href="/cursos"
-              className="inline-block bg-[#c9a227] text-[#0f172a] rounded-lg px-8 py-3 font-medium hover:bg-[#b8931f] transition-colors"
-            >
-              Ir al catalogo
-            </Link>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course) => {
-              const courseHref = `/cursos/${course.cursoId}/${toSlug(course.nombre)}`
-              const totalClasses = course.clases?.length ?? 0
-              const completedClasses = 0
-              const progressPercentage = totalClasses > 0 ? (completedClasses / totalClasses) * 100 : 0
-
-              return (
-                <article
-                  key={course.cursoId}
-                  className="border-2 border-[#c9a227] rounded-2xl bg-[#0f172a]/80 backdrop-blur-sm overflow-hidden"
-                >
-                  <div className="p-4 pb-2 flex items-start justify-between gap-3">
-                    <h2 className="text-xl md:text-2xl font-semibold text-[#e8e8e8] break-words [overflow-wrap:anywhere] flex-1">
-                      {course.nombre}
-                    </h2>
-                    <span className="text-[11px] uppercase tracking-wide border border-[#c9a227]/70 text-[#c9a227] rounded-full px-2 py-1 shrink-0">
-                      {formatEstado(course.inscripcion.estado)}
-                    </span>
+            return (
+              <article key={course.cursoId} className={`${panelClassName} overflow-hidden p-4 transition-colors hover:border-white/20`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Curso #{course.cursoId}</p>
+                    <h2 className="mt-2 text-xl font-semibold text-white break-words [overflow-wrap:anywhere]">{course.nombre}</h2>
                   </div>
+                  <span className="shrink-0 rounded-full border border-[#5f87ab]/20 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                    {formatEstado(course.inscripcion.estado)}
+                  </span>
+                </div>
 
-                  <div className="px-4">
-                    <div className="border-2 border-[#c9a227] rounded-xl overflow-hidden bg-[#1a2744]">
-                      {course.imagenUrl ? (
-                        <img
-                          src={course.imagenUrl}
-                          alt={`Imagen de ${course.nombre}`}
-                          className="w-full h-40 object-cover"
-                        />
-                      ) : (
-                        <div className="h-40 flex items-center justify-center text-[#a0a0a0] text-sm">
-                          Imagen no disponible
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                <div className="mt-4 overflow-hidden rounded-xl bg-[#13233a]">
+                  {course.imagenUrl ? (
+                    <img src={course.imagenUrl} alt={`Imagen de ${course.nombre}`} className="h-44 w-full object-cover" />
+                  ) : (
+                    <div className="flex h-44 items-center justify-center text-sm text-slate-400">Imagen no disponible</div>
+                  )}
+                </div>
 
-                  <div className="px-4 pt-4">
-                    <p className="text-[#c8ced8] text-sm min-h-16 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
-                      {course.descripcion || "Este curso todavia no tiene descripcion cargada."}
-                    </p>
+                <p className="mt-4 min-h-20 text-sm leading-7 text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
+                  {course.descripcion || "Este curso todavia no tiene descripcion cargada."}
+                </p>
 
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between text-xs text-[#8f9aad]">
-                        <span>Completado</span>
-                        <span>
-                          {completedClasses}/{totalClasses} clases
-                        </span>
-                      </div>
-                      <div className="mt-2 h-2 rounded-full bg-[#1a2744] overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-[#5f87ab] transition-all duration-300"
-                          style={{ width: `${progressPercentage}%` }}
-                        />
-                      </div>
-                    </div>
+                <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-slate-500">
+                  <span>{totalCourseClasses} clases</span>
+                  <span>{formatEstado(course.inscripcion.estado)}</span>
+                </div>
 
-                    <div className="mt-3 flex items-center justify-between text-xs text-[#8f9aad]">
-                      <span>{totalClasses} clases</span>
-                      <span>Inscripto</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 pt-5">
-                    <Link
-                      href={courseHref}
-                      className="w-full inline-flex justify-center bg-[#c9a227] text-[#0f172a] rounded-lg py-2.5 text-sm font-medium hover:bg-[#b8931f] transition-colors"
-                    >
-                      Continuar
-                    </Link>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-        )}
-      </main>
-    </div>
+                <div className="mt-5">
+                  <Link
+                    href={courseHref}
+                    className="inline-flex w-full items-center justify-center rounded-2xl bg-[#e3a72f] px-4 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a]"
+                  >
+                    Continuar curso
+                  </Link>
+                </div>
+              </article>
+            )
+          })}
+        </section>
+      )}
+    </LearningShell>
   )
 }

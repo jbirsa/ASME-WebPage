@@ -7,8 +7,7 @@ import { FormEvent, useEffect, useState } from "react"
 
 import LoginHeader from "@/components/LoginHeader"
 import { Input } from "@/components/ui/input"
-import { getAuthToken, setAuthToken } from "@/lib/auth-token"
-import type { LoginResponse } from "@/types/learning"
+import { getAuthToken } from "@/lib/auth-token"
 
 function extractErrorMessage(payload: unknown) {
   if (typeof payload === "object" && payload !== null) {
@@ -17,55 +16,58 @@ function extractErrorMessage(payload: unknown) {
     if (typeof maybePayload.message === "string") return maybePayload.message
   }
 
-  return "No se pudo iniciar sesion"
+  return "No se pudo crear la cuenta"
 }
 
-export default function LoginPage() {
+export default function RegistroPage() {
   const router = useRouter()
+  const [nombre, setNombre] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [isClientReady, setIsClientReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const [showRegisteredMessage, setShowRegisteredMessage] = useState(false)
 
   useEffect(() => {
     setIsClientReady(true)
 
     const token = getAuthToken()
     if (token) router.replace("/cursos")
-
-    const searchParams = new URLSearchParams(window.location.search)
-    setShowRegisteredMessage(searchParams.get("registered") === "1")
   }, [router])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage("")
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Las contrasenas no coinciden")
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ nombre, email, password }),
       })
 
-      const payload = (await response.json().catch(() => null)) as LoginResponse | null
+      const payload = (await response.json().catch(() => null)) as unknown
 
-      if (!response.ok || !payload?.access_token) {
+      if (!response.ok) {
         throw new Error(extractErrorMessage(payload))
       }
 
-      setAuthToken(payload.access_token)
-      router.replace("/cursos")
+      router.replace("/login?registered=1")
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message)
       } else {
-        setErrorMessage("No se pudo iniciar sesion")
+        setErrorMessage("No se pudo crear la cuenta")
       }
     } finally {
       setIsLoading(false)
@@ -94,16 +96,27 @@ export default function LoginPage() {
               className="mx-auto mb-3"
               priority
             />
-            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Inicia sesion para acceder a tus cursos</p>
+            <h1 className="text-3xl font-serif italic text-[#e8e8e8]">Crear cuenta</h1>
+            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Registrate para acceder a los cursos de ASME</p>
           </div>
 
-          {showRegisteredMessage ? (
-            <p className="mb-4 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
-              Cuenta creada correctamente. Ya podes iniciar sesion.
-            </p>
-          ) : null}
-
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="nombre" className="sr-only">
+                Nombre
+              </label>
+              <Input
+                id="nombre"
+                type="text"
+                value={nombre}
+                onChange={(event) => setNombre(event.target.value)}
+                required
+                autoComplete="name"
+                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="Nombre completo"
+              />
+            </div>
+
             <div>
               <label htmlFor="email" className="sr-only">
                 Correo electronico
@@ -114,6 +127,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
+                autoComplete="email"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Correo electronico"
               />
@@ -129,8 +143,27 @@ export default function LoginPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
+                minLength={6}
+                autoComplete="new-password"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Contrasena"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="sr-only">
+                Confirmar contrasena
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="Confirmar contrasena"
               />
             </div>
 
@@ -143,14 +176,14 @@ export default function LoginPage() {
               disabled={isLoading || !isClientReady}
               className="w-full h-12 bg-[#c9a227] hover:bg-[#b8931f] text-[#0f172a] rounded-lg font-medium text-lg transition-colors disabled:opacity-70"
             >
-              {isLoading ? "Ingresando..." : "Ingresar"}
+              {isLoading ? "Creando cuenta..." : "Crear cuenta"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-[#a0a0a0]">
-            No tenes cuenta?{" "}
-            <Link href="/registro" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-              Crear cuenta
+            Ya tenes cuenta?{" "}
+            <Link href="/login" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
+              Inicia sesion
             </Link>
           </p>
         </section>
