@@ -15,7 +15,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ message: "No autenticado" }, { status: 401 })
     }
 
-    const response = await fetch(getBackendApiUrl(`/cursos/${id}`), {
+    const response = await fetch(getBackendApiUrl(`/clases/${id}`), {
       method: "GET",
       headers: {
         Authorization: authorization,
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
 
     return NextResponse.json(data, { status: response.status })
   } catch {
-    return NextResponse.json({ message: "No se pudo obtener el curso" }, { status: 500 })
+    return NextResponse.json({ message: "No se pudo obtener la clase" }, { status: 500 })
   }
 }
 
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 
     const body = await req.json()
 
-    const response = await fetch(getBackendApiUrl(`/cursos/${id}`), {
+    const response = await fetch(getBackendApiUrl(`/clases/${id}`), {
       method: "PATCH",
       headers: {
         Authorization: authorization,
@@ -56,7 +56,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 
     return NextResponse.json(data, { status: response.status })
   } catch {
-    return NextResponse.json({ message: "No se pudo actualizar el curso" }, { status: 500 })
+    return NextResponse.json({ message: "No se pudo actualizar la clase" }, { status: 500 })
   }
 }
 
@@ -69,7 +69,7 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ message: "No autenticado" }, { status: 401 })
     }
 
-    const response = await fetch(getBackendApiUrl(`/cursos/${id}`), {
+    const response = await fetch(getBackendApiUrl(`/clases/${id}`), {
       method: "DELETE",
       headers: {
         Authorization: authorization,
@@ -81,6 +81,6 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
 
     return NextResponse.json(data, { status: response.status })
   } catch {
-    return NextResponse.json({ message: "No se pudo eliminar el curso" }, { status: 500 })
+    return NextResponse.json({ message: "No se pudo eliminar la clase" }, { status: 500 })
   }
 }

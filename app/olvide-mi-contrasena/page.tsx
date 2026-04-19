@@ -7,8 +7,7 @@ import { FormEvent, useEffect, useState } from "react"
 
 import LoginHeader from "@/components/LoginHeader"
 import { Input } from "@/components/ui/input"
-import { getAuthToken, setAuthToken } from "@/lib/auth-token"
-import type { LoginResponse } from "@/types/learning"
+import { getAuthToken } from "@/lib/auth-token"
 
 function extractErrorMessage(payload: unknown) {
   if (typeof payload === "object" && payload !== null) {
@@ -17,57 +16,64 @@ function extractErrorMessage(payload: unknown) {
     if (typeof maybePayload.message === "string") return maybePayload.message
   }
 
-  return "No se pudo iniciar sesion"
+  return "No se pudo iniciar la recuperacion"
 }
 
-export default function LoginPage() {
+function extractDevelopmentCode(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) return null
+
+  const maybePayload = payload as { token?: string; code?: string }
+  if (typeof maybePayload.code === "string") return maybePayload.code
+  if (typeof maybePayload.token === "string") return maybePayload.token
+
+  return null
+}
+
+export default function OlvideMiContrasenaPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [isClientReady, setIsClientReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const [showRegisteredMessage, setShowRegisteredMessage] = useState(false)
-  const [showResetMessage, setShowResetMessage] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
+  const [developmentCode, setDevelopmentCode] = useState<string | null>(null)
 
   useEffect(() => {
     setIsClientReady(true)
 
     const token = getAuthToken()
     if (token) router.replace("/cursos")
-
-    const searchParams = new URLSearchParams(window.location.search)
-    setShowRegisteredMessage(searchParams.get("registered") === "1")
-    setShowResetMessage(searchParams.get("reset") === "1")
   }, [router])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage("")
+    setSuccessMessage("")
+    setDevelopmentCode(null)
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       })
 
-      const payload = (await response.json().catch(() => null)) as LoginResponse | null
+      const payload = (await response.json().catch(() => null)) as unknown
 
-      if (!response.ok || !payload?.access_token) {
+      if (!response.ok) {
         throw new Error(extractErrorMessage(payload))
       }
 
-      setAuthToken(payload.access_token)
-      router.replace("/cursos")
+      setSuccessMessage("Si el correo existe, te enviamos un codigo para restablecer la contrasena.")
+      setDevelopmentCode(extractDevelopmentCode(payload))
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message)
       } else {
-        setErrorMessage("No se pudo iniciar sesion")
+        setErrorMessage("No se pudo iniciar la recuperacion")
       }
     } finally {
       setIsLoading(false)
@@ -96,20 +102,9 @@ export default function LoginPage() {
               className="mx-auto mb-3"
               priority
             />
-            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Inicia sesion para acceder a tus cursos</p>
+            <h1 className="text-3xl font-serif italic text-[#e8e8e8]">Recuperar contrasena</h1>
+            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Ingresa tu correo y te vamos a enviar un codigo para recuperar el acceso.</p>
           </div>
-
-          {showRegisteredMessage ? (
-            <p className="mb-4 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
-              Cuenta creada correctamente. Ya podes iniciar sesion.
-            </p>
-          ) : null}
-
-          {showResetMessage ? (
-            <p className="mb-4 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
-              Contrasena actualizada correctamente. Ya podes iniciar sesion.
-            </p>
-          ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -122,31 +117,30 @@ export default function LoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
+                autoComplete="email"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Correo electronico"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Contrasena
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Contrasena"
-              />
-            </div>
+            {successMessage ? (
+              <p className="text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
+                {successMessage}
+              </p>
+            ) : null}
 
-            <div className="flex justify-end">
-              <Link href="/olvide-mi-contrasena" className="text-sm text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-                Olvide mi contrasena
-              </Link>
-            </div>
+            {developmentCode ? (
+              <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-3 text-sm text-sky-100">
+                <p className="font-medium">Codigo de desarrollo</p>
+                <p className="mt-2 break-all font-mono text-xs">{developmentCode}</p>
+                <Link
+                  href={`/restablecer-contrasena?codigo=${encodeURIComponent(developmentCode)}`}
+                  className="mt-3 inline-flex text-[#e3a72f] hover:text-[#d4961a] transition-colors"
+                >
+                  Usar este codigo ahora
+                </Link>
+              </div>
+            ) : null}
 
             {errorMessage ? (
               <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">{errorMessage}</p>
@@ -157,16 +151,23 @@ export default function LoginPage() {
               disabled={isLoading || !isClientReady}
               className="w-full h-12 bg-[#c9a227] hover:bg-[#b8931f] text-[#0f172a] rounded-lg font-medium text-lg transition-colors disabled:opacity-70"
             >
-              {isLoading ? "Ingresando..." : "Ingresar"}
+              {isLoading ? "Enviando codigo..." : "Enviar codigo"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-[#a0a0a0]">
-            No tenes cuenta?{" "}
-            <Link href="/registro" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-              Crear cuenta
-            </Link>
-          </p>
+          <div className="mt-6 space-y-2 text-center text-sm text-[#a0a0a0]">
+            <p>
+              Ya tenes el codigo?{" "}
+              <Link href="/restablecer-contrasena" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
+                Restablece tu contrasena
+              </Link>
+            </p>
+            <p>
+              <Link href="/login" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
+                Volver a login
+              </Link>
+            </p>
+          </div>
         </section>
       </main>
     </div>

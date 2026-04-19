@@ -89,6 +89,16 @@ test("campus dashboard navega en desktop y permite logout", async ({ page }) => 
   await expect(page).toHaveURL(/\/login$/)
 })
 
+test("campus dashboard muestra acceso admin cuando el rol es admin", async ({ page }) => {
+  await setAuthToken(page, createToken({ sub: "admin-1", email: "admin@asme.org", rol: "admin" }))
+  await mockLearningApi(page)
+
+  await page.goto("/cursos")
+
+  await openNavigationIfNeeded(page)
+  await expect(page.getByRole("link", { name: /^Admin$/ })).toBeVisible()
+})
+
 test("campus dashboard abre drawer mobile y navega a perfil", async ({ page }) => {
   await setAuthToken(page, createToken({ sub: "user-1", email: "alumno@asme.org", rol: "user" }))
   await mockLearningApi(page)

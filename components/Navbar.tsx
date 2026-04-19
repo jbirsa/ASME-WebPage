@@ -118,7 +118,7 @@ export default function Navbar() {
               className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold"
               onClick={handleAuthAction}
             >
-              {isAuthenticated ? "Cerrar sesion" : "Login"}
+              {isAuthenticated ? "Cerrar sesion" : "Iniciar sesión"}
             </Button>
           </div>
 
@@ -186,7 +186,7 @@ export default function Navbar() {
               className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold px-8 mt-2"
               onClick={handleAuthAction}
             >
-              {isAuthenticated ? "Cerrar sesion" : "Login"}
+              {isAuthenticated ? "Cerrar sesion" : "Iniciar sesión"}
             </Button>
             <Link
               href="/aero"

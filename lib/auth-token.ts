@@ -9,6 +9,8 @@ export type AuthTokenPayload = {
   iat?: number
 }
 
+export type AuthRole = "admin" | "user"
+
 function emitAuthTokenChanged() {
   if (typeof window === "undefined") return
   window.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT))
@@ -50,6 +52,18 @@ export function getAuthToken() {
 
 export function getAuthTokenPayload() {
   return parseAuthTokenPayload(getAuthToken())
+}
+
+export function getAuthUserRole(payload: AuthTokenPayload | null = getAuthTokenPayload()) {
+  return payload?.rol ?? null
+}
+
+export function isAdminAuthPayload(payload: AuthTokenPayload | null) {
+  return getAuthUserRole(payload) === "admin"
+}
+
+export function isAdminUser() {
+  return isAdminAuthPayload(getAuthTokenPayload())
 }
 
 export function setAuthToken(token: string) {

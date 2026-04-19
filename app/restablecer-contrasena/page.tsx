@@ -7,8 +7,7 @@ import { FormEvent, useEffect, useState } from "react"
 
 import LoginHeader from "@/components/LoginHeader"
 import { Input } from "@/components/ui/input"
-import { getAuthToken, setAuthToken } from "@/lib/auth-token"
-import type { LoginResponse } from "@/types/learning"
+import { getAuthToken } from "@/lib/auth-token"
 
 function extractErrorMessage(payload: unknown) {
   if (typeof payload === "object" && payload !== null) {
@@ -17,57 +16,71 @@ function extractErrorMessage(payload: unknown) {
     if (typeof maybePayload.message === "string") return maybePayload.message
   }
 
-  return "No se pudo iniciar sesion"
+  return "No se pudo restablecer la contrasena"
 }
 
-export default function LoginPage() {
+function isRejectedReset(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) return false
+
+  const maybePayload = payload as { ok?: boolean }
+  return maybePayload.ok === false
+}
+
+export default function RestablecerContrasenaPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [codigo, setCodigo] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [isClientReady, setIsClientReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const [showRegisteredMessage, setShowRegisteredMessage] = useState(false)
-  const [showResetMessage, setShowResetMessage] = useState(false)
 
   useEffect(() => {
     setIsClientReady(true)
 
     const token = getAuthToken()
-    if (token) router.replace("/cursos")
+    if (token) {
+      router.replace("/cursos")
+      return
+    }
 
     const searchParams = new URLSearchParams(window.location.search)
-    setShowRegisteredMessage(searchParams.get("registered") === "1")
-    setShowResetMessage(searchParams.get("reset") === "1")
+    const prefilledCode = searchParams.get("codigo")
+    if (prefilledCode) setCodigo(prefilledCode)
   }, [router])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage("")
+
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("Las contrasenas no coinciden")
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ token: codigo, newPassword }),
       })
 
-      const payload = (await response.json().catch(() => null)) as LoginResponse | null
+      const payload = (await response.json().catch(() => null)) as unknown
 
-      if (!response.ok || !payload?.access_token) {
+      if (!response.ok || isRejectedReset(payload)) {
         throw new Error(extractErrorMessage(payload))
       }
 
-      setAuthToken(payload.access_token)
-      router.replace("/cursos")
+      router.replace("/login?reset=1")
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message)
       } else {
-        setErrorMessage("No se pudo iniciar sesion")
+        setErrorMessage("No se pudo restablecer la contrasena")
       }
     } finally {
       setIsLoading(false)
@@ -96,56 +109,59 @@ export default function LoginPage() {
               className="mx-auto mb-3"
               priority
             />
-            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Inicia sesion para acceder a tus cursos</p>
+            <h1 className="text-3xl font-serif italic text-[#e8e8e8]">Nueva contrasena</h1>
+            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Ingresa el codigo recibido y define una nueva contrasena.</p>
           </div>
-
-          {showRegisteredMessage ? (
-            <p className="mb-4 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
-              Cuenta creada correctamente. Ya podes iniciar sesion.
-            </p>
-          ) : null}
-
-          {showResetMessage ? (
-            <p className="mb-4 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
-              Contrasena actualizada correctamente. Ya podes iniciar sesion.
-            </p>
-          ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Correo electronico
+              <label htmlFor="codigo" className="sr-only">
+                Codigo
               </label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                id="codigo"
+                type="text"
+                value={codigo}
+                onChange={(event) => setCodigo(event.target.value)}
                 required
+                autoComplete="one-time-code"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Correo electronico"
+                placeholder="Codigo recibido"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="sr-only">
-                Contrasena
+              <label htmlFor="newPassword" className="sr-only">
+                Nueva contrasena
               </label>
               <Input
-                id="password"
+                id="newPassword"
                 type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
                 required
+                minLength={6}
+                autoComplete="new-password"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Contrasena"
+                placeholder="Nueva contrasena"
               />
             </div>
 
-            <div className="flex justify-end">
-              <Link href="/olvide-mi-contrasena" className="text-sm text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-                Olvide mi contrasena
-              </Link>
+            <div>
+              <label htmlFor="confirmPassword" className="sr-only">
+                Confirmar nueva contrasena
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                required
+                minLength={6}
+                autoComplete="new-password"
+                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="Confirmar nueva contrasena"
+              />
             </div>
 
             {errorMessage ? (
@@ -157,16 +173,23 @@ export default function LoginPage() {
               disabled={isLoading || !isClientReady}
               className="w-full h-12 bg-[#c9a227] hover:bg-[#b8931f] text-[#0f172a] rounded-lg font-medium text-lg transition-colors disabled:opacity-70"
             >
-              {isLoading ? "Ingresando..." : "Ingresar"}
+              {isLoading ? "Guardando..." : "Actualizar contrasena"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-[#a0a0a0]">
-            No tenes cuenta?{" "}
-            <Link href="/registro" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-              Crear cuenta
-            </Link>
-          </p>
+          <div className="mt-6 space-y-2 text-center text-sm text-[#a0a0a0]">
+            <p>
+              Necesitas un codigo?{" "}
+              <Link href="/olvide-mi-contrasena" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
+                Solicitalo aca
+              </Link>
+            </p>
+            <p>
+              <Link href="/login" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
+                Volver a login
+              </Link>
+            </p>
+          </div>
         </section>
       </main>
     </div>

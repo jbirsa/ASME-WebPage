@@ -14,7 +14,7 @@ export default function LoginHeader() {
         </Link>
 
         <Button asChild className="bg-[#e3a72f] hover:bg-[#d4961a] text-slate-900 font-semibold rounded-lg">
-          <Link href="/login">Login</Link>
+          <Link href="/login">Iniciar sesión</Link>
         </Button>
       </div>
     </header>

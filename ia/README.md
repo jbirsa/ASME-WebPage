@@ -37,36 +37,36 @@ La idea es avanzar de forma incremental, validando cada cambio con Playwright y 
 - Desbloquea: roles, admin, perfil y navegacion privada consistente.
 
 ### `01-forgot-password.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: permitir solicitar recuperacion de contrasena mediante email.
 - Backend esperado: `POST /auth/forgot-password`
 - Dependencias: ninguna fuerte.
 
 ### `02-reset-password.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: permitir resetear contrasena con codigo.
 - Backend esperado: `POST /auth/reset-password`
 - Dependencias: `01-forgot-password.md`
 
 ### `03-jwt-roles.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: leer el rol desde JWT para diferenciar `admin` y `user`.
 - Dependencias: ninguna fuerte.
 - Desbloquea: admin, menu contextual de usuario y proteccion de rutas.
 
 ### `04-bloqueo-clases-no-inscriptos.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: impedir que usuarios no inscriptos vean clases de un curso.
 - Dependencias: recomendable despues del shell nuevo.
 
 ### `05-admin-shell.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: crear la base de la seccion admin.
 - Dependencias: `03-jwt-roles.md`
 - Desbloquea: ABM de cursos, clases y eventos.
 
 ### `06-admin-cursos-abm.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: ABM completo de cursos.
 - Backend esperado:
   - `GET /cursos`
@@ -76,7 +76,7 @@ La idea es avanzar de forma incremental, validando cada cambio con Playwright y 
 - Dependencias: `05-admin-shell.md`
 
 ### `07-admin-clases-abm.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: ABM completo de clases.
 - Backend esperado:
   - `GET /clases/curso/:cursoId`

@@ -10,6 +10,7 @@ import {
   AUTH_TOKEN_CHANGED_EVENT,
   clearAuthToken,
   getAuthTokenPayload,
+  isAdminAuthPayload,
   type AuthTokenPayload,
 } from "@/lib/auth-token"
 import { cn } from "@/lib/utils"
@@ -139,7 +140,7 @@ export default function LearningShell({
       },
     ]
 
-    if (user?.rol === "admin") {
+    if (isAdminAuthPayload(user)) {
       items.push({
         href: "/admin",
         label: "Admin",
@@ -149,7 +150,7 @@ export default function LearningShell({
     }
 
     return items
-  }, [user?.rol])
+  }, [user])
 
   const handleLogout = () => {
     clearAuthToken()

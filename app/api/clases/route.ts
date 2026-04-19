@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "No autenticado" }, { status: 401 })
     }
 
-    const response = await fetch(getBackendApiUrl("/cursos"), {
+    const response = await fetch(getBackendApiUrl("/clases"), {
       method: "GET",
       headers: {
         Authorization: authorization,
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(data, { status: response.status })
   } catch {
-    return NextResponse.json({ message: "No se pudieron obtener los cursos" }, { status: 500 })
+    return NextResponse.json({ message: "No se pudieron obtener las clases" }, { status: 500 })
   }
 }
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
 
-    const response = await fetch(getBackendApiUrl("/cursos"), {
+    const response = await fetch(getBackendApiUrl("/clases"), {
       method: "POST",
       headers: {
         Authorization: authorization,
@@ -50,6 +50,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(data, { status: response.status })
   } catch {
-    return NextResponse.json({ message: "No se pudo crear el curso" }, { status: 500 })
+    return NextResponse.json({ message: "No se pudo crear la clase" }, { status: 500 })
   }
 }
