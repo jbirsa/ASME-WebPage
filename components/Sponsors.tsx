@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Patrocinador } from "@/types/db_types";
 import Image from "next/image";
+import { getSafeHttpUrl, getSafeImageSrc } from "@/lib/safe-url";
 
 // Helper function to get sponsors from API
 const getSponsors = async (): Promise<Patrocinador[]> => {
@@ -26,30 +27,40 @@ const SponsorCard = ({
 }: {
   sponsor: Patrocinador;
   keyPrefix: string;
-}) => (
-  <a
-    key={`${keyPrefix}-${sponsor.id}`}
-    href={sponsor.link}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex-shrink-0 group"
-  >
-    <div className="w-48 h-28 rounded-lg flex items-center justify-center p-4 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-      <Image
-        src={sponsor.imagen_url}
-        alt={sponsor.nombre}
-        width={192}
-        height={96}
-        className="max-w-full max-h-full object-contain"
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          target.style.display = "none";
-          target.parentElement!.innerHTML = `<span class="text-slate-900 font-bold text-lg">${sponsor.nombre}</span>`;
-        }}
-      />
-    </div>
-  </a>
-);
+}) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const sponsorLink = getSafeHttpUrl(sponsor.link);
+  const sponsorImage = getSafeImageSrc(sponsor.imagen_url);
+
+  if (!sponsorLink) return null;
+
+  return (
+    <a
+      key={`${keyPrefix}-${sponsor.id}`}
+      href={sponsorLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex-shrink-0 group"
+    >
+      <div className="w-48 h-28 rounded-lg flex items-center justify-center p-4 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+        {!imageFailed && sponsorImage ? (
+          <Image
+            src={sponsorImage}
+            alt={sponsor.nombre}
+            width={192}
+            height={96}
+            className="max-w-full max-h-full object-contain"
+            onError={() => {
+              setImageFailed(true);
+            }}
+          />
+        ) : (
+          <span className="text-slate-900 font-bold text-lg">{sponsor.nombre}</span>
+        )}
+      </div>
+    </a>
+  );
+};
 
 // Helper function to render multiple sets of sponsors
 const renderSponsorSets = (sponsors: Patrocinador[], prefixes: string[]) => {

@@ -5,8 +5,9 @@ import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 
 import LearningShell from "@/components/learning/LearningShell"
-import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
+import { clearAuthToken, getAuthToken, getAuthTokenPayload, isAdminAuthPayload } from "@/lib/auth-token"
 import { toSlug } from "@/lib/slug"
+import { getSafeHttpUrl, getSafeImageSrc } from "@/lib/safe-url"
 import type { Clase, Curso, MiCurso } from "@/types/learning"
 
 function extractErrorMessage(payload: unknown, fallback: string) {
@@ -25,11 +26,6 @@ function getAuthHeaders(token: string) {
   }
 }
 
-function normalizeUrl(url: string) {
-  if (/^https?:\/\//i.test(url)) return url
-  return `https://${url}`
-}
-
 const panelClassName = "rounded-2xl border border-white/10 bg-[#0d1726]"
 
 export default function CursoDetallePage() {
@@ -37,6 +33,7 @@ export default function CursoDetallePage() {
   const params = useParams<{ cursoId: string; slug: string }>()
   const [course, setCourse] = useState<Curso | null>(null)
   const [isEnrolled, setIsEnrolled] = useState(false)
+  const [isAdminView, setIsAdminView] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
   const [isEnrolling, setIsEnrolling] = useState(false)
@@ -51,6 +48,9 @@ export default function CursoDetallePage() {
         return
       }
 
+      const isAdmin = isAdminAuthPayload(getAuthTokenPayload())
+      setIsAdminView(isAdmin)
+
       if (!Number.isFinite(courseId)) {
         setErrorMessage("Curso invalido")
         setIsLoading(false)
@@ -60,27 +60,19 @@ export default function CursoDetallePage() {
       try {
         setErrorMessage("")
 
-        const [courseResponse, myCoursesResponse] = await Promise.all([
-          fetch(`/api/cursos/${courseId}`, {
-            method: "GET",
-            headers: getAuthHeaders(token),
-            cache: "no-store",
-          }),
-          fetch("/api/cursos/mis-cursos", {
-            method: "GET",
-            headers: getAuthHeaders(token),
-            cache: "no-store",
-          }),
-        ])
+        const courseResponse = await fetch(`/api/cursos/${courseId}`, {
+          method: "GET",
+          headers: getAuthHeaders(token),
+          cache: "no-store",
+        })
 
-        if (courseResponse.status === 401 || myCoursesResponse.status === 401) {
+        if (courseResponse.status === 401) {
           clearAuthToken()
           router.replace("/login")
           return
         }
 
         const coursePayload = (await courseResponse.json().catch(() => null)) as unknown
-        const myCoursesPayload = (await myCoursesResponse.json().catch(() => [])) as unknown
 
         if (!courseResponse.ok || Array.isArray(coursePayload) || !coursePayload) {
           throw new Error(extractErrorMessage(coursePayload, "No se pudo cargar el curso"))
@@ -95,9 +87,27 @@ export default function CursoDetallePage() {
 
         setCourse(currentCourse)
 
-        if (myCoursesResponse.ok && Array.isArray(myCoursesPayload)) {
-          const myCourses = myCoursesPayload as MiCurso[]
-          setIsEnrolled(myCourses.some((myCourse) => myCourse.cursoId === courseId))
+        if (!isAdmin) {
+          const myCoursesResponse = await fetch("/api/cursos/mis-cursos", {
+            method: "GET",
+            headers: getAuthHeaders(token),
+            cache: "no-store",
+          })
+
+          if (myCoursesResponse.status === 401) {
+            clearAuthToken()
+            router.replace("/login")
+            return
+          }
+
+          const myCoursesPayload = (await myCoursesResponse.json().catch(() => [])) as unknown
+
+          if (myCoursesResponse.ok && Array.isArray(myCoursesPayload)) {
+            const myCourses = myCoursesPayload as MiCurso[]
+            setIsEnrolled(myCourses.some((myCourse) => myCourse.cursoId === courseId))
+          }
+        } else {
+          setIsEnrolled(false)
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -164,6 +174,8 @@ export default function CursoDetallePage() {
   }
 
   const renderClassItem = (classItem: Clase, index: number) => {
+    const videoHref = getSafeHttpUrl(classItem.videoUrl)
+
     return (
       <article key={classItem.claseId} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
         <div className="flex flex-wrap items-center gap-3">
@@ -180,9 +192,9 @@ export default function CursoDetallePage() {
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <span className="text-xs uppercase tracking-[0.18em] text-slate-500">Orden {classItem.orden ?? index + 1}</span>
 
-          {classItem.videoUrl ? (
+          {videoHref ? (
             <a
-              href={normalizeUrl(classItem.videoUrl)}
+              href={videoHref}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-4 py-2 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
@@ -200,8 +212,10 @@ export default function CursoDetallePage() {
   }
 
   const courseTitle = course?.nombre || "Detalle del curso"
+  const canAccessClasses = isAdminView || isEnrolled
+  const courseImage = getSafeImageSrc(course?.imagenUrl)
   const pageActions = course ? (
-    isEnrolled ? (
+    isAdminView ? null : isEnrolled ? (
       <Link
         href="/mis-cursos"
         className="inline-flex items-center justify-center rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-5 py-2.5 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
@@ -249,17 +263,15 @@ export default function CursoDetallePage() {
       ) : (
         <div className="space-y-6">
           <section className={`${panelClassName} overflow-hidden`}>
-            {course.imagenUrl ? (
+            {courseImage ? (
               <div className="overflow-hidden bg-[#13233a]">
-                <img src={course.imagenUrl} alt={`Imagen de ${course.nombre}`} className="h-64 w-full object-cover" />
+                <img src={courseImage} alt={`Imagen de ${course.nombre}`} className="h-64 w-full object-cover" />
               </div>
             ) : null}
 
             <div className="p-6">
               <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-                <span>Curso #{course.cursoId}</span>
-                <span>{course.estado || "activo"}</span>
-                <span>{isEnrolled ? "Inscripto" : "Disponible"}</span>
+                <span>{isAdminView ? "Vista admin" : isEnrolled ? "Inscripto" : "Disponible"}</span>
                 <span>{sortedClasses.length} clases</span>
               </div>
 
@@ -276,7 +288,7 @@ export default function CursoDetallePage() {
             </div>
 
             <div className="mt-6 space-y-4">
-              {!isEnrolled ? (
+              {!canAccessClasses ? (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-10 text-center text-slate-400">
                   Inscribite para desbloquear las clases de este curso.
                 </div>

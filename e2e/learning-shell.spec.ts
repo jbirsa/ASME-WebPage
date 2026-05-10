@@ -97,6 +97,16 @@ test("campus dashboard muestra acceso admin cuando el rol es admin", async ({ pa
 
   await openNavigationIfNeeded(page)
   await expect(page.getByRole("link", { name: /^Admin$/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: /^Mis cursos$/ })).toHaveCount(0)
+  await expect(page.getByRole("link", { name: "Ver mis cursos" })).toHaveCount(0)
+})
+
+test("admin es redirigido desde mis cursos al panel admin", async ({ page }) => {
+  await setAuthToken(page, createToken({ sub: "admin-1", email: "admin@asme.org", rol: "admin" }))
+  await page.goto("/mis-cursos")
+
+  await expect(page).toHaveURL(/\/admin$/)
+  await expect(page.getByRole("heading", { name: "Admin" })).toBeVisible()
 })
 
 test("campus dashboard abre drawer mobile y navega a perfil", async ({ page }) => {

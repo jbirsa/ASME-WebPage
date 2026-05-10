@@ -1,34 +1,25 @@
-import { NextResponse, NextRequest } from "next/server";
-import { Evento } from "@/types/db_types";
-import { getSupabaseServerClient } from "@/lib/supabaseClient";
+import { NextResponse } from "next/server"
 
+import { getBackendApiUrl } from "@/lib/backend-api"
+import { isFutureEvent, normalizeEvent, sortEventsByDateAscending } from "@/lib/events"
 
-export async function GET(req: NextRequest) {
-    try {   
-        const supabase = getSupabaseServerClient();
-        const { data, error } = await supabase.from('evento').select('*').gte('fecha', new Date().toISOString()).order('fecha', { ascending: true });
-        if(error)
-            return NextResponse.json( {error: error}, { status: 500 } );
-        if(!data)
-            return NextResponse.json( { error: 'No data found' }, { status: 404 } );
+export async function GET() {
+  try {
+    const response = await fetch(getBackendApiUrl("/eventos"), {
+      method: "GET",
+      cache: "no-store",
+    })
 
-        const res = data.map((event: Evento) => {
-            return {
-                id: event.id,
-                nombre: event.nombre,
-                tipo: event.tipo,
-                fecha: event.fecha,
-                direccion: event.direccion,
-                barrio: event.barrio,
-                provincia: event.provincia,
-                descripcion: event.descripcion,
-                link: event.link,
-                imagen_url: event.imagen_url,
-                pagina_evento: event.pagina_evento
-            }
-        });
-        return NextResponse.json({ events: res }, { status: 200, headers: { 'Content-Type': 'application/json' } });
-    } catch (error){
-        return NextResponse.json( {error: error}, { status: 500 } );
+    const data = (await response.json().catch(() => [])) as unknown
+
+    if (!response.ok || !Array.isArray(data)) {
+      return NextResponse.json({ error: "No se pudieron obtener los eventos" }, { status: response.status || 500 })
     }
+
+    const events = sortEventsByDateAscending(data.map((event) => normalizeEvent(event as Record<string, unknown>))).filter(isFutureEvent)
+
+    return NextResponse.json({ events }, { status: 200, headers: { "Content-Type": "application/json" } })
+  } catch {
+    return NextResponse.json({ error: "No se pudieron obtener los eventos" }, { status: 500 })
+  }
 }

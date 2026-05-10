@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { User, Mail } from "lucide-react";
+import { getSafeImageSrc, getSafeMailtoHref } from "@/lib/safe-url";
 
 interface TeamMemberCardProps {
   nombre: string;
@@ -10,14 +11,17 @@ interface TeamMemberCardProps {
 }
 
 export function TeamMemberCard({ nombre, apellido, role, image, mail }: TeamMemberCardProps) {
+  const safeImage = getSafeImageSrc(image);
+  const mailtoHref = getSafeMailtoHref(mail);
+
   return (
     <Card className="h-full w-full min-h-[190px] md:min-h-[320px] bg-slate-800/70 text-slate-900 border-slate-600 backdrop-blur-sm hover:bg-slate-800/90 transition-all duration-300">
       <CardContent className="h-full p-5">
         <div className="flex h-full md:flex-col items-center md:items-center gap-4 md:gap-0">
           <div className="flex-shrink-0">
-            {image ? (
+            {safeImage ? (
               <img 
-                src={image} 
+                src={safeImage} 
                 alt={nombre + ' ' + apellido}
                 className="w-34 h-34 md:w-36 md:h-36 rounded-full object-cover md:mx-auto md:mb-5" 
               />
@@ -36,16 +40,16 @@ export function TeamMemberCard({ nombre, apellido, role, image, mail }: TeamMemb
             </div>
 
             <div className="flex justify-start md:justify-center space-x-4">
-              {mail && (
+              {mailtoHref ? (
                 <a 
-                  href={`mailto:${mail}`}
+                  href={mailtoHref}
                   className="text-[#5f87ab] hover:text-[#e3a72f] transition-colors duration-200"
                   aria-label={`Enviar email a ${nombre}`}
                   title={mail}
                 >
                   <Mail className="w-6 h-6 md:w-8 md:h-8" />
                 </a>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

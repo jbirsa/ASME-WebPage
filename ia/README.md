@@ -86,13 +86,13 @@ La idea es avanzar de forma incremental, validando cada cambio con Playwright y 
 - Dependencias: `06-admin-cursos-abm.md`
 
 ### `08-eventos-migracion-nest.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: migrar eventos desde Supabase al backend Nest.
 - Dependencias: ninguna tecnica estricta, pero recomendable antes del ABM de eventos.
 - Nota: decision ya tomada, eventos deben vivir en Nest.
 
 ### `09-admin-eventos-abm.md`
-- Estado: `pending`
+- Estado: `done`
 - Objetivo: ABM completo de eventos.
 - Backend esperado:
   - `GET /eventos`

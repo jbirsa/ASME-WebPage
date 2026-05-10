@@ -30,6 +30,7 @@ import MecHubNavbar from "@/components/MecHubNavbar"
 import Link from "next/link"
 import AOS from "aos"
 import "aos/dist/aos.css"
+import { isValidEmailInput, normalizeEmailInput, trimMultiline, trimSingleLine } from "@/lib/form-validation"
 
 const planKeys = ["silver", "gold", "platinum"] as const
 type PlanKey = (typeof planKeys)[number]
@@ -155,12 +156,44 @@ export default function MecHubPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const safePayload = {
+      name: trimSingleLine(formData.name),
+      email: normalizeEmailInput(formData.email),
+      message: trimMultiline(formData.message),
+    }
+
+    if (!safePayload.name) {
+      alert("El nombre es obligatorio")
+      return
+    }
+
+    if (safePayload.name.length > 120) {
+      alert("El nombre supera el limite de caracteres")
+      return
+    }
+
+    if (!isValidEmailInput(safePayload.email)) {
+      alert("Ingresa un email valido")
+      return
+    }
+
+    if (!safePayload.message) {
+      alert("El mensaje es obligatorio")
+      return
+    }
+
+    if (safePayload.message.length > 5000) {
+      alert("El mensaje supera el limite de caracteres")
+      return
+    }
+
     setIsSubmitting(true)
     try {
       const res = await fetch("/api/send-mail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(safePayload),
       })
 
       const data = await res.json()
@@ -627,6 +660,7 @@ export default function MecHubPage() {
                     required
                     value={formData.name}
                     onChange={handleInputChange}
+                    maxLength={120}
                     className="bg-slate-800/50 border-slate-600 text-white placeholder-gray-400 focus:border-[#e3a72f] focus:ring-[#e3a72f]"
                     placeholder="Tu nombre completo"
                   />
@@ -643,6 +677,7 @@ export default function MecHubPage() {
                     required
                     value={formData.email}
                     onChange={handleInputChange}
+                    maxLength={254}
                     className="bg-slate-800/50 border-slate-600 text-white placeholder-gray-400 focus:border-[#e3a72f] focus:ring-[#e3a72f]"
                     placeholder="tu@email.com"
                   />
@@ -659,6 +694,7 @@ export default function MecHubPage() {
                     rows={5}
                     value={formData.message}
                     onChange={handleInputChange}
+                    maxLength={5000}
                     className="bg-slate-800/50 border-slate-600 text-white placeholder-gray-400 focus:border-[#e3a72f] focus:ring-[#e3a72f]"
                     placeholder="Cuéntanos sobre tu proyecto o consulta..."
                   />

@@ -51,6 +51,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Entrada inválida" }, { status: 400 })
     }
 
+    if (safeNamePlain.length > 120) {
+      return NextResponse.json({ error: "El nombre supera el límite de caracteres" }, { status: 400 })
+    }
+
+    if (safeEmail.length > 254) {
+      return NextResponse.json({ error: "El email supera el límite de caracteres" }, { status: 400 })
+    }
+
     if (safeMessagePlain.length > 5000) {
       return NextResponse.json({ error: "El mensaje supera el límite de caracteres" }, { status: 400 })
     }
@@ -108,7 +116,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Error interno del servidor",
-        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     )

@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 import LearningShell from "@/components/learning/LearningShell"
-import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
+import { clearAuthToken, getAuthToken, getAuthTokenPayload, isAdminAuthPayload } from "@/lib/auth-token"
 import { toSlug } from "@/lib/slug"
+import { getSafeImageSrc } from "@/lib/safe-url"
 import type { MiCurso } from "@/types/learning"
 
 function extractErrorMessage(payload: unknown, fallback: string) {
@@ -42,6 +43,11 @@ export default function MisCursosPage() {
       const token = getAuthToken()
       if (!token) {
         router.replace("/login")
+        return
+      }
+
+      if (isAdminAuthPayload(getAuthTokenPayload())) {
+        router.replace("/admin")
         return
       }
 
@@ -116,13 +122,13 @@ export default function MisCursosPage() {
           {courses.map((course) => {
             const courseHref = `/cursos/${course.cursoId}/${toSlug(course.nombre)}`
             const totalCourseClasses = course.clases?.length ?? 0
+            const courseImage = getSafeImageSrc(course.imagenUrl)
 
             return (
               <article key={course.cursoId} className={`${panelClassName} overflow-hidden p-4 transition-colors hover:border-white/20`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Curso #{course.cursoId}</p>
-                    <h2 className="mt-2 text-xl font-semibold text-white break-words [overflow-wrap:anywhere]">{course.nombre}</h2>
+                    <h2 className="text-xl font-semibold text-white break-words [overflow-wrap:anywhere]">{course.nombre}</h2>
                   </div>
                   <span className="shrink-0 rounded-full border border-[#5f87ab]/20 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
                     {formatEstado(course.inscripcion.estado)}
@@ -130,8 +136,8 @@ export default function MisCursosPage() {
                 </div>
 
                 <div className="mt-4 overflow-hidden rounded-xl bg-[#13233a]">
-                  {course.imagenUrl ? (
-                    <img src={course.imagenUrl} alt={`Imagen de ${course.nombre}`} className="h-44 w-full object-cover" />
+                  {courseImage ? (
+                    <img src={courseImage} alt={`Imagen de ${course.nombre}`} className="h-44 w-full object-cover" />
                   ) : (
                     <div className="flex h-44 items-center justify-center text-sm text-slate-400">Imagen no disponible</div>
                   )}

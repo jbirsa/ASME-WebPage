@@ -1,6 +1,6 @@
 "use client"
 
-import { Fingerprint, Mail, ShieldCheck } from "lucide-react"
+import { Mail, ShieldCheck } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -40,7 +40,7 @@ export default function PerfilPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <article className="rounded-3xl border border-white/10 bg-white/[0.05] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#5f87ab]/20 text-[#dbe9f6]">
                 <Mail className="h-5 w-5" />
@@ -55,14 +55,6 @@ export default function PerfilPage() {
               </div>
               <p className="mt-4 text-xs uppercase tracking-[0.24em] text-slate-400">Rol</p>
               <p className="mt-2 text-sm font-medium text-white">{formatRole(user?.rol)}</p>
-            </article>
-
-            <article className="rounded-3xl border border-white/10 bg-white/[0.05] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#5f87ab]/20 text-[#dbe9f6]">
-                <Fingerprint className="h-5 w-5" />
-              </div>
-              <p className="mt-4 text-xs uppercase tracking-[0.24em] text-slate-400">Usuario</p>
-              <p className="mt-2 break-all text-sm font-medium text-white">{user?.sub || "No disponible"}</p>
             </article>
           </div>
 

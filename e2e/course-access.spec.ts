@@ -79,3 +79,15 @@ test("usuario inscripto si ve clases del curso", async ({ page }) => {
   await expect(page.getByText("Clase 1 - Interfaz y primeros pasos")).toBeVisible()
   await expect(page.getByRole("link", { name: "Ver clase" })).toBeVisible()
 })
+
+test("admin puede revisar el detalle del curso sin inscribirse", async ({ page }) => {
+  await setAuthToken(page, createToken({ sub: "admin-1", email: "admin@asme.org", rol: "admin" }))
+  await mockCourseDetail(page, false)
+
+  await page.goto("/cursos/1/introduccion-a-cad")
+
+  await expect(page.getByText("Vista admin")).toBeVisible()
+  await expect(page.getByRole("button", { name: "Inscribirme" })).toHaveCount(0)
+  await expect(page.getByText("Inscribite para desbloquear las clases de este curso.")).toHaveCount(0)
+  await expect(page.getByText("Clase 1 - Interfaz y primeros pasos")).toBeVisible()
+})

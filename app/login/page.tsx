@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useState } from "react"
 import LoginHeader from "@/components/LoginHeader"
 import { Input } from "@/components/ui/input"
 import { getAuthToken, setAuthToken } from "@/lib/auth-token"
+import { isValidEmailInput, normalizeEmailInput } from "@/lib/form-validation"
 import type { LoginResponse } from "@/types/learning"
 
 function extractErrorMessage(payload: unknown) {
@@ -44,6 +45,18 @@ export default function LoginPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage("")
+
+    const normalizedEmail = normalizeEmailInput(email)
+    if (!isValidEmailInput(normalizedEmail)) {
+      setErrorMessage("Ingresa un correo electronico valido")
+      return
+    }
+
+    if (!password || password.length > 128) {
+      setErrorMessage("La contrasena es invalida")
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -52,7 +65,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: normalizedEmail, password }),
       })
 
       const payload = (await response.json().catch(() => null)) as LoginResponse | null
@@ -122,6 +135,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
+                maxLength={254}
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Correo electronico"
               />
@@ -137,6 +151,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
+                maxLength={128}
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Contrasena"
               />

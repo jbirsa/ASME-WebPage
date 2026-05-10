@@ -127,18 +127,21 @@ export default function LearningShell({
         match: (currentPathname) => currentPathname === "/cursos" || currentPathname.startsWith("/cursos/"),
       },
       {
-        href: "/mis-cursos",
-        label: "Mis cursos",
-        icon: BookMarked,
-        match: (currentPathname) => currentPathname === "/mis-cursos",
-      },
-      {
         href: "/perfil",
         label: "Mi perfil",
         icon: UserRound,
         match: (currentPathname) => currentPathname === "/perfil",
       },
     ]
+
+    if (!isAdminAuthPayload(user)) {
+      items.splice(1, 0, {
+        href: "/mis-cursos",
+        label: "Mis cursos",
+        icon: BookMarked,
+        match: (currentPathname) => currentPathname === "/mis-cursos",
+      })
+    }
 
     if (isAdminAuthPayload(user)) {
       items.push({

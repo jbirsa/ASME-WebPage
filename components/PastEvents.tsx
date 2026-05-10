@@ -4,6 +4,7 @@ import Image from "next/image"
 import { MapPin } from "lucide-react"
 import type { Evento } from "@/types/db_types"
 import { formatEventDate } from "@/lib/date"
+import { getSafeImageSrc } from "@/lib/safe-url"
 import { useEffect } from "react"
 import AOS from "aos"
 import "aos/dist/aos.css"
@@ -51,6 +52,7 @@ export default function PastEvents({ events }: { events: Evento[] }) {
               const isEven = index % 2 === 0
               const delay = 150 * index
               const animation = isEven ? "fade-right" : "fade-left"
+              const imageSrc = getSafeImageSrc(event.imagen_url)
 
               return (
                 <div
@@ -69,15 +71,15 @@ export default function PastEvents({ events }: { events: Evento[] }) {
                   <div className="bg-slate-700/60 border border-slate-500/30 rounded-xl overflow-hidden backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 group">
                     {/* Image */}
                     <div className="relative h-48 overflow-hidden">
-                      {event.imagen_url && (
+                      {imageSrc ? (
                         <Image
-                          src={event.imagen_url || "/placeholder.svg"}
+                          src={imageSrc}
                           alt={event.nombre}
                           fill
                           className="object-cover grayscale-[50%] group-hover:grayscale-[20%] transition-all duration-300"
                           sizes="(max-width: 768px) 100vw, 50vw"
                         />
-                      )}
+                      ) : null}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent"></div>
 
                       {/* Date badge */}

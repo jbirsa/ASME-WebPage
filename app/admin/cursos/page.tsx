@@ -9,20 +9,19 @@ import DestructiveConfirmDialog from "@/components/admin/DestructiveConfirmDialo
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
+import { isValidHttpUrlInput, trimMultiline, trimSingleLine } from "@/lib/form-validation"
 import type { Curso } from "@/types/learning"
 
 type CourseFormState = {
   nombre: string
   descripcion: string
   imagenUrl: string
-  estado: string
 }
 
 const emptyFormState: CourseFormState = {
   nombre: "",
   descripcion: "",
   imagenUrl: "",
-  estado: "activo",
 }
 
 function extractErrorMessage(payload: unknown, fallback: string) {
@@ -45,13 +44,11 @@ function buildCoursePayload(formState: CourseFormState, includeEmptyOptional: bo
   const nombre = formState.nombre.trim()
   const descripcion = formState.descripcion.trim()
   const imagenUrl = formState.imagenUrl.trim()
-  const estado = formState.estado.trim()
 
   const payload: Record<string, string> = { nombre }
 
   if (includeEmptyOptional || descripcion) payload.descripcion = descripcion
   if (includeEmptyOptional || imagenUrl) payload.imagenUrl = imagenUrl
-  if (includeEmptyOptional || estado) payload.estado = estado
 
   return payload
 }
@@ -129,8 +126,27 @@ export default function AdminCursosPage() {
     setErrorMessage("")
     setSuccessMessage("")
 
-    if (!formState.nombre.trim()) {
+    const normalizedName = trimSingleLine(formState.nombre)
+    const normalizedDescription = trimMultiline(formState.descripcion)
+    const normalizedImageUrl = trimSingleLine(formState.imagenUrl)
+
+    if (!normalizedName) {
       setErrorMessage("El nombre del curso es obligatorio")
+      return
+    }
+
+    if (normalizedName.length > 120) {
+      setErrorMessage("El nombre del curso supera el limite de caracteres")
+      return
+    }
+
+    if (normalizedDescription.length > 2000) {
+      setErrorMessage("La descripcion del curso supera el limite de caracteres")
+      return
+    }
+
+    if (normalizedImageUrl && (!isValidHttpUrlInput(normalizedImageUrl) || normalizedImageUrl.length > 500)) {
+      setErrorMessage("La imagen debe ser una URL http o https valida")
       return
     }
 
@@ -150,7 +166,16 @@ export default function AdminCursosPage() {
           ...getAuthHeaders(token),
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(buildCoursePayload(formState, isEditing)),
+        body: JSON.stringify(
+          buildCoursePayload(
+            {
+              nombre: normalizedName,
+              descripcion: normalizedDescription,
+              imagenUrl: normalizedImageUrl,
+            },
+            isEditing,
+          ),
+        ),
       })
 
       const payload = (await response.json().catch(() => null)) as unknown
@@ -192,7 +217,6 @@ export default function AdminCursosPage() {
       nombre: course.nombre,
       descripcion: course.descripcion ?? "",
       imagenUrl: course.imagenUrl ?? "",
-      estado: course.estado ?? "",
     })
   }
 
@@ -270,7 +294,7 @@ export default function AdminCursosPage() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold text-white">{editingCourseId ? "Editar curso" : "Nuevo curso"}</h2>
-            <p className="mt-2 text-sm leading-7 text-slate-400">Carga los campos principales del curso y administra su estado.</p>
+            <p className="mt-2 text-sm leading-7 text-slate-400">Carga los campos principales del curso para publicarlo dentro del catalogo.</p>
           </div>
 
           {editingCourseId ? (
@@ -294,6 +318,7 @@ export default function AdminCursosPage() {
               value={formState.nombre}
               onChange={(event) => setFormState((current) => ({ ...current, nombre: event.target.value }))}
               placeholder="Introduccion a CAD"
+              maxLength={120}
               className="border-white/10 bg-[#08111b] text-white"
             />
           </div>
@@ -307,6 +332,7 @@ export default function AdminCursosPage() {
               value={formState.descripcion}
               onChange={(event) => setFormState((current) => ({ ...current, descripcion: event.target.value }))}
               placeholder="Curso inicial de modelado 3D para estudiantes."
+              maxLength={2000}
               className="min-h-28 border-white/10 bg-[#08111b] text-white"
             />
           </div>
@@ -320,24 +346,9 @@ export default function AdminCursosPage() {
               value={formState.imagenUrl}
               onChange={(event) => setFormState((current) => ({ ...current, imagenUrl: event.target.value }))}
               placeholder="https://example.com/curso.jpg"
+              maxLength={500}
               className="border-white/10 bg-[#08111b] text-white"
             />
-          </div>
-
-          <div>
-            <label htmlFor="estado" className="mb-2 block text-sm font-medium text-slate-200">
-              Estado
-            </label>
-            <select
-              id="estado"
-              value={formState.estado}
-              onChange={(event) => setFormState((current) => ({ ...current, estado: event.target.value }))}
-              className="flex h-10 w-full rounded-md border border-white/10 bg-[#08111b] px-3 py-2 text-sm text-white outline-none transition-colors focus:border-[#d4a726]"
-            >
-              <option value="activo">activo</option>
-              <option value="borrador">borrador</option>
-              <option value="archivado">archivado</option>
-            </select>
           </div>
 
           <div className="md:col-span-2 flex flex-wrap gap-3">
@@ -374,14 +385,8 @@ export default function AdminCursosPage() {
           <div className="mt-6 grid gap-4 xl:grid-cols-2">
             {sortedCourses.map((course) => (
               <article key={course.cursoId} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Curso #{course.cursoId}</p>
-                    <h3 className="mt-2 text-lg font-semibold text-white break-words [overflow-wrap:anywhere]">{course.nombre}</h3>
-                  </div>
-                  <span className="shrink-0 rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                    {course.estado || "activo"}
-                  </span>
+                <div>
+                  <h3 className="text-lg font-semibold text-white break-words [overflow-wrap:anywhere]">{course.nombre}</h3>
                 </div>
 
                 <p className="mt-4 text-sm leading-7 text-slate-300 break-words [overflow-wrap:anywhere]">

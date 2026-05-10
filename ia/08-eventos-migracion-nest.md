@@ -2,15 +2,15 @@
 
 ## Estado
 
-`pending`
+`done`
 
 ## Objetivo
 
-Migrar la fuente de datos de eventos desde Supabase al backend principal en Nest.
+Migrar el consumo del frontend de eventos para que pase por el backend principal en Nest.
 
 ## Decision Ya Tomada
 
-Los eventos deben dejar de depender de Supabase y pasar a vivir en el backend Nest, para que el futuro ABM de eventos impacte directamente en la home publica.
+El frontend debe dejar de depender de Supabase de forma directa y pasar a pedir los eventos a Nest. Nest puede seguir resolviendo los datos con su capa actual por detras.
 
 ## Contexto Actual
 
@@ -20,7 +20,7 @@ Hoy el frontend usa:
 - `app/api/events/future/route.ts`
 - `app/api/events/past/route.ts`
 
-Estas rutas consultan Supabase.
+Estas rutas consultaban Supabase de forma directa.
 
 ## Backend Involucrado
 
@@ -29,7 +29,7 @@ Estas rutas consultan Supabase.
 
 ## Ajustes Esperados
 
-1. Reemplazar acceso a Supabase por proxy a Nest.
+1. Reemplazar acceso directo a Supabase por proxy a Nest.
 2. Adaptar el shape de datos del frontend.
 3. Revisar nombres como `imagenUrl` y `paginaEvento` contra el tipo local.
 

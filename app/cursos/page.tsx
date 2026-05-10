@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from "react"
 import { X } from "lucide-react"
 
 import LearningShell from "@/components/learning/LearningShell"
-import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
+import { clearAuthToken, getAuthToken, getAuthTokenPayload, isAdminAuthPayload } from "@/lib/auth-token"
+import { getSafeImageSrc } from "@/lib/safe-url"
 import type { Curso, MiCurso } from "@/types/learning"
 
 function extractErrorMessage(payload: unknown, fallback: string) {
@@ -31,6 +32,7 @@ export default function CursosPage() {
   const router = useRouter()
   const [courses, setCourses] = useState<Curso[]>([])
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<number[]>([])
+  const [isAdminView, setIsAdminView] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState("")
   const [enrollingCourseId, setEnrollingCourseId] = useState<number | null>(null)
@@ -46,30 +48,25 @@ export default function CursosPage() {
         return
       }
 
+      const isAdmin = isAdminAuthPayload(getAuthTokenPayload())
+      setIsAdminView(isAdmin)
+
       try {
         setErrorMessage("")
 
-        const [coursesResponse, myCoursesResponse] = await Promise.all([
-          fetch("/api/cursos", {
-            method: "GET",
-            headers: getAuthHeaders(token),
-            cache: "no-store",
-          }),
-          fetch("/api/cursos/mis-cursos", {
-            method: "GET",
-            headers: getAuthHeaders(token),
-            cache: "no-store",
-          }),
-        ])
+        const coursesResponse = await fetch("/api/cursos", {
+          method: "GET",
+          headers: getAuthHeaders(token),
+          cache: "no-store",
+        })
 
-        if (coursesResponse.status === 401 || myCoursesResponse.status === 401) {
+        if (coursesResponse.status === 401) {
           clearAuthToken()
           router.replace("/login")
           return
         }
 
         const coursesPayload = (await coursesResponse.json().catch(() => null)) as unknown
-        const myCoursesPayload = (await myCoursesResponse.json().catch(() => [])) as unknown
 
         if (!coursesResponse.ok || !Array.isArray(coursesPayload)) {
           throw new Error(extractErrorMessage(coursesPayload, "No se pudo cargar el catalogo de cursos"))
@@ -77,9 +74,27 @@ export default function CursosPage() {
 
         setCourses(coursesPayload as Curso[])
 
-        if (myCoursesResponse.ok && Array.isArray(myCoursesPayload)) {
-          const myCourses = myCoursesPayload as MiCurso[]
-          setEnrolledCourseIds(myCourses.map((course) => course.cursoId))
+        if (!isAdmin) {
+          const myCoursesResponse = await fetch("/api/cursos/mis-cursos", {
+            method: "GET",
+            headers: getAuthHeaders(token),
+            cache: "no-store",
+          })
+
+          if (myCoursesResponse.status === 401) {
+            clearAuthToken()
+            router.replace("/login")
+            return
+          }
+
+          const myCoursesPayload = (await myCoursesResponse.json().catch(() => [])) as unknown
+
+          if (myCoursesResponse.ok && Array.isArray(myCoursesPayload)) {
+            const myCourses = myCoursesPayload as MiCurso[]
+            setEnrolledCourseIds(myCourses.map((course) => course.cursoId))
+          }
+        } else {
+          setEnrolledCourseIds([])
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -139,12 +154,14 @@ export default function CursosPage() {
       title="Catalogo"
       breadcrumbs={[{ label: "Campus", href: "/cursos" }, { label: "Catalogo" }]}
       actions={
+        !isAdminView ? (
         <Link
           href="/mis-cursos"
           className="inline-flex items-center justify-center rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-5 py-2.5 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
         >
           Ver mis cursos
         </Link>
+        ) : null
       }
     >
       {errorMessage ? (
@@ -163,22 +180,17 @@ export default function CursosPage() {
           {courses.map((course) => {
             const isEnrolled = enrolledSet.has(course.cursoId)
             const isSubmitting = enrollingCourseId === course.cursoId
+            const courseImage = getSafeImageSrc(course.imagenUrl)
 
             return (
               <article key={course.cursoId} className={`${panelClassName} overflow-hidden p-4 transition-colors hover:border-white/20`}>
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Curso #{course.cursoId}</p>
-                    <h2 className="mt-2 text-xl font-semibold text-white break-words [overflow-wrap:anywhere]">{course.nombre}</h2>
-                  </div>
-                  <span className="shrink-0 rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                    {course.estado || "activo"}
-                  </span>
+                  <h2 className="text-xl font-semibold text-white break-words [overflow-wrap:anywhere]">{course.nombre}</h2>
                 </div>
 
                 <div className="mt-4 overflow-hidden rounded-xl bg-[#13233a]">
-                  {course.imagenUrl ? (
-                    <img src={course.imagenUrl} alt={`Imagen de ${course.nombre}`} className="h-44 w-full object-cover" />
+                  {courseImage ? (
+                    <img src={courseImage} alt={`Imagen de ${course.nombre}`} className="h-44 w-full object-cover" />
                   ) : (
                     <div className="flex h-44 items-center justify-center text-sm text-slate-400">Imagen no disponible</div>
                   )}
@@ -190,23 +202,27 @@ export default function CursosPage() {
 
                 <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-slate-500">
                   <span>{course.clases?.length ?? 0} clases</span>
-                  <span>{isEnrolled ? "Inscripto" : "Disponible"}</span>
+                  <span>{isAdminView ? "Vista admin" : isEnrolled ? "Inscripto" : "Disponible"}</span>
                 </div>
 
                 <div className="mt-5 flex gap-3">
                   <button
                     onClick={() => setSelectedCourse(course)}
-                    className="flex-1 rounded-2xl border border-white/10 px-4 py-3 text-sm font-medium text-slate-100 transition-colors hover:bg-white/[0.04]"
+                    className={`rounded-2xl border border-white/10 px-4 py-3 text-sm font-medium text-slate-100 transition-colors hover:bg-white/[0.04] ${
+                      isAdminView ? "w-full" : "flex-1"
+                    }`}
                   >
                     Ver detalles
                   </button>
-                  <button
-                    onClick={() => handleEnroll(course.cursoId)}
-                    disabled={isEnrolled || isSubmitting}
-                    className="flex-1 rounded-2xl bg-[#e3a72f] px-4 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a] disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {isEnrolled ? "Ya inscripto" : isSubmitting ? "Inscribiendo..." : "Inscribirme"}
-                  </button>
+                  {!isAdminView ? (
+                    <button
+                      onClick={() => handleEnroll(course.cursoId)}
+                      disabled={isEnrolled || isSubmitting}
+                      className="flex-1 rounded-2xl bg-[#e3a72f] px-4 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a] disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      {isEnrolled ? "Ya inscripto" : isSubmitting ? "Inscribiendo..." : "Inscribirme"}
+                    </button>
+                  ) : null}
                 </div>
               </article>
             )
@@ -233,14 +249,12 @@ export default function CursosPage() {
               <X className="h-5 w-5" />
             </button>
 
-            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Curso #{selectedCourse.cursoId}</p>
             <h2 className="mt-3 pr-12 text-3xl font-semibold text-white break-words [overflow-wrap:anywhere]">{selectedCourse.nombre}</h2>
             <p className="mt-5 text-sm leading-7 text-slate-300 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
               {selectedCourse.descripcion || "Este curso todavia no tiene descripcion cargada."}
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-              <span>{selectedCourse.estado || "activo"}</span>
               <span>{selectedCourse.clases?.length ?? 0} clases</span>
             </div>
           </div>

@@ -9,6 +9,8 @@ import DestructiveConfirmDialog from "@/components/admin/DestructiveConfirmDialo
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
+import { isValidHttpUrlInput, trimMultiline, trimSingleLine } from "@/lib/form-validation"
+import { getSafeHttpUrl } from "@/lib/safe-url"
 import type { Clase, Curso } from "@/types/learning"
 
 type ClassFormState = {
@@ -161,8 +163,33 @@ export default function AdminCursoClasesPage() {
     setErrorMessage("")
     setSuccessMessage("")
 
-    if (!formState.titulo.trim()) {
+    const normalizedTitle = trimSingleLine(formState.titulo)
+    const normalizedDescription = trimMultiline(formState.descripcion)
+    const normalizedVideoUrl = trimSingleLine(formState.videoUrl)
+    const normalizedOrder = trimSingleLine(formState.orden)
+
+    if (!normalizedTitle) {
       setErrorMessage("El titulo de la clase es obligatorio")
+      return
+    }
+
+    if (normalizedTitle.length > 140) {
+      setErrorMessage("El titulo de la clase supera el limite de caracteres")
+      return
+    }
+
+    if (normalizedDescription.length > 2000) {
+      setErrorMessage("La descripcion de la clase supera el limite de caracteres")
+      return
+    }
+
+    if (normalizedVideoUrl && (!isValidHttpUrlInput(normalizedVideoUrl) || normalizedVideoUrl.length > 500)) {
+      setErrorMessage("El video debe ser una URL http o https valida")
+      return
+    }
+
+    if (normalizedOrder && (!/^\d+$/.test(normalizedOrder) || Number(normalizedOrder) < 1)) {
+      setErrorMessage("El orden debe ser un numero entero mayor a cero")
       return
     }
 
@@ -182,7 +209,18 @@ export default function AdminCursoClasesPage() {
           ...getAuthHeaders(token),
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(buildClassPayload(courseId, formState, isEditing)),
+        body: JSON.stringify(
+          buildClassPayload(
+            courseId,
+            {
+              titulo: normalizedTitle,
+              descripcion: normalizedDescription,
+              videoUrl: normalizedVideoUrl,
+              orden: normalizedOrder,
+            },
+            isEditing,
+          ),
+        ),
       })
 
       const payload = (await response.json().catch(() => null)) as unknown
@@ -327,6 +365,7 @@ export default function AdminCursoClasesPage() {
               value={formState.titulo}
               onChange={(event) => setFormState((current) => ({ ...current, titulo: event.target.value }))}
               placeholder="Clase 1 - Interfaz y primeros pasos"
+              maxLength={140}
               className="border-white/10 bg-[#08111b] text-white"
             />
           </div>
@@ -340,6 +379,7 @@ export default function AdminCursoClasesPage() {
               value={formState.descripcion}
               onChange={(event) => setFormState((current) => ({ ...current, descripcion: event.target.value }))}
               placeholder="Recorrido inicial por el entorno de trabajo."
+              maxLength={2000}
               className="min-h-28 border-white/10 bg-[#08111b] text-white"
             />
           </div>
@@ -353,6 +393,7 @@ export default function AdminCursoClasesPage() {
               value={formState.videoUrl}
               onChange={(event) => setFormState((current) => ({ ...current, videoUrl: event.target.value }))}
               placeholder="https://www.youtube.com/watch?v=abcd1234"
+              maxLength={500}
               className="border-white/10 bg-[#08111b] text-white"
             />
           </div>
@@ -409,56 +450,62 @@ export default function AdminCursoClasesPage() {
         ) : (
           <div className="mt-6 space-y-4">
             {sortedClasses.map((classItem) => (
-              <article key={classItem.claseId} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Clase #{classItem.claseId}</p>
-                    <h3 className="mt-2 text-lg font-semibold text-white break-words [overflow-wrap:anywhere]">{classItem.titulo}</h3>
-                  </div>
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                    Orden {classItem.orden ?? "sin definir"}
-                  </span>
-                </div>
+              (() => {
+                const videoHref = getSafeHttpUrl(classItem.videoUrl)
 
-                <p className="mt-4 text-sm leading-7 text-slate-300 break-words [overflow-wrap:anywhere]">
-                  {classItem.descripcion || "Sin descripcion cargada."}
-                </p>
+                return (
+                  <article key={classItem.claseId} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Clase #{classItem.claseId}</p>
+                        <h3 className="mt-2 text-lg font-semibold text-white break-words [overflow-wrap:anywhere]">{classItem.titulo}</h3>
+                      </div>
+                      <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                        Orden {classItem.orden ?? "sin definir"}
+                      </span>
+                    </div>
 
-                <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-slate-500">
-                  <span>{classItem.videoUrl ? "Con video" : "Sin video"}</span>
-                  {classItem.videoUrl ? (
-                    <a href={classItem.videoUrl} target="_blank" rel="noreferrer noopener" className="transition-colors hover:text-[#e3a72f]">
-                      Abrir video
-                    </a>
-                  ) : (
-                    <span>URL pendiente</span>
-                  )}
-                </div>
+                    <p className="mt-4 text-sm leading-7 text-slate-300 break-words [overflow-wrap:anywhere]">
+                      {classItem.descripcion || "Sin descripcion cargada."}
+                    </p>
 
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    aria-label={`Editar clase ${classItem.titulo}`}
-                    onClick={() => handleEdit(classItem)}
-                    className="inline-flex rounded-2xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:bg-white/[0.04]"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Eliminar clase ${classItem.titulo}`}
-                    disabled={deletingClassId === classItem.claseId}
-                    onClick={() => {
-                      setErrorMessage("")
-                      setSuccessMessage("")
-                      setClassToDelete(classItem)
-                    }}
-                    className="inline-flex rounded-2xl border border-rose-500/30 px-4 py-2 text-sm font-medium text-rose-200 transition-colors hover:bg-rose-500/10 disabled:opacity-70"
-                  >
-                    {deletingClassId === classItem.claseId ? "Eliminando..." : "Eliminar"}
-                  </button>
-                </div>
-              </article>
+                    <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-slate-500">
+                      <span>{videoHref ? "Con video" : "Sin video"}</span>
+                      {videoHref ? (
+                        <a href={videoHref} target="_blank" rel="noreferrer noopener" className="transition-colors hover:text-[#e3a72f]">
+                          Abrir video
+                        </a>
+                      ) : (
+                        <span>URL pendiente</span>
+                      )}
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        aria-label={`Editar clase ${classItem.titulo}`}
+                        onClick={() => handleEdit(classItem)}
+                        className="inline-flex rounded-2xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:bg-white/[0.04]"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Eliminar clase ${classItem.titulo}`}
+                        disabled={deletingClassId === classItem.claseId}
+                        onClick={() => {
+                          setErrorMessage("")
+                          setSuccessMessage("")
+                          setClassToDelete(classItem)
+                        }}
+                        className="inline-flex rounded-2xl border border-rose-500/30 px-4 py-2 text-sm font-medium text-rose-200 transition-colors hover:bg-rose-500/10 disabled:opacity-70"
+                      >
+                        {deletingClassId === classItem.claseId ? "Eliminando..." : "Eliminar"}
+                      </button>
+                    </div>
+                  </article>
+                )
+              })()
             ))}
           </div>
         )}

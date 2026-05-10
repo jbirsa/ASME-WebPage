@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useState } from "react"
 import LoginHeader from "@/components/LoginHeader"
 import { Input } from "@/components/ui/input"
 import { getAuthToken } from "@/lib/auth-token"
+import { isValidEmailInput, normalizeEmailInput, trimSingleLine } from "@/lib/form-validation"
 
 function extractErrorMessage(payload: unknown) {
   if (typeof payload === "object" && payload !== null) {
@@ -40,6 +41,29 @@ export default function RegistroPage() {
     event.preventDefault()
     setErrorMessage("")
 
+    const normalizedName = trimSingleLine(nombre)
+    const normalizedEmail = normalizeEmailInput(email)
+
+    if (!normalizedName) {
+      setErrorMessage("El nombre es obligatorio")
+      return
+    }
+
+    if (normalizedName.length > 120) {
+      setErrorMessage("El nombre supera el limite de caracteres")
+      return
+    }
+
+    if (!isValidEmailInput(normalizedEmail)) {
+      setErrorMessage("Ingresa un correo electronico valido")
+      return
+    }
+
+    if (password.length > 128) {
+      setErrorMessage("La contrasena supera el limite de caracteres")
+      return
+    }
+
     if (password !== confirmPassword) {
       setErrorMessage("Las contrasenas no coinciden")
       return
@@ -53,7 +77,7 @@ export default function RegistroPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nombre, email, password }),
+        body: JSON.stringify({ nombre: normalizedName, email: normalizedEmail, password }),
       })
 
       const payload = (await response.json().catch(() => null)) as unknown
@@ -112,6 +136,7 @@ export default function RegistroPage() {
                 onChange={(event) => setNombre(event.target.value)}
                 required
                 autoComplete="name"
+                maxLength={120}
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Nombre completo"
               />
@@ -128,6 +153,7 @@ export default function RegistroPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 required
                 autoComplete="email"
+                maxLength={254}
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Correo electronico"
               />
@@ -144,6 +170,7 @@ export default function RegistroPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 required
                 minLength={6}
+                maxLength={128}
                 autoComplete="new-password"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Contrasena"
@@ -161,6 +188,7 @@ export default function RegistroPage() {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 required
                 minLength={6}
+                maxLength={128}
                 autoComplete="new-password"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Confirmar contrasena"

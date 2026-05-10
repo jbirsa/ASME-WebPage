@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useState } from "react"
 import LoginHeader from "@/components/LoginHeader"
 import { Input } from "@/components/ui/input"
 import { getAuthToken } from "@/lib/auth-token"
+import { trimSingleLine } from "@/lib/form-validation"
 
 function extractErrorMessage(payload: unknown) {
   if (typeof payload === "object" && payload !== null) {
@@ -53,6 +54,22 @@ export default function RestablecerContrasenaPage() {
     event.preventDefault()
     setErrorMessage("")
 
+    const normalizedCode = trimSingleLine(codigo)
+    if (!normalizedCode) {
+      setErrorMessage("El codigo es obligatorio")
+      return
+    }
+
+    if (normalizedCode.length > 512) {
+      setErrorMessage("El codigo supera el limite de caracteres")
+      return
+    }
+
+    if (newPassword.length > 128) {
+      setErrorMessage("La contrasena supera el limite de caracteres")
+      return
+    }
+
     if (newPassword !== confirmPassword) {
       setErrorMessage("Las contrasenas no coinciden")
       return
@@ -66,7 +83,7 @@ export default function RestablecerContrasenaPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token: codigo, newPassword }),
+        body: JSON.stringify({ token: normalizedCode, newPassword }),
       })
 
       const payload = (await response.json().catch(() => null)) as unknown
@@ -125,6 +142,7 @@ export default function RestablecerContrasenaPage() {
                 onChange={(event) => setCodigo(event.target.value)}
                 required
                 autoComplete="one-time-code"
+                maxLength={512}
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Codigo recibido"
               />
@@ -141,6 +159,7 @@ export default function RestablecerContrasenaPage() {
                 onChange={(event) => setNewPassword(event.target.value)}
                 required
                 minLength={6}
+                maxLength={128}
                 autoComplete="new-password"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Nueva contrasena"
@@ -158,6 +177,7 @@ export default function RestablecerContrasenaPage() {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 required
                 minLength={6}
+                maxLength={128}
                 autoComplete="new-password"
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Confirmar nueva contrasena"

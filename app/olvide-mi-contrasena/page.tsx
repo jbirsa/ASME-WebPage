@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useState } from "react"
 import LoginHeader from "@/components/LoginHeader"
 import { Input } from "@/components/ui/input"
 import { getAuthToken } from "@/lib/auth-token"
+import { isValidEmailInput, normalizeEmailInput } from "@/lib/form-validation"
 
 function extractErrorMessage(payload: unknown) {
   if (typeof payload === "object" && payload !== null) {
@@ -50,6 +51,13 @@ export default function OlvideMiContrasenaPage() {
     setErrorMessage("")
     setSuccessMessage("")
     setDevelopmentCode(null)
+
+    const normalizedEmail = normalizeEmailInput(email)
+    if (!isValidEmailInput(normalizedEmail)) {
+      setErrorMessage("Ingresa un correo electronico valido")
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -58,7 +66,7 @@ export default function OlvideMiContrasenaPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: normalizedEmail }),
       })
 
       const payload = (await response.json().catch(() => null)) as unknown
@@ -118,6 +126,7 @@ export default function OlvideMiContrasenaPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 required
                 autoComplete="email"
+                maxLength={254}
                 className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Correo electronico"
               />

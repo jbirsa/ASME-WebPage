@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, Calendar, MapPin, Clock } from "lucide-react"
 import type { Evento } from "@/types/db_types"
 import { formatEventDate, parseEventDate } from "@/lib/date"
+import { getEventDetailsHref, isExternalEventLink } from "@/lib/events"
+import { getSafeHttpUrl, getSafeImageSrc } from "@/lib/safe-url"
 import AOS from "aos"
 import "aos/dist/aos.css"
 import { useEffect } from "react"
@@ -73,6 +75,11 @@ export default function NextEvents({
       ? currentEventDate.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
       : null
 
+  const detailsHref = getEventDetailsHref(currentEvent.pagina_evento)
+  const detailsIsExternal = isExternalEventLink(detailsHref)
+  const registrationHref = getSafeHttpUrl(currentEvent.link)
+  const imageSrc = getSafeImageSrc(currentEvent.imagen_url)
+
   return (
     <section className="relative z-10 py-20 px-6 bg-gradient-to-br from-slate-900/40 to-slate-800/60">
       <div className="max-w-7xl mx-auto">
@@ -89,16 +96,16 @@ export default function NextEvents({
             <div className="grid md:grid-cols-2 gap-0 min-h-[500px]">
               {/* Image Section */}
               <div className="relative h-64 md:h-full">
-                {currentEvent.imagen_url && (
+                {imageSrc ? (
                   <Image
-                    src={currentEvent.imagen_url || "/placeholder.svg"}
+                    src={imageSrc}
                     alt={currentEvent.nombre}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
                     priority={currentIndex === 0}
                   />
-                )}
+                ) : null}
 
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -132,19 +139,29 @@ export default function NextEvents({
                 </p>
 
                 <div className="flex flex-wrap gap-3">
-                  <a href={currentEvent.link} target="_blank" rel="noopener noreferrer">
-                    <Button size="lg" className="bg-[#e3a72f] hover:bg-[#d4961a] text-black px-8 py-3">
-                      Inscribirse
-                    </Button>
-                  </a>
-
-                  {currentEvent.pagina_evento && (
-                    <Link href={`/${currentEvent.pagina_evento}`}>
-                      <Button size="lg" className="bg-[#f2f1e8] hover:bg-[#e8e7dc] text-black px-8 py-3">
-                        Ver Detalles
+                  {registrationHref ? (
+                    <a href={registrationHref} target="_blank" rel="noopener noreferrer">
+                      <Button size="lg" className="bg-[#e3a72f] hover:bg-[#d4961a] text-black px-8 py-3">
+                        Inscribirse
                       </Button>
-                    </Link>
-                  )}
+                    </a>
+                  ) : null}
+
+                  {detailsHref ? (
+                    detailsIsExternal ? (
+                      <a href={detailsHref} target="_blank" rel="noopener noreferrer">
+                        <Button size="lg" className="bg-[#f2f1e8] hover:bg-[#e8e7dc] text-black px-8 py-3">
+                          Ver Detalles
+                        </Button>
+                      </a>
+                    ) : (
+                      <Link href={detailsHref}>
+                        <Button size="lg" className="bg-[#f2f1e8] hover:bg-[#e8e7dc] text-black px-8 py-3">
+                          Ver Detalles
+                        </Button>
+                      </Link>
+                    )
+                  ) : null}
                 </div>
               </div>
             </div>

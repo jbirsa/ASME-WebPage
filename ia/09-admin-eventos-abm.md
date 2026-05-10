@@ -2,7 +2,7 @@
 
 ## Estado
 
-`pending`
+`done`
 
 ## Objetivo
 
