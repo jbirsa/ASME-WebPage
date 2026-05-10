@@ -58,12 +58,14 @@ export default function Navbar() {
             >
               Inicio
             </Link>
+            {/*
             <Link
               href="/mechub" 
               className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
             >
               Mechub
             </Link>
+            */}
             <Link
               href="/#eventos" 
               className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
@@ -141,13 +143,14 @@ export default function Navbar() {
             >
               Inicio
             </Link>
-            <Link
+  {/*          <Link
               href="/mechub" 
               className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
               onClick={handleLinkClick}
             >
               Mechub
             </Link>
+  */}
             <Link
               href="/#eventos" 
               className="text-xl font-medium hover:text-[#e3a72f] transition-colors"
