@@ -10,6 +10,7 @@ import {
   campusAccentBadgeClassName,
   campusAccentButtonClassName,
   campusCardClassName,
+  campusOutlineButtonClassName,
   campusPanelClassName,
   campusPrimaryButtonClassName,
 } from "@/lib/campus-theme"
