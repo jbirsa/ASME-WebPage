@@ -9,21 +9,36 @@ import DestructiveConfirmDialog from "@/components/admin/DestructiveConfirmDialo
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { clearAuthToken, getAuthToken } from "@/lib/auth-token"
+import {
+  campusAccentBadgeClassName,
+  campusAccentButtonClassName,
+  campusCardClassName,
+  campusFileInputClassName,
+  campusInputClassName,
+  campusOutlineButtonClassName,
+  campusPanelClassName,
+  campusPrimaryButtonClassName,
+  campusSelectClassName,
+  campusSubtleSurfaceClassName,
+} from "@/lib/campus-theme"
 import { formatEventDate } from "@/lib/date"
-import { isValidEventPageInput, isValidHttpUrlInput, trimMultiline, trimSingleLine } from "@/lib/form-validation"
+import { trimMultiline, trimSingleLine } from "@/lib/form-validation"
 import type { Evento } from "@/types/db_types"
+
+const EVENT_TYPE_OPTIONS = ["Charla", "Visita", "Competencia", "Evento especial"] as const
+const EVENT_SEDE_OPTIONS = [
+  "Sede Distrito Financiero (SDF)",
+  "Sede Distrito Rectorado (SDR)",
+  "Sede Distrito Tecnologico (SDT)",
+] as const
 
 type EventFormState = {
   nombre: string
   tipo: string
   fecha: string
   direccion: string
-  barrio: string
-  provincia: string
+  sede: string
   descripcion: string
-  link: string
-  imagenUrl: string
-  paginaEvento: string
 }
 
 const emptyFormState: EventFormState = {
@@ -31,13 +46,12 @@ const emptyFormState: EventFormState = {
   tipo: "",
   fecha: "",
   direccion: "",
-  barrio: "",
-  provincia: "",
+  sede: "",
   descripcion: "",
-  link: "",
-  imagenUrl: "",
-  paginaEvento: "",
 }
+
+const selectClassName = campusSelectClassName
+const fileInputClassName = campusFileInputClassName
 
 function extractErrorMessage(payload: unknown, fallback: string) {
   if (typeof payload === "object" && payload !== null) {
@@ -55,44 +69,26 @@ function getAuthHeaders(token: string) {
   }
 }
 
-function buildEventPayload(formState: EventFormState, includeEmptyOptional: boolean) {
-  const nombre = formState.nombre.trim()
-  const payload: Record<string, string> = { nombre }
-
-  const optionalFields = {
-    tipo: formState.tipo.trim(),
-    fecha: formState.fecha.trim(),
-    direccion: formState.direccion.trim(),
-    barrio: formState.barrio.trim(),
-    provincia: formState.provincia.trim(),
-    descripcion: formState.descripcion.trim(),
-    link: formState.link.trim(),
-    imagenUrl: formState.imagenUrl.trim(),
-    paginaEvento: formState.paginaEvento.trim(),
-  }
-
-  for (const [key, value] of Object.entries(optionalFields)) {
-    if (includeEmptyOptional || value) payload[key] = value
-  }
-
-  return payload
-}
-
 export default function AdminEventosPage() {
   const router = useRouter()
   const [events, setEvents] = useState<Evento[]>([])
   const [formState, setFormState] = useState<EventFormState>(emptyFormState)
   const [editingEventId, setEditingEventId] = useState<number | null>(null)
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(null)
+  const [removeCurrentPhoto, setRemoveCurrentPhoto] = useState(false)
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null)
   const [eventToDelete, setEventToDelete] = useState<Evento | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [deletingEventId, setDeletingEventId] = useState<number | null>(null)
   const [errorMessage, setErrorMessage] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
+  const [updatedEventMessage, setUpdatedEventMessage] = useState("")
 
   const sortedEvents = useMemo(() => {
     return [...events].sort((eventA, eventB) => String(eventB.fecha ?? "").localeCompare(String(eventA.fecha ?? "")))
   }, [events])
+  const panelClassName = campusPanelClassName
 
   const loadEvents = async () => {
     try {
@@ -128,24 +124,24 @@ export default function AdminEventosPage() {
   const resetForm = () => {
     setFormState(emptyFormState)
     setEditingEventId(null)
+    setCurrentPhotoUrl(null)
+    setRemoveCurrentPhoto(false)
+    setSelectedPhoto(null)
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage("")
     setSuccessMessage("")
+    setUpdatedEventMessage("")
 
     const normalizedForm = {
       nombre: trimSingleLine(formState.nombre),
       tipo: trimSingleLine(formState.tipo),
       fecha: trimSingleLine(formState.fecha),
       direccion: trimSingleLine(formState.direccion),
-      barrio: trimSingleLine(formState.barrio),
-      provincia: trimSingleLine(formState.provincia),
+      sede: trimSingleLine(formState.sede),
       descripcion: trimMultiline(formState.descripcion),
-      link: trimSingleLine(formState.link),
-      imagenUrl: trimSingleLine(formState.imagenUrl),
-      paginaEvento: trimSingleLine(formState.paginaEvento),
     }
 
     if (!normalizedForm.nombre) {
@@ -158,13 +154,33 @@ export default function AdminEventosPage() {
       return
     }
 
-    if (normalizedForm.tipo.length > 40) {
-      setErrorMessage("El tipo del evento supera el limite de caracteres")
+    if (!normalizedForm.tipo) {
+      setErrorMessage("El tipo del evento es obligatorio")
       return
     }
 
-    if (normalizedForm.direccion.length > 160 || normalizedForm.barrio.length > 80 || normalizedForm.provincia.length > 80) {
-      setErrorMessage("La ubicacion del evento supera el limite de caracteres")
+    if (!EVENT_TYPE_OPTIONS.includes(normalizedForm.tipo as (typeof EVENT_TYPE_OPTIONS)[number])) {
+      setErrorMessage("El tipo del evento no es valido")
+      return
+    }
+
+    if (!normalizedForm.fecha) {
+      setErrorMessage("La fecha del evento es obligatoria")
+      return
+    }
+
+    if (!normalizedForm.direccion) {
+      setErrorMessage("La direccion del evento es obligatoria")
+      return
+    }
+
+    if (normalizedForm.direccion.length > 160) {
+      setErrorMessage("La direccion del evento supera el limite de caracteres")
+      return
+    }
+
+    if (!normalizedForm.descripcion) {
+      setErrorMessage("La descripcion del evento es obligatoria")
       return
     }
 
@@ -173,18 +189,8 @@ export default function AdminEventosPage() {
       return
     }
 
-    if (normalizedForm.link && (!isValidHttpUrlInput(normalizedForm.link) || normalizedForm.link.length > 500)) {
-      setErrorMessage("El link principal debe ser una URL http o https valida")
-      return
-    }
-
-    if (normalizedForm.imagenUrl && (!isValidHttpUrlInput(normalizedForm.imagenUrl) || normalizedForm.imagenUrl.length > 500)) {
-      setErrorMessage("La imagen debe ser una URL http o https valida")
-      return
-    }
-
-    if (normalizedForm.paginaEvento && (!isValidEventPageInput(normalizedForm.paginaEvento) || normalizedForm.paginaEvento.length > 500)) {
-      setErrorMessage("La pagina del evento debe ser una URL segura o un path relativo valido")
+    if (normalizedForm.sede && !EVENT_SEDE_OPTIONS.includes(normalizedForm.sede as (typeof EVENT_SEDE_OPTIONS)[number])) {
+      setErrorMessage("La sede del evento no es valida")
       return
     }
 
@@ -194,17 +200,28 @@ export default function AdminEventosPage() {
       return
     }
 
+    const formData = new FormData()
+    formData.set("nombre", normalizedForm.nombre)
+    formData.set("tipo", normalizedForm.tipo)
+    formData.set("fecha", normalizedForm.fecha)
+    formData.set("direccion", normalizedForm.direccion)
+    formData.set("descripcion", normalizedForm.descripcion)
+    if (normalizedForm.sede) formData.set("sede", normalizedForm.sede)
+
     setIsSaving(true)
 
     try {
       const isEditing = editingEventId !== null
+      if (selectedPhoto) {
+        formData.set("foto", selectedPhoto)
+      } else if (isEditing && removeCurrentPhoto) {
+        formData.set("eliminarFoto", "true")
+      }
+
       const response = await fetch(isEditing ? `/api/events/${editingEventId}` : "/api/events", {
         method: isEditing ? "PATCH" : "POST",
-        headers: {
-          ...getAuthHeaders(token),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(buildEventPayload(normalizedForm, isEditing)),
+        headers: getAuthHeaders(token),
+        body: formData,
       })
 
       const payload = (await response.json().catch(() => null)) as unknown
@@ -224,7 +241,11 @@ export default function AdminEventosPage() {
         throw new Error(extractErrorMessage(payload, isEditing ? "No se pudo actualizar el evento" : "No se pudo crear el evento"))
       }
 
-      setSuccessMessage(isEditing ? "Evento actualizado correctamente" : "Evento creado correctamente")
+      if (isEditing) {
+        setUpdatedEventMessage("Evento actualizado correctamente")
+      } else {
+        setSuccessMessage("Evento creado correctamente")
+      }
       resetForm()
       await loadEvents()
     } catch (error) {
@@ -239,6 +260,7 @@ export default function AdminEventosPage() {
   }
 
   const handleEdit = (event: Evento) => {
+    setUpdatedEventMessage("")
     setSuccessMessage("")
     setErrorMessage("")
     setEditingEventId(event.id)
@@ -247,13 +269,12 @@ export default function AdminEventosPage() {
       tipo: event.tipo ?? "",
       fecha: typeof event.fecha === "string" ? event.fecha.slice(0, 10) : "",
       direccion: event.direccion ?? "",
-      barrio: event.barrio ?? "",
-      provincia: event.provincia ?? "",
+      sede: event.sede ?? "",
       descripcion: event.descripcion ?? "",
-      link: event.link ?? "",
-      imagenUrl: event.imagen_url ?? "",
-      paginaEvento: event.pagina_evento ?? "",
     })
+    setCurrentPhotoUrl(event.imagen_url ?? null)
+    setRemoveCurrentPhoto(false)
+    setSelectedPhoto(null)
   }
 
   const handleDelete = async (event: Evento) => {
@@ -320,24 +341,24 @@ export default function AdminEventosPage() {
       actions={
         <Link
           href="/admin"
-          className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-slate-100 transition-colors hover:bg-white/[0.06]"
+          className={`${campusOutlineButtonClassName} px-5 py-2.5`}
         >
           Volver al panel
         </Link>
       }
     >
-      <section className="rounded-2xl border border-white/10 bg-[#0d1726] p-6">
+      <section className={`${panelClassName} p-6`}>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-white">{editingEventId ? "Editar evento" : "Nuevo evento"}</h2>
-            <p className="mt-2 text-sm leading-7 text-slate-400">Crea o actualiza eventos publicos para la home institucional.</p>
+            <h2 className="text-xl font-semibold text-[var(--campus-text)]">{editingEventId ? "Editar evento" : "Nuevo evento"}</h2>
+            <p className="mt-2 text-sm leading-7 text-[var(--campus-text-muted)]">Crea o actualiza eventos publicos para la home institucional.</p>
           </div>
 
           {editingEventId ? (
             <button
               type="button"
               onClick={resetForm}
-              className="inline-flex rounded-2xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-white/[0.04]"
+              className={`${campusOutlineButtonClassName} px-4 py-2`}
             >
               Cancelar edicion
             </button>
@@ -346,7 +367,7 @@ export default function AdminEventosPage() {
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
-            <label htmlFor="nombre" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="nombre" className="mb-2 block text-sm font-medium text-[var(--campus-text)]">
               Nombre
             </label>
             <Input
@@ -355,26 +376,35 @@ export default function AdminEventosPage() {
               onChange={(inputEvent) => setFormState((current) => ({ ...current, nombre: inputEvent.target.value }))}
               placeholder="Feria de Proyectos ASME"
               maxLength={140}
-              className="border-white/10 bg-[#08111b] text-white"
+              required
+              className={campusInputClassName}
             />
           </div>
 
           <div>
-            <label htmlFor="tipo" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="tipo" className="mb-2 block text-sm font-medium text-[var(--campus-text)]">
               Tipo
             </label>
-            <Input
+            <select
               id="tipo"
               value={formState.tipo}
               onChange={(inputEvent) => setFormState((current) => ({ ...current, tipo: inputEvent.target.value }))}
-              placeholder="presencial"
-              maxLength={40}
-              className="border-white/10 bg-[#08111b] text-white"
-            />
+              required
+              className={selectClassName}
+            >
+              <option value="" disabled>
+                Seleccionar tipo
+              </option>
+              {EVENT_TYPE_OPTIONS.map((eventType) => (
+                <option key={eventType} value={eventType}>
+                  {eventType}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
-            <label htmlFor="fecha" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="fecha" className="mb-2 block text-sm font-medium text-[var(--campus-text)]">
               Fecha
             </label>
             <Input
@@ -382,12 +412,13 @@ export default function AdminEventosPage() {
               type="date"
               value={formState.fecha}
               onChange={(inputEvent) => setFormState((current) => ({ ...current, fecha: inputEvent.target.value }))}
-              className="border-white/10 bg-[#08111b] text-white"
+              required
+              className={campusInputClassName}
             />
           </div>
 
           <div>
-            <label htmlFor="direccion" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="direccion" className="mb-2 block text-sm font-medium text-[var(--campus-text)]">
               Direccion
             </label>
             <Input
@@ -396,40 +427,34 @@ export default function AdminEventosPage() {
               onChange={(inputEvent) => setFormState((current) => ({ ...current, direccion: inputEvent.target.value }))}
               placeholder="Av. Siempre Viva 123"
               maxLength={160}
-              className="border-white/10 bg-[#08111b] text-white"
+              required
+              className={campusInputClassName}
             />
           </div>
 
           <div>
-            <label htmlFor="barrio" className="mb-2 block text-sm font-medium text-slate-200">
-              Barrio
+            <label htmlFor="sede" className="mb-2 block text-sm font-medium text-[var(--campus-text)]">
+              Sede
             </label>
-            <Input
-              id="barrio"
-              value={formState.barrio}
-              onChange={(inputEvent) => setFormState((current) => ({ ...current, barrio: inputEvent.target.value }))}
-              placeholder="Centro"
-              maxLength={80}
-              className="border-white/10 bg-[#08111b] text-white"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="provincia" className="mb-2 block text-sm font-medium text-slate-200">
-              Provincia
-            </label>
-            <Input
-              id="provincia"
-              value={formState.provincia}
-              onChange={(inputEvent) => setFormState((current) => ({ ...current, provincia: inputEvent.target.value }))}
-              placeholder="Cordoba"
-              maxLength={80}
-              className="border-white/10 bg-[#08111b] text-white"
-            />
+            <select
+              id="sede"
+              value={formState.sede}
+              onChange={(inputEvent) => setFormState((current) => ({ ...current, sede: inputEvent.target.value }))}
+              className={selectClassName}
+            >
+              <option value="">
+                Seleccionar sede
+              </option>
+              {EVENT_SEDE_OPTIONS.map((eventSede) => (
+                <option key={eventSede} value={eventSede}>
+                  {eventSede}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="descripcion" className="mb-2 block text-sm font-medium text-slate-200">
+            <label htmlFor="descripcion" className="mb-2 block text-sm font-medium text-[var(--campus-text)]">
               Descripcion
             </label>
             <Textarea
@@ -438,138 +463,156 @@ export default function AdminEventosPage() {
               onChange={(inputEvent) => setFormState((current) => ({ ...current, descripcion: inputEvent.target.value }))}
               placeholder="Evento institucional abierto para la comunidad."
               maxLength={3000}
-              className="min-h-28 border-white/10 bg-[#08111b] text-white"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="link" className="mb-2 block text-sm font-medium text-slate-200">
-              Link principal
-            </label>
-            <Input
-              id="link"
-              value={formState.link}
-              onChange={(inputEvent) => setFormState((current) => ({ ...current, link: inputEvent.target.value }))}
-              placeholder="https://meet.example.com/asme-feria"
-              maxLength={500}
-              className="border-white/10 bg-[#08111b] text-white"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="imagenUrl" className="mb-2 block text-sm font-medium text-slate-200">
-              Imagen URL
-            </label>
-            <Input
-              id="imagenUrl"
-              value={formState.imagenUrl}
-              onChange={(inputEvent) => setFormState((current) => ({ ...current, imagenUrl: inputEvent.target.value }))}
-              placeholder="https://example.com/eventos/feria.jpg"
-              maxLength={500}
-              className="border-white/10 bg-[#08111b] text-white"
+              required
+              className={`min-h-28 ${campusInputClassName}`}
             />
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="paginaEvento" className="mb-2 block text-sm font-medium text-slate-200">
-              Pagina del evento
+            <label htmlFor="foto" className="mb-2 block text-sm font-medium text-[var(--campus-text)]">
+              Foto
             </label>
-            <Input
-              id="paginaEvento"
-              value={formState.paginaEvento}
-              onChange={(inputEvent) => setFormState((current) => ({ ...current, paginaEvento: inputEvent.target.value }))}
-              placeholder="https://asme.org/eventos/feria-2026"
-              maxLength={500}
-              className="border-white/10 bg-[#08111b] text-white"
+            <input
+              id="foto"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(inputEvent) => {
+                const file = inputEvent.target.files?.[0] ?? null
+                setSelectedPhoto(file)
+                if (file) setRemoveCurrentPhoto(false)
+              }}
+              className={fileInputClassName}
             />
+            <p className="mt-2 text-xs text-[var(--campus-text-muted)]">JPG, PNG o WEBP. Maximo 25 MB.</p>
+
+            {selectedPhoto ? (
+              <div className={`${campusSubtleSurfaceClassName} mt-3 flex items-center justify-between px-4 py-3 text-sm text-[var(--campus-text)]`}>
+                <span>Nueva foto: {selectedPhoto.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPhoto(null)}
+                  className="text-[var(--campus-text-muted)] transition-colors hover:text-[var(--campus-primary-deep)]"
+                >
+                  Quitar
+                </button>
+              </div>
+            ) : null}
+
+            {currentPhotoUrl && !removeCurrentPhoto && !selectedPhoto ? (
+              <div className={`${campusSubtleSurfaceClassName} mt-4 p-4`}>
+                <p className="text-sm font-medium text-[var(--campus-text)]">Foto actual</p>
+                <img src={currentPhotoUrl} alt="Foto actual del evento" className="mt-3 h-40 w-full rounded-xl object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setRemoveCurrentPhoto(true)}
+                  className={campusAccentButtonClassName}
+                >
+                  Eliminar foto actual
+                </button>
+              </div>
+            ) : null}
+
+            {removeCurrentPhoto && !selectedPhoto ? (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-[var(--campus-text)]">La foto actual se eliminara cuando guardes los cambios.</p>
+                <button
+                  type="button"
+                  onClick={() => setRemoveCurrentPhoto(false)}
+                  className="text-sm font-medium text-[var(--campus-primary-deep)] transition-colors hover:text-[var(--campus-primary-dark)]"
+                >
+                  Restaurar foto
+                </button>
+              </div>
+            ) : null}
           </div>
 
           <div className="md:col-span-2 flex flex-wrap gap-3">
             <button
               type="submit"
               disabled={isSaving}
-              className="inline-flex rounded-2xl bg-[#e3a72f] px-5 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a] disabled:opacity-70"
+              className={`${campusPrimaryButtonClassName} px-5 py-3`}
             >
               {isSaving ? (editingEventId ? "Guardando..." : "Creando...") : editingEventId ? "Guardar cambios" : "Crear evento"}
             </button>
           </div>
         </form>
 
-        {successMessage ? <p className="mt-4 text-sm text-emerald-300">{successMessage}</p> : null}
-        {errorMessage ? <p className="mt-4 text-sm text-rose-300">{errorMessage}</p> : null}
+        {successMessage ? <p className="campus-accent-panel mt-4 rounded-[18px] px-4 py-3 text-sm">{successMessage}</p> : null}
+        {errorMessage ? <p className="campus-feedback-panel mt-4 rounded-[18px] px-4 py-3 text-sm">{errorMessage}</p> : null}
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-[#0d1726] p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold text-white">Eventos cargados</h2>
-            <p className="mt-2 text-sm leading-7 text-slate-400">Lista de eventos visibles para la home y listos para editar o borrar.</p>
+      {editingEventId === null ? (
+        <section className={`${panelClassName} p-6`}>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-[var(--campus-text)]">Eventos cargados</h2>
+              <p className="mt-2 text-sm leading-7 text-[var(--campus-text-muted)]">Lista de eventos visibles para la home y listos para editar o borrar.</p>
+            </div>
+            <span className="text-sm text-[var(--campus-text-muted)]">{sortedEvents.length} eventos</span>
           </div>
-          <span className="text-sm text-slate-500">{sortedEvents.length} eventos</span>
-        </div>
 
-        {isLoading ? (
-          <div className="mt-6 text-sm text-slate-400">Cargando eventos...</div>
-        ) : sortedEvents.length === 0 ? (
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-12 text-center text-slate-400">
-            Todavia no hay eventos creados.
-          </div>
-        ) : (
-          <div className="mt-6 grid gap-4 xl:grid-cols-2">
-            {sortedEvents.map((event) => (
-              <article key={event.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white break-words [overflow-wrap:anywhere]">{event.nombre}</h3>
-                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-500">
-                      {event.fecha
-                        ? formatEventDate(event.fecha, "es-AR", { day: "numeric", month: "long", year: "numeric" }) ||
-                          String(event.fecha)
-                        : "Sin fecha"}
+          {isLoading ? (
+            <div className="mt-6 text-sm text-[var(--campus-text-muted)]">Cargando eventos...</div>
+          ) : sortedEvents.length === 0 ? (
+            <div className={`${campusSubtleSurfaceClassName} mt-6 px-5 py-12 text-center text-[var(--campus-text-muted)]`}>
+              Todavia no hay eventos creados.
+            </div>
+          ) : (
+            <div className="mt-6 grid gap-4 xl:grid-cols-2">
+              {sortedEvents.map((event) => {
+                const eventDateLabel = event.fecha
+                  ? formatEventDate(event.fecha, "es-AR", { day: "numeric", month: "long", year: "numeric" }) || String(event.fecha)
+                  : null
+                const eventMeta = [eventDateLabel, event.direccion, event.sede].filter(Boolean).join(" · ")
+
+                return (
+                  <article key={event.id} className={`${campusCardClassName} flex h-full flex-col p-5`}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-[var(--campus-text)] break-words [overflow-wrap:anywhere]">{event.nombre}</h3>
+                        <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--campus-text-muted)]">
+                          {eventMeta || "Sin datos principales"}
+                        </p>
+                      </div>
+                      <span className={`${campusAccentBadgeClassName} shrink-0`}>
+                        {event.tipo || "evento"}
+                      </span>
+                    </div>
+
+                    <p className="mt-4 text-sm leading-7 text-[var(--campus-text-muted)] break-words [overflow-wrap:anywhere]">
+                      {event.descripcion || "Sin descripcion cargada."}
                     </p>
-                  </div>
-                  <span className="shrink-0 rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                    {event.tipo || "evento"}
-                  </span>
-                </div>
 
-                <p className="mt-4 text-sm leading-7 text-slate-300 break-words [overflow-wrap:anywhere]">
-                  {event.descripcion || "Sin descripcion cargada."}
-                </p>
-
-                <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-slate-500">
-                  <span>{event.direccion || "Sin direccion"}</span>
-                  <span>{event.imagen_url ? "Con imagen" : "Sin imagen"}</span>
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    aria-label={`Editar evento ${event.nombre}`}
-                    onClick={() => handleEdit(event)}
-                    className="inline-flex rounded-2xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:bg-white/[0.04]"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Eliminar evento ${event.nombre}`}
-                    disabled={deletingEventId === event.id}
-                    onClick={() => {
-                      setErrorMessage("")
-                      setSuccessMessage("")
-                      setEventToDelete(event)
-                    }}
-                    className="inline-flex rounded-2xl border border-rose-500/30 px-4 py-2 text-sm font-medium text-rose-200 transition-colors hover:bg-rose-500/10 disabled:opacity-70"
-                  >
-                    {deletingEventId === event.id ? "Eliminando..." : "Eliminar"}
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+                    <div className="mt-auto flex flex-wrap gap-3 pt-5">
+                      <button
+                        type="button"
+                        aria-label={`Editar evento ${event.nombre}`}
+                        onClick={() => handleEdit(event)}
+                        className={`${campusOutlineButtonClassName} px-4 py-2`}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Eliminar evento ${event.nombre}`}
+                        disabled={deletingEventId === event.id}
+                        onClick={() => {
+                          setErrorMessage("")
+                          setSuccessMessage("")
+                          setEventToDelete(event)
+                        }}
+                        className={`${campusAccentButtonClassName} px-4 py-2`}
+                      >
+                        {deletingEventId === event.id ? "Eliminando..." : "Eliminar"}
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          )}
+        </section>
+      ) : null}
 
       <DestructiveConfirmDialog
         open={eventToDelete !== null}
@@ -590,6 +633,40 @@ export default function AdminEventosPage() {
           void handleDelete(eventToDelete)
         }}
       />
+
+      {updatedEventMessage ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center px-4">
+          <button
+            type="button"
+            aria-label="Cerrar confirmacion"
+            onClick={() => setUpdatedEventMessage("")}
+            className="absolute inset-0 bg-[rgba(23,32,51,0.22)] backdrop-blur-sm"
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="event-updated-dialog-title"
+            className="relative w-full max-w-md rounded-[28px] border border-[var(--campus-secondary)] bg-[var(--campus-surface)] p-6 shadow-[0_24px_80px_rgba(121,142,161,0.16)]"
+          >
+            <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--campus-text-muted)]">Cambios guardados</p>
+            <h2 id="event-updated-dialog-title" className="mt-3 text-2xl font-semibold text-[var(--campus-text)]">
+              Evento actualizado
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-[var(--campus-text-muted)]">{updatedEventMessage}</p>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setUpdatedEventMessage("")}
+                className={`${campusPrimaryButtonClassName} px-5 py-2.5`}
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </AdminShell>
   )
 }

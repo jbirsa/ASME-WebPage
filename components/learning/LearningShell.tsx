@@ -13,6 +13,7 @@ import {
   isAdminAuthPayload,
   type AuthTokenPayload,
 } from "@/lib/auth-token"
+import { campusOutlineButtonClassName } from "@/lib/campus-theme"
 import { cn } from "@/lib/utils"
 
 type BreadcrumbItem = {
@@ -69,14 +70,18 @@ function LearningNavLink({
       onClick={onClick}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors",
-        isActive ? "bg-white/[0.06] text-white" : "text-slate-300 hover:bg-white/[0.04] hover:text-white",
+        "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all",
+        isActive
+          ? "border border-[var(--campus-secondary)] bg-[var(--campus-primary-soft)] text-[var(--campus-text)] shadow-[0_14px_30px_rgba(121,142,161,0.12)]"
+          : "border border-transparent bg-transparent text-[var(--campus-text)] hover:border-[var(--campus-border-soft)] hover:bg-[var(--campus-surface)] hover:text-[var(--campus-text)] hover:shadow-[0_10px_22px_rgba(121,142,161,0.08)]",
       )}
     >
       <span
         className={cn(
           "flex h-9 w-9 items-center justify-center rounded-xl border transition-colors",
-          isActive ? "border-white/15 bg-white/[0.06]" : "border-white/10 bg-white/[0.02]",
+          isActive
+            ? "border-[var(--campus-secondary)] bg-[var(--campus-surface)] text-[var(--campus-text)]"
+            : "border-[var(--campus-border-soft)] bg-[var(--campus-surface)] text-[var(--campus-text)]",
         )}
       >
         <Icon className="h-4 w-4" />
@@ -124,7 +129,10 @@ export default function LearningShell({
         href: "/cursos",
         label: "Catalogo",
         icon: LayoutGrid,
-        match: (currentPathname) => currentPathname === "/cursos" || currentPathname.startsWith("/cursos/"),
+        match: (currentPathname) => {
+          if (currentPathname === "/cursos") return true
+          return isAdminAuthPayload(user) && currentPathname.startsWith("/cursos/")
+        },
       },
       {
         href: "/perfil",
@@ -139,7 +147,7 @@ export default function LearningShell({
         href: "/mis-cursos",
         label: "Mis cursos",
         icon: BookMarked,
-        match: (currentPathname) => currentPathname === "/mis-cursos",
+        match: (currentPathname) => currentPathname === "/mis-cursos" || currentPathname.startsWith("/cursos/"),
       })
     }
 
@@ -167,8 +175,8 @@ export default function LearningShell({
           <Image src="/asme_logo_blanco.png" alt="ASME" fill sizes="48px" className="object-contain" priority />
         </Link>
         <div>
-          <p className="text-[10px] uppercase tracking-[0.28em] text-slate-500">ASME</p>
-          <p className="text-lg font-semibold text-white">Campus</p>
+          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--campus-text-muted)]">ASME</p>
+          <p className="text-lg font-semibold text-[var(--campus-text)]">Campus</p>
         </div>
       </div>
 
@@ -178,21 +186,21 @@ export default function LearningShell({
         ))}
       </nav>
 
-      <div className="mt-auto border-t border-white/10 pt-4">
+      <div className="mt-auto border-t border-[color-mix(in_srgb,var(--campus-secondary)_78%,transparent)] pt-4">
         <div className="flex items-center gap-3 px-3 py-2">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#13253d] text-sm font-semibold text-white">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--campus-secondary)] bg-[var(--campus-primary-soft)] text-sm font-semibold text-[var(--campus-text)]">
             {getUserInitial(user)}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-white">{getUserLabel(user)}</p>
-            <p className="truncate text-xs text-slate-500">{formatRole(user?.rol)}</p>
+            <p className="truncate text-sm font-medium text-[var(--campus-text)]">{getUserLabel(user)}</p>
+            <p className="truncate text-xs text-[var(--campus-text-muted)]">{formatRole(user?.rol)}</p>
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-slate-100 transition-colors hover:bg-white/[0.06]"
+          className={cn(campusOutlineButtonClassName, "mt-3 w-full gap-2 py-3")}
         >
           <LogOut className="h-4 w-4" />
           Cerrar sesion
@@ -200,7 +208,7 @@ export default function LearningShell({
 
         <Link
           href="/"
-          className="mt-4 inline-flex px-2 text-xs font-medium text-slate-500 transition-colors hover:text-slate-300"
+          className="mt-4 inline-flex px-2 text-xs font-medium text-[var(--campus-text-muted)] transition-colors hover:text-[var(--campus-primary-deep)]"
         >
           Volver al sitio ASME
         </Link>
@@ -209,56 +217,31 @@ export default function LearningShell({
   )
 
   return (
-    <div className="min-h-screen bg-[#08111b] text-white">
+    <div className="campus-app min-h-screen bg-[var(--campus-background)] text-[var(--campus-text)]">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#102338_0%,#08111b_52%,#050b12_100%)]" />
-        <div className="absolute -top-24 left-0 h-64 w-64 rounded-full bg-[#5f87ab]/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[var(--campus-background)]" />
+        <div className="absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--campus-primary)_14%,transparent)_0%,transparent_72%)]" />
       </div>
 
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 overflow-y-auto border-r border-white/10 bg-[#0a1320] lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 overflow-y-auto border-r border-[var(--campus-secondary)] bg-[var(--campus-primary)] lg:block">
         {navigationContent}
       </aside>
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 border-b border-white/10 bg-[#08111b]/92 backdrop-blur-md">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsMobileNavOpen(true)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-slate-100 transition-colors hover:bg-white/[0.06] lg:hidden"
-                aria-label="Abrir navegacion privada"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-
-              <span className="text-sm font-medium text-slate-200">Campus</span>
-            </div>
-
-            <Link
-              href="/perfil"
-              aria-label="Abrir perfil"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-sm font-semibold text-white transition-colors hover:bg-white/[0.06]"
-            >
-              {getUserInitial(user)}
-            </Link>
-          </div>
-        </header>
-
         {isMobileNavOpen ? (
           <div className="fixed inset-0 z-50 lg:hidden">
             <button
               type="button"
               aria-label="Cerrar navegacion privada"
               onClick={() => setIsMobileNavOpen(false)}
-              className="absolute inset-0 bg-[#02060b]/70 backdrop-blur-sm"
+              className="absolute inset-0 bg-[rgba(23,32,51,0.24)] backdrop-blur-sm"
             />
 
-            <aside className="absolute inset-y-0 left-0 w-[84vw] max-w-sm overflow-y-auto border-r border-white/10 bg-[#0a1320] shadow-2xl">
+            <aside className="absolute inset-y-0 left-0 w-[84vw] max-w-sm overflow-y-auto border-r border-[var(--campus-secondary)] bg-[var(--campus-primary)] shadow-2xl">
               <button
                 type="button"
                 onClick={() => setIsMobileNavOpen(false)}
-                className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-100 transition-colors hover:bg-white/[0.08]"
+                className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--campus-border-soft)] bg-[var(--campus-surface)] text-[var(--campus-text)] transition-colors hover:bg-[var(--campus-primary-soft)]"
                 aria-label="Cerrar menu"
               >
                 <X className="h-5 w-5" />
@@ -269,18 +252,37 @@ export default function LearningShell({
         ) : null}
 
         <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <div className="mb-5 flex items-center justify-between lg:hidden">
+            <button
+              type="button"
+              onClick={() => setIsMobileNavOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--campus-border-soft)] bg-[var(--campus-surface)] text-[var(--campus-text)] transition-colors hover:bg-[var(--campus-primary-soft)]"
+              aria-label="Abrir navegacion privada"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+
+            <Link
+              href="/perfil"
+              aria-label="Abrir perfil"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--campus-border-soft)] bg-[var(--campus-surface)] text-sm font-semibold text-[var(--campus-text)] transition-colors hover:bg-[var(--campus-primary-soft)]"
+            >
+              {getUserInitial(user)}
+            </Link>
+          </div>
+
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               {breadcrumbs?.length ? (
-                <nav className="mb-2 flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                <nav className="mb-2 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--campus-text-muted)]">
                   {breadcrumbs.map((breadcrumb, index) => (
                     <span key={`${breadcrumb.label}-${index}`} className="flex items-center gap-2">
                       {breadcrumb.href ? (
-                        <Link href={breadcrumb.href} className="transition-colors hover:text-[#e3a72f]">
+                        <Link href={breadcrumb.href} className="transition-colors hover:text-[var(--campus-primary-deep)]">
                           {breadcrumb.label}
                         </Link>
                       ) : (
-                        <span className="text-slate-300">{breadcrumb.label}</span>
+                        <span className="text-[var(--campus-primary-deep)]">{breadcrumb.label}</span>
                       )}
                       {index < breadcrumbs.length - 1 ? <ChevronRight className="h-3.5 w-3.5" /> : null}
                     </span>
@@ -288,8 +290,8 @@ export default function LearningShell({
                 </nav>
               ) : null}
 
-              <h1 className="text-3xl font-semibold tracking-tight text-white md:text-[2rem]">{title}</h1>
-              {description ? <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-400">{description}</p> : null}
+              <h1 className="text-3xl font-semibold tracking-tight text-[var(--campus-text)] md:text-[2.2rem]">{title}</h1>
+              {description ? <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--campus-text-muted)]">{description}</p> : null}
             </div>
 
             {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}

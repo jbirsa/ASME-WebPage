@@ -6,6 +6,13 @@ const course = {
   descripcion: "Curso inicial de modelado 3D para estudiantes.",
   imagenUrl: "https://example.com/cad.jpg",
   estado: "activo",
+  archivos: [
+    {
+      cursoArchivoId: 31,
+      nombreOriginal: "guia-del-curso.pdf",
+      url: "https://example.com/guia-del-curso.pdf",
+    },
+  ],
   clases: [
     {
       claseId: 11,
@@ -13,6 +20,13 @@ const course = {
       descripcion: "Recorrido inicial por el entorno de trabajo.",
       orden: 1,
       videoUrl: "https://www.youtube.com/watch?v=abcd1234",
+      archivos: [
+        {
+          claseArchivoId: 41,
+          nombreOriginal: "plantilla-clase-1.pdf",
+          url: "https://example.com/plantilla-clase-1.pdf",
+        },
+      ],
     },
   ],
 }
@@ -65,8 +79,14 @@ test("usuario no inscripto no ve clases del curso", async ({ page }) => {
   await page.goto("/cursos/1/introduccion-a-cad")
 
   await expect(page.getByRole("button", { name: "Inscribirme" })).toBeVisible()
+  await expect(page.getByRole("main").getByRole("link", { name: /^Mis cursos$/ })).toBeVisible()
   await expect(page.getByText("Inscribite para desbloquear las clases de este curso.")).toBeVisible()
+  await expect(page.getByText("Inscripto")).toHaveCount(0)
+  await expect(page.getByText("1 clases")).toHaveCount(0)
+  await expect(page.getByText("Orden 1")).toHaveCount(0)
   await expect(page.getByText("Clase 1 - Interfaz y primeros pasos")).toHaveCount(0)
+  await expect(page.getByText("guia-del-curso.pdf")).toHaveCount(0)
+  await expect(page.getByText("plantilla-clase-1.pdf")).toHaveCount(0)
 })
 
 test("usuario inscripto si ve clases del curso", async ({ page }) => {
@@ -75,9 +95,17 @@ test("usuario inscripto si ve clases del curso", async ({ page }) => {
 
   await page.goto("/cursos/1/introduccion-a-cad")
 
+  await expect(page.getByRole("main").getByRole("link", { name: /^Mis cursos$/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: "Ver en mis cursos" })).toHaveCount(0)
   await expect(page.getByText("Inscribite para desbloquear las clases de este curso.")).toHaveCount(0)
+  await expect(page.getByText("Inscripto")).toHaveCount(0)
+  await expect(page.getByText("1 clases")).toHaveCount(0)
+  await expect(page.getByText("Orden 1")).toHaveCount(0)
   await expect(page.getByText("Clase 1 - Interfaz y primeros pasos")).toBeVisible()
   await expect(page.getByRole("link", { name: "Ver clase" })).toBeVisible()
+  await expect(page.getByText("guia-del-curso.pdf")).toBeVisible()
+  await expect(page.getByText("plantilla-clase-1.pdf")).toBeVisible()
+  await expect(page.getByRole("link", { name: "Ver material" })).toHaveCount(2)
 })
 
 test("admin puede revisar el detalle del curso sin inscribirse", async ({ page }) => {
@@ -87,7 +115,13 @@ test("admin puede revisar el detalle del curso sin inscribirse", async ({ page }
   await page.goto("/cursos/1/introduccion-a-cad")
 
   await expect(page.getByText("Vista admin")).toBeVisible()
+  await expect(page.getByRole("main").getByRole("link", { name: /^Mis cursos$/ })).toHaveCount(0)
   await expect(page.getByRole("button", { name: "Inscribirme" })).toHaveCount(0)
   await expect(page.getByText("Inscribite para desbloquear las clases de este curso.")).toHaveCount(0)
+  await expect(page.getByText("1 clases")).toHaveCount(0)
+  await expect(page.getByText("Orden 1")).toHaveCount(0)
   await expect(page.getByText("Clase 1 - Interfaz y primeros pasos")).toBeVisible()
+  await expect(page.getByText("guia-del-curso.pdf")).toBeVisible()
+  await expect(page.getByText("plantilla-clase-1.pdf")).toBeVisible()
+  await expect(page.getByRole("link", { name: "Ver material" })).toHaveCount(2)
 })

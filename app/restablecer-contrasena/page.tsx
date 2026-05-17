@@ -5,10 +5,11 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useState } from "react"
 
-import LoginHeader from "@/components/LoginHeader"
+import AuthSplitLayout from "@/components/AuthSplitLayout"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { getAuthToken } from "@/lib/auth-token"
-import { trimSingleLine } from "@/lib/form-validation"
+import { isValidEmailInput, normalizeEmailInput, trimSingleLine } from "@/lib/form-validation"
 
 function extractErrorMessage(payload: unknown) {
   if (typeof payload === "object" && payload !== null) {
@@ -17,7 +18,7 @@ function extractErrorMessage(payload: unknown) {
     if (typeof maybePayload.message === "string") return maybePayload.message
   }
 
-  return "No se pudo restablecer la contrasena"
+  return "No se pudo restablecer la contraseña"
 }
 
 function isRejectedReset(payload: unknown) {
@@ -29,6 +30,7 @@ function isRejectedReset(payload: unknown) {
 
 export default function RestablecerContrasenaPage() {
   const router = useRouter()
+  const [email, setEmail] = useState("")
   const [codigo, setCodigo] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -47,31 +49,38 @@ export default function RestablecerContrasenaPage() {
 
     const searchParams = new URLSearchParams(window.location.search)
     const prefilledCode = searchParams.get("codigo")
-    if (prefilledCode) setCodigo(prefilledCode)
+    if (prefilledCode) setCodigo(prefilledCode.toUpperCase())
   }, [router])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage("")
 
+    const normalizedEmail = normalizeEmailInput(email)
     const normalizedCode = trimSingleLine(codigo)
+
+    if (!isValidEmailInput(normalizedEmail)) {
+      setErrorMessage("Ingresa un correo electronico valido")
+      return
+    }
+
     if (!normalizedCode) {
       setErrorMessage("El codigo es obligatorio")
       return
     }
 
-    if (normalizedCode.length > 512) {
-      setErrorMessage("El codigo supera el limite de caracteres")
+    if (!/^[A-Z]{6}$/.test(normalizedCode)) {
+      setErrorMessage("El codigo debe tener 6 letras")
       return
     }
 
     if (newPassword.length > 128) {
-      setErrorMessage("La contrasena supera el limite de caracteres")
+      setErrorMessage("La contraseña supera el limite de caracteres")
       return
     }
 
     if (newPassword !== confirmPassword) {
-      setErrorMessage("Las contrasenas no coinciden")
+      setErrorMessage("Las contraseñas no coinciden")
       return
     }
 
@@ -83,7 +92,7 @@ export default function RestablecerContrasenaPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token: normalizedCode, newPassword }),
+        body: JSON.stringify({ email: normalizedEmail, code: normalizedCode, newPassword }),
       })
 
       const payload = (await response.json().catch(() => null)) as unknown
@@ -97,7 +106,7 @@ export default function RestablecerContrasenaPage() {
       if (error instanceof Error) {
         setErrorMessage(error.message)
       } else {
-        setErrorMessage("No se pudo restablecer la contrasena")
+        setErrorMessage("No se pudo restablecer la contraseña")
       }
     } finally {
       setIsLoading(false)
@@ -105,113 +114,109 @@ export default function RestablecerContrasenaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#1a2744_0%,#0f172a_70%)]" />
-        <div className="stars"></div>
-        <div className="stars2"></div>
-        <div className="stars3"></div>
+    <AuthSplitLayout imageSrc="/aeroContent10.jpg" imageAlt="Avión de ala volante sobre la pista listo para volar">
+      <div className="mb-8 text-center">
+        <Image src="/asme_logo_azul_sin_fondo.png" alt="ASME ITBA" width={156} height={156} className="mx-auto mb-4" priority />
+        <h2 className="text-3xl font-semibold tracking-tight md:text-[2.1rem]">Nueva contraseña</h2>
+        <p className="auth-muted-copy mt-3 text-sm leading-6 md:text-base">Ingresa el codigo recibido y define una nueva contraseña.</p>
       </div>
 
-      <LoginHeader />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="sr-only">
+            Correo electronico
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            autoComplete="email"
+            maxLength={254}
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Correo electronico"
+          />
+        </div>
 
-      <main className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-28 pb-12">
-        <section className="w-full max-w-md border-2 border-[#c9a227] rounded-2xl bg-[#0f172a]/90 backdrop-blur-sm px-7 py-8 md:px-10 md:py-10">
-          <div className="text-center mb-8">
-            <Image
-              src="/asme_logo_blanco.png"
-              alt="ASME ITBA"
-              width={110}
-              height={110}
-              className="mx-auto mb-3"
-              priority
-            />
-            <h1 className="text-3xl font-serif italic text-[#e8e8e8]">Nueva contrasena</h1>
-            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Ingresa el codigo recibido y define una nueva contrasena.</p>
-          </div>
+        <div>
+          <label htmlFor="codigo" className="sr-only">
+            Codigo
+          </label>
+          <Input
+            id="codigo"
+            type="text"
+            value={codigo}
+            onChange={(event) => setCodigo(event.target.value.toUpperCase())}
+            required
+            autoComplete="one-time-code"
+            autoCapitalize="characters"
+            maxLength={6}
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Codigo recibido"
+          />
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="codigo" className="sr-only">
-                Codigo
-              </label>
-              <Input
-                id="codigo"
-                type="text"
-                value={codigo}
-                onChange={(event) => setCodigo(event.target.value)}
-                required
-                autoComplete="one-time-code"
-                maxLength={512}
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Codigo recibido"
-              />
-            </div>
+        <div>
+          <label htmlFor="newPassword" className="sr-only">
+            Nueva contraseña
+          </label>
+          <PasswordInput
+            id="newPassword"
+            value={newPassword}
+            onChange={(event) => setNewPassword(event.target.value)}
+            required
+            minLength={6}
+            maxLength={128}
+            autoComplete="new-password"
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Nueva contraseña"
+          />
+        </div>
 
-            <div>
-              <label htmlFor="newPassword" className="sr-only">
-                Nueva contrasena
-              </label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
-                required
-                minLength={6}
-                maxLength={128}
-                autoComplete="new-password"
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Nueva contrasena"
-              />
-            </div>
+        <div>
+          <label htmlFor="confirmPassword" className="sr-only">
+            Confirmar nueva contraseña
+          </label>
+          <PasswordInput
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            required
+            minLength={6}
+            maxLength={128}
+            autoComplete="new-password"
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Confirmar nueva contraseña"
+          />
+        </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirmar nueva contrasena
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                required
-                minLength={6}
-                maxLength={128}
-                autoComplete="new-password"
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Confirmar nueva contrasena"
-              />
-            </div>
+        {errorMessage ? (
+          <p className="campus-feedback-panel rounded-xl px-4 py-3 text-sm">{errorMessage}</p>
+        ) : null}
 
-            {errorMessage ? (
-              <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">{errorMessage}</p>
-            ) : null}
+        <button
+          type="submit"
+          disabled={isLoading || !isClientReady}
+          className="campus-accent-button h-12 w-full rounded-xl text-base font-semibold disabled:opacity-70"
+        >
+          {isLoading ? "Guardando..." : "Actualizar contraseña"}
+        </button>
+      </form>
 
-            <button
-              type="submit"
-              disabled={isLoading || !isClientReady}
-              className="w-full h-12 bg-[#c9a227] hover:bg-[#b8931f] text-[#0f172a] rounded-lg font-medium text-lg transition-colors disabled:opacity-70"
-            >
-              {isLoading ? "Guardando..." : "Actualizar contrasena"}
-            </button>
-          </form>
-
-          <div className="mt-6 space-y-2 text-center text-sm text-[#a0a0a0]">
-            <p>
-              Necesitas un codigo?{" "}
-              <Link href="/olvide-mi-contrasena" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-                Solicitalo aca
-              </Link>
-            </p>
-            <p>
-              <Link href="/login" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-                Volver a login
-              </Link>
-            </p>
-          </div>
-        </section>
-      </main>
-    </div>
+      <div className="auth-muted-copy mt-6 space-y-2 text-center text-sm">
+        <p>
+          Necesitas un codigo?{" "}
+          <Link href="/olvide-mi-contrasena" className="auth-link">
+            Solicitalo aca
+          </Link>
+        </p>
+        <p>
+          <Link href="/login" className="auth-link">
+            Volver a login
+          </Link>
+        </p>
+      </div>
+    </AuthSplitLayout>
   )
 }

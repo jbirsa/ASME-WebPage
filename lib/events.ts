@@ -10,6 +10,7 @@ type BackendEventoPayload = {
   tipo?: string | null
   fecha?: string | Date | null
   direccion?: string | null
+  sede?: string | null
   barrio?: string | null
   provincia?: string | null
   descripcion?: string | null
@@ -27,6 +28,7 @@ export function normalizeEvent(event: BackendEventoPayload): Evento {
     tipo: event.tipo ?? "",
     fecha: event.fecha ?? "",
     direccion: event.direccion ?? "",
+    sede: event.sede ?? "",
     barrio: event.barrio ?? "",
     provincia: event.provincia ?? "",
     descripcion: event.descripcion ?? "",

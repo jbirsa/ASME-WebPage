@@ -5,8 +5,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useState } from "react"
 
-import LoginHeader from "@/components/LoginHeader"
+import AuthSplitLayout from "@/components/AuthSplitLayout"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { getAuthToken } from "@/lib/auth-token"
 import { isValidEmailInput, normalizeEmailInput, trimSingleLine } from "@/lib/form-validation"
 
@@ -60,12 +61,12 @@ export default function RegistroPage() {
     }
 
     if (password.length > 128) {
-      setErrorMessage("La contrasena supera el limite de caracteres")
+      setErrorMessage("La contraseña supera el limite de caracteres")
       return
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage("Las contrasenas no coinciden")
+      setErrorMessage("Las contraseñas no coinciden")
       return
     }
 
@@ -99,123 +100,101 @@ export default function RegistroPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#1a2744_0%,#0f172a_70%)]" />
-        <div className="stars"></div>
-        <div className="stars2"></div>
-        <div className="stars3"></div>
+    <AuthSplitLayout imageSrc="/aeroContent9.JPG" imageAlt="Prototipo de ala volante sobre la pista de pruebas">
+      <div className="mb-8 text-center">
+        <Image src="/asme_logo_azul_sin_fondo.png" alt="ASME ITBA" width={156} height={156} className="mx-auto mb-4" priority />
+        <h2 className="text-3xl font-semibold tracking-tight md:text-[2.1rem]">Crear cuenta</h2>
+        <p className="auth-muted-copy mt-3 text-sm leading-6 md:text-base">Registrate para empezar a aprender dentro del campus.</p>
       </div>
 
-      <LoginHeader />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="nombre" className="sr-only">
+            Nombre
+          </label>
+          <Input
+            id="nombre"
+            type="text"
+            value={nombre}
+            onChange={(event) => setNombre(event.target.value)}
+            required
+            autoComplete="name"
+            maxLength={120}
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Nombre completo"
+          />
+        </div>
 
-      <main className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-28 pb-12">
-        <section className="w-full max-w-md border-2 border-[#c9a227] rounded-2xl bg-[#0f172a]/90 backdrop-blur-sm px-7 py-8 md:px-10 md:py-10">
-          <div className="text-center mb-8">
-            <Image
-              src="/asme_logo_blanco.png"
-              alt="ASME ITBA"
-              width={110}
-              height={110}
-              className="mx-auto mb-3"
-              priority
-            />
-            <h1 className="text-3xl font-serif italic text-[#e8e8e8]">Crear cuenta</h1>
-            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Registrate para acceder a los cursos de ASME</p>
-          </div>
+        <div>
+          <label htmlFor="email" className="sr-only">
+            Correo electronico
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            autoComplete="email"
+            maxLength={254}
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Correo electronico"
+          />
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="nombre" className="sr-only">
-                Nombre
-              </label>
-              <Input
-                id="nombre"
-                type="text"
-                value={nombre}
-                onChange={(event) => setNombre(event.target.value)}
-                required
-                autoComplete="name"
-                maxLength={120}
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Nombre completo"
-              />
-            </div>
+        <div>
+          <label htmlFor="password" className="sr-only">
+            Contraseña
+          </label>
+          <PasswordInput
+            id="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            minLength={6}
+            maxLength={128}
+            autoComplete="new-password"
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Contraseña"
+          />
+        </div>
 
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Correo electronico
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                autoComplete="email"
-                maxLength={254}
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Correo electronico"
-              />
-            </div>
+        <div>
+          <label htmlFor="confirmPassword" className="sr-only">
+            Confirmar contraseña
+          </label>
+          <PasswordInput
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            required
+            minLength={6}
+            maxLength={128}
+            autoComplete="new-password"
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Confirmar contraseña"
+          />
+        </div>
 
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Contrasena
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                minLength={6}
-                maxLength={128}
-                autoComplete="new-password"
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Contrasena"
-              />
-            </div>
+        {errorMessage ? (
+          <p className="campus-feedback-panel rounded-xl px-4 py-3 text-sm">{errorMessage}</p>
+        ) : null}
 
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirmar contrasena
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                required
-                minLength={6}
-                maxLength={128}
-                autoComplete="new-password"
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Confirmar contrasena"
-              />
-            </div>
+        <button
+          type="submit"
+          disabled={isLoading || !isClientReady}
+          className="campus-accent-button h-12 w-full rounded-xl text-base font-semibold disabled:opacity-70"
+        >
+          {isLoading ? "Creando cuenta..." : "Crear cuenta"}
+        </button>
+      </form>
 
-            {errorMessage ? (
-              <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">{errorMessage}</p>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={isLoading || !isClientReady}
-              className="w-full h-12 bg-[#c9a227] hover:bg-[#b8931f] text-[#0f172a] rounded-lg font-medium text-lg transition-colors disabled:opacity-70"
-            >
-              {isLoading ? "Creando cuenta..." : "Crear cuenta"}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-[#a0a0a0]">
-            Ya tenes cuenta?{" "}
-            <Link href="/login" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-              Inicia sesion
-            </Link>
-          </p>
-        </section>
-      </main>
-    </div>
+      <p className="auth-muted-copy mt-6 text-center text-sm">
+        Ya tenes cuenta?{" "}
+        <Link href="/login" className="auth-link">
+          Inicia sesion
+        </Link>
+      </p>
+    </AuthSplitLayout>
   )
 }

@@ -12,6 +12,7 @@ export type Evento = {
   tipo: string;
   fecha: string | Date;
   direccion: string;
+  sede: string;
   barrio: string;
   provincia: string;
   descripcion: string;

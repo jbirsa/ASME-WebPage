@@ -36,7 +36,7 @@ export default function AdminShell({ title, description, actions, children, brea
   }, [router])
 
   if (status !== "ready") {
-    return <div className="min-h-screen bg-[#08111b] text-slate-400 flex items-center justify-center">Verificando permisos...</div>
+    return <div className="campus-app flex min-h-screen items-center justify-center bg-[var(--campus-background)] text-[var(--campus-text-muted)]">Verificando permisos...</div>
   }
 
   return (

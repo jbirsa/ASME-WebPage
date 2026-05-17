@@ -79,6 +79,7 @@ export default function NextEvents({
   const detailsIsExternal = isExternalEventLink(detailsHref)
   const registrationHref = getSafeHttpUrl(currentEvent.link)
   const imageSrc = getSafeImageSrc(currentEvent.imagen_url)
+  const locationLabel = [currentEvent.sede, currentEvent.direccion].filter(Boolean).join(" · ")
 
   return (
     <section className="relative z-10 py-20 px-6 bg-gradient-to-br from-slate-900/40 to-slate-800/60">
@@ -97,14 +98,23 @@ export default function NextEvents({
               {/* Image Section */}
               <div className="relative h-64 md:h-full">
                 {imageSrc ? (
-                  <Image
-                    src={imageSrc}
-                    alt={currentEvent.nombre}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority={currentIndex === 0}
-                  />
+                  imageSrc.startsWith("/") ? (
+                    <Image
+                      src={imageSrc}
+                      alt={currentEvent.nombre}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority={currentIndex === 0}
+                    />
+                  ) : (
+                    <img
+                      src={imageSrc}
+                      alt={currentEvent.nombre}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      loading={currentIndex === 0 ? "eager" : "lazy"}
+                    />
+                  )
                 ) : null}
 
                 {/* Gradient overlay */}
@@ -114,7 +124,8 @@ export default function NextEvents({
               {/* Content Section */}
               <div className="p-8 md:p-12 flex flex-col justify-center bg-slate-800/90">
                 <div className="mb-4">
-                  <div className="flex flex-wrap items-center gap-4 text-[#e3a72f] text-sm font-medium mb-4">
+                  <div className="space-y-2 text-[#e3a72f] text-sm font-medium mb-4">
+                    <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
                       {formattedDate || rawDateValue}
@@ -125,10 +136,13 @@ export default function NextEvents({
                         {formattedTime}
                       </div>
                     ) : null}
-                    <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {currentEvent.direccion}
                     </div>
+                    {locationLabel ? (
+                      <div className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {locationLabel}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 

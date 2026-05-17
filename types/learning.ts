@@ -1,9 +1,28 @@
+export type CursoArchivo = {
+  cursoArchivoId: number
+  nombreOriginal: string
+  mimeType?: string | null
+  size?: number | null
+  createdAt?: string | Date | null
+  url?: string | null
+}
+
+export type ClaseArchivo = {
+  claseArchivoId: number
+  nombreOriginal: string
+  mimeType?: string | null
+  size?: number | null
+  createdAt?: string | Date | null
+  url?: string | null
+}
+
 export type Clase = {
   claseId: number
   titulo: string
   descripcion?: string | null
   videoUrl?: string | null
   orden?: number | null
+  archivos?: ClaseArchivo[]
 }
 
 export type Curso = {
@@ -12,6 +31,7 @@ export type Curso = {
   descripcion?: string | null
   imagenUrl?: string | null
   estado?: string | null
+  archivos?: CursoArchivo[]
   clases?: Clase[]
 }
 

@@ -3,9 +3,17 @@
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
+import { FileText, ImageIcon, PlayCircle } from "lucide-react"
 
 import LearningShell from "@/components/learning/LearningShell"
 import { clearAuthToken, getAuthToken, getAuthTokenPayload, isAdminAuthPayload } from "@/lib/auth-token"
+import {
+  campusAccentBadgeClassName,
+  campusCardClassName,
+  campusOutlineButtonClassName,
+  campusPanelClassName,
+  campusPrimaryButtonClassName,
+} from "@/lib/campus-theme"
 import { toSlug } from "@/lib/slug"
 import { getSafeHttpUrl, getSafeImageSrc } from "@/lib/safe-url"
 import type { Clase, Curso, MiCurso } from "@/types/learning"
@@ -26,7 +34,78 @@ function getAuthHeaders(token: string) {
   }
 }
 
-const panelClassName = "rounded-2xl border border-white/10 bg-[#0d1726]"
+const panelClassName = campusPanelClassName
+
+function formatFileSize(size?: number | null) {
+  if (!size || size < 1) return null
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatClassCount(count: number) {
+  return count === 1 ? "1 clase" : `${count} clases`
+}
+
+function formatAvailableClassCount(count: number) {
+  return count === 1 ? "1 clase disponible" : `${count} clases disponibles`
+}
+
+function formatMaterialCount(count: number) {
+  if (count < 1) return "Sin materiales"
+  return count === 1 ? "1 material" : `${count} materiales`
+}
+
+function FileRow({
+  fileName,
+  fileUrl,
+  fileSize,
+  actionLabel = "Descargar",
+}: {
+  fileName: string
+  fileUrl?: string | null
+  fileSize?: number | null
+  actionLabel?: string
+}) {
+  const fileSizeLabel = formatFileSize(fileSize)
+
+  if (!fileUrl) {
+    return (
+      <div className="flex items-center gap-3 rounded-[18px] border border-[var(--campus-border-soft)] bg-[var(--campus-surface)] px-4 py-3 shadow-[0_8px_20px_rgba(121,142,161,0.06)]">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--campus-divider)] bg-[var(--campus-surface-soft)] text-[var(--campus-text)]">
+          <FileText className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="break-words text-sm font-medium text-[var(--campus-text)] [overflow-wrap:anywhere]">{fileName}</p>
+          <p className="mt-1 text-xs text-[var(--campus-text-muted)]">{fileSizeLabel || "Tamaño no disponible"}</p>
+        </div>
+        <span className="inline-flex shrink-0 rounded-full border border-[var(--campus-divider)] bg-[var(--campus-surface-soft)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--campus-text-muted)]">
+          URL pendiente
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-[18px] border border-[var(--campus-border-soft)] bg-[var(--campus-surface)] px-4 py-3 shadow-[0_8px_20px_rgba(121,142,161,0.06)] transition-colors hover:border-[var(--campus-secondary)]">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--campus-divider)] bg-[var(--campus-surface-soft)] text-[var(--campus-text)]">
+        <FileText className="h-4 w-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="break-words text-sm font-medium text-[var(--campus-text)] [overflow-wrap:anywhere]">{fileName}</p>
+        <p className="mt-1 text-xs text-[var(--campus-text-muted)]">{fileSizeLabel || "Tamaño no disponible"}</p>
+      </div>
+      <a
+        href={fileUrl}
+        target="_blank"
+        rel="noreferrer noopener"
+        className={`${campusOutlineButtonClassName} shrink-0 px-4 py-2`}
+      >
+        {actionLabel}
+      </a>
+    </div>
+  )
+}
 
 export default function CursoDetallePage() {
   const router = useRouter()
@@ -175,34 +254,63 @@ export default function CursoDetallePage() {
 
   const renderClassItem = (classItem: Clase, index: number) => {
     const videoHref = getSafeHttpUrl(classItem.videoUrl)
+    const classFiles = classItem.archivos ?? []
 
     return (
-      <article key={classItem.claseId} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-500">
+      <article key={classItem.claseId} className={`${campusCardClassName} flex flex-col gap-5 p-5 md:p-6`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <span className={`${campusAccentBadgeClassName} self-start normal-case tracking-[0.03em]`}>
             Clase {index + 1}
           </span>
-          <h2 className="text-lg font-semibold text-white break-words [overflow-wrap:anywhere]">{classItem.titulo}</h2>
+          <span className="inline-flex self-start rounded-full border border-[var(--campus-divider)] bg-[var(--campus-surface-soft)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--campus-text-muted)]">
+            {formatMaterialCount(classFiles.length)}
+          </span>
         </div>
 
-        <p className="mt-4 text-sm leading-7 text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
-          {classItem.descripcion || "Esta clase todavia no tiene descripcion cargada."}
-        </p>
+        <div>
+          <h3 className="text-lg font-semibold text-[var(--campus-text)] break-words [overflow-wrap:anywhere] md:text-xl">{classItem.titulo}</h3>
+          <p className="mt-3 text-sm leading-7 text-[var(--campus-text-muted)] break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
+            {classItem.descripcion || "Esta clase todavia no tiene descripcion cargada."}
+          </p>
+        </div>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <span className="text-xs uppercase tracking-[0.18em] text-slate-500">Orden {classItem.orden ?? index + 1}</span>
+        <div className="space-y-3">
+          <h4 className="text-xs uppercase tracking-[0.16em] text-[var(--campus-text-muted)]">Materiales</h4>
+
+          {classFiles.length ? (
+            <div className="space-y-3">
+              {classFiles.map((file) => (
+                <FileRow
+                  key={file.claseArchivoId}
+                  fileName={file.nombreOriginal}
+                  fileUrl={file.url}
+                  fileSize={file.size}
+                  actionLabel="Ver material"
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--campus-text-muted)]">Esta clase no tiene materiales cargados.</p>
+          )}
+        </div>
+
+        <div className="mt-auto flex flex-col gap-3 border-t border-[var(--campus-divider)] pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-[var(--campus-text-muted)]">
+            {videoHref ? "Contenido principal disponible para esta clase." : "El enlace principal de la clase todavia no esta disponible."}
+          </p>
 
           {videoHref ? (
             <a
               href={videoHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-4 py-2 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
+              className={`${campusPrimaryButtonClassName} self-start px-5 py-2.5 sm:self-auto`}
             >
+              <PlayCircle className="mr-2 h-4 w-4" />
               Ver clase
             </a>
           ) : (
-            <span className="inline-flex rounded-2xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-500">
+            <span className="inline-flex self-start rounded-full border border-[var(--campus-divider)] bg-[var(--campus-surface-soft)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--campus-text-muted)] sm:self-auto">
               URL pendiente
             </span>
           )}
@@ -214,19 +322,15 @@ export default function CursoDetallePage() {
   const courseTitle = course?.nombre || "Detalle del curso"
   const canAccessClasses = isAdminView || isEnrolled
   const courseImage = getSafeImageSrc(course?.imagenUrl)
+  const courseFiles = course?.archivos ?? []
+  const availableClassesLabel = formatAvailableClassCount(sortedClasses.length)
+  const generalMaterialsCountLabel = formatMaterialCount(courseFiles.length)
   const pageActions = course ? (
-    isAdminView ? null : isEnrolled ? (
-      <Link
-        href="/mis-cursos"
-        className="inline-flex items-center justify-center rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-5 py-2.5 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
-      >
-        Ver en mis cursos
-      </Link>
-    ) : (
+    isAdminView || isEnrolled ? null : (
       <button
         onClick={handleEnroll}
         disabled={isEnrolling}
-        className="inline-flex items-center justify-center rounded-2xl bg-[#e3a72f] px-5 py-2.5 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a] disabled:cursor-not-allowed disabled:opacity-70"
+        className={`${campusPrimaryButtonClassName} px-5 py-2.5`}
       >
         {isEnrolling ? "Inscribiendo..." : "Inscribirme"}
       </button>
@@ -235,71 +339,116 @@ export default function CursoDetallePage() {
 
   return (
     <LearningShell
-      title={courseTitle}
+      title="Detalle del curso"
       breadcrumbs={[
         { label: "Campus", href: "/cursos" },
-        { label: "Catalogo", href: "/cursos" },
+        ...(isAdminView ? [] : [{ label: "Mis cursos", href: "/mis-cursos" }]),
         { label: courseTitle },
       ]}
       actions={pageActions}
     >
       {errorMessage ? (
-        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-4 text-sm text-rose-200">{errorMessage}</div>
+        <div className="campus-feedback-panel rounded-2xl px-5 py-4 text-sm">{errorMessage}</div>
       ) : null}
 
       {isLoading ? (
-        <div className={`${panelClassName} px-6 py-16 text-center text-slate-400`}>Cargando curso...</div>
+        <div className={`${panelClassName} px-6 py-16 text-center text-[var(--campus-text-muted)]`}>Cargando curso...</div>
       ) : !course ? (
         <div className={`${panelClassName} px-6 py-16 text-center`}>
-          <p className="text-lg font-medium text-white">No se encontro el curso.</p>
-          <p className="mt-3 text-sm text-slate-400">Volve al catalogo para continuar navegando el portal.</p>
-          <Link
-            href="/cursos"
-            className="mt-6 inline-flex rounded-2xl bg-[#e3a72f] px-6 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a]"
-          >
+          <p className="text-lg font-medium text-[var(--campus-text)]">No se encontro el curso.</p>
+          <p className="mt-3 text-sm text-[var(--campus-text-muted)]">Volve al catalogo para continuar navegando el portal.</p>
+          <Link href="/cursos" className={`${campusPrimaryButtonClassName} mt-6 px-6 py-3`}>
             Volver al catalogo
           </Link>
         </div>
       ) : (
-        <div className="space-y-6">
-          <section className={`${panelClassName} overflow-hidden`}>
-            {courseImage ? (
-              <div className="overflow-hidden bg-[#13233a]">
-                <img src={courseImage} alt={`Imagen de ${course.nombre}`} className="h-64 w-full object-cover" />
-              </div>
-            ) : null}
+        <div className="space-y-8">
+          <section className={`${panelClassName} overflow-hidden p-6 md:p-8`}>
+            <div className="grid gap-8 xl:grid-cols-[minmax(0,1.18fr)_minmax(20rem,0.82fr)] xl:items-start">
+              <div className="space-y-6 xl:col-start-1 xl:row-start-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  {isAdminView ? <span className={campusAccentBadgeClassName}>Vista admin</span> : null}
+                  {course.estado ? <span className={`${campusAccentBadgeClassName} normal-case tracking-[0.03em]`}>{course.estado}</span> : null}
+                </div>
 
-            <div className="p-6">
-              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.18em] text-slate-500">
-                <span>{isAdminView ? "Vista admin" : isEnrolled ? "Inscripto" : "Disponible"}</span>
-                <span>{sortedClasses.length} clases</span>
+                <div>
+                  <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--campus-text-muted)]">Curso</p>
+                  <h2 className="mt-3 text-3xl font-semibold leading-tight text-[var(--campus-text)] md:text-[2.6rem]">{course.nombre}</h2>
+                  <p className="mt-4 max-w-3xl text-sm leading-8 text-[var(--campus-text-muted)] md:text-[1.01rem]">
+                    {course.descripcion || "Este curso todavia no tiene descripcion cargada."}
+                  </p>
+                </div>
               </div>
 
-              <p className="mt-5 text-sm leading-7 text-slate-300 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
-                {course.descripcion || "Este curso todavia no tiene descripcion cargada."}
-              </p>
+              <div className="xl:col-start-2 xl:row-span-2">
+                <div className="overflow-hidden rounded-[22px] border border-[var(--campus-border)] bg-[var(--campus-surface)] p-3 shadow-[0_18px_36px_rgba(121,142,161,0.08)]">
+                  {courseImage ? (
+                    <div className="aspect-[4/3] overflow-hidden rounded-[18px] border border-[var(--campus-divider)] bg-[var(--campus-surface-soft)] p-3">
+                      <img src={courseImage} alt={`Imagen de ${course.nombre}`} className="h-full w-full rounded-[14px] object-cover" />
+                    </div>
+                  ) : (
+                    <div className="aspect-[4/3] flex flex-col items-center justify-center rounded-[18px] border border-[var(--campus-divider)] bg-[var(--campus-surface-soft)] px-6 text-center text-sm text-[var(--campus-text-muted)]">
+                      <ImageIcon className="mb-3 h-8 w-8 text-[var(--campus-text)]" />
+                      Este curso no tiene imagen cargada.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4 xl:col-start-1 xl:row-start-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h3 className="text-2xl font-semibold text-[var(--campus-text)]">Materiales del curso</h3>
+                  <span className="inline-flex items-center rounded-full border border-[var(--campus-divider)] bg-[var(--campus-surface-soft)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--campus-text-muted)]">
+                    <FileText className="mr-2 h-3.5 w-3.5" />
+                    {generalMaterialsCountLabel}
+                  </span>
+                </div>
+
+                {!canAccessClasses ? (
+                  <div className="campus-accent-panel rounded-[22px] px-5 py-4 text-sm leading-7 text-[var(--campus-text)]">
+                    Inscribite para desbloquear las clases y los materiales generales de este curso.
+                  </div>
+                ) : courseFiles.length ? (
+                  <div className="space-y-3">
+                    {courseFiles.map((file) => (
+                      <FileRow
+                        key={file.cursoArchivoId}
+                        fileName={file.nombreOriginal}
+                        fileUrl={file.url}
+                        fileSize={file.size}
+                        actionLabel="Ver material"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-[var(--campus-text-muted)]">No hay materiales generales cargados para este curso.</p>
+                )}
+              </div>
             </div>
           </section>
 
-          <section className={`${panelClassName} p-6`}>
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
-              <h2 className="text-xl font-semibold text-white">Clases del curso</h2>
-              <span className="text-xs uppercase tracking-[0.18em] text-slate-500">{sortedClasses.length} clases</span>
+          <section className="space-y-5">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-[var(--campus-text)]">Clases del curso</h2>
+                <p className="mt-1 text-sm leading-7 text-[var(--campus-text-muted)]">Avanzá por las clases y accedé a sus materiales.</p>
+              </div>
+              <span className="text-sm font-medium text-[var(--campus-text-muted)]">{availableClassesLabel}</span>
             </div>
 
-            <div className="mt-6 space-y-4">
-              {!canAccessClasses ? (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-10 text-center text-slate-400">
-                  Inscribite para desbloquear las clases de este curso.
-                </div>
-              ) : sortedClasses.length > 0 ? (
-                sortedClasses.map((classItem, index) => renderClassItem(classItem, index))
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-10 text-center text-slate-400">
-                  Este curso aun no tiene clases publicadas.
-                </div>
-              )}
-            </div>
+            {!canAccessClasses ? (
+              <div className={`${panelClassName} px-5 py-10 text-center text-[var(--campus-text-muted)]`}>
+                Inscribite para desbloquear las clases de este curso.
+              </div>
+            ) : sortedClasses.length > 0 ? (
+              <div className="space-y-4">
+                {sortedClasses.map((classItem, index) => renderClassItem(classItem, index))}
+              </div>
+            ) : (
+              <div className={`${panelClassName} px-5 py-10 text-center text-[var(--campus-text-muted)]`}>
+                Este curso aun no tiene clases publicadas.
+              </div>
+            )}
           </section>
         </div>
       )}

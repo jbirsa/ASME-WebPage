@@ -5,8 +5,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useState } from "react"
 
-import LoginHeader from "@/components/LoginHeader"
+import AuthSplitLayout from "@/components/AuthSplitLayout"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { getAuthToken, setAuthToken } from "@/lib/auth-token"
 import { isValidEmailInput, normalizeEmailInput } from "@/lib/form-validation"
 import type { LoginResponse } from "@/types/learning"
@@ -53,7 +54,7 @@ export default function LoginPage() {
     }
 
     if (!password || password.length > 128) {
-      setErrorMessage("La contrasena es invalida")
+      setErrorMessage("La contraseña es invalida")
       return
     }
 
@@ -88,102 +89,82 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#1a2744_0%,#0f172a_70%)]" />
-        <div className="stars"></div>
-        <div className="stars2"></div>
-        <div className="stars3"></div>
+    <AuthSplitLayout imageSrc="/aeroContent4.jpg" imageAlt="Estudiante trabajando sobre el prototipo de ala volante en el taller">
+      <div className="mb-8 text-center">
+        <Image src="/asme_logo_azul_sin_fondo.png" alt="ASME ITBA" width={156} height={156} className="mx-auto mb-4" priority />
+        <h2 className="text-3xl font-semibold tracking-tight md:text-[2.1rem]">Iniciá sesión</h2>
+        <p className="auth-muted-copy mt-3 text-sm leading-6 md:text-base">Accedé a tus cursos, clases y recursos del campus ASME.</p>
       </div>
 
-      <LoginHeader />
+      {showRegisteredMessage ? (
+        <p className="campus-accent-panel mb-4 rounded-xl px-4 py-3 text-sm">
+          Cuenta creada correctamente. Ya podes iniciar sesion.
+        </p>
+      ) : null}
 
-      <main className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-28 pb-12">
-        <section className="w-full max-w-md border-2 border-[#c9a227] rounded-2xl bg-[#0f172a]/90 backdrop-blur-sm px-7 py-8 md:px-10 md:py-10">
-          <div className="text-center mb-8">
-            <Image
-              src="/asme_logo_blanco.png"
-              alt="ASME ITBA"
-              width={110}
-              height={110}
-              className="mx-auto mb-3"
-              priority
-            />
-            <p className="text-[#a0a0a0] text-sm md:text-base mt-2">Inicia sesion para acceder a tus cursos</p>
-          </div>
+      {showResetMessage ? (
+        <p className="campus-accent-panel mb-4 rounded-xl px-4 py-3 text-sm">
+          Contraseña actualizada correctamente. Ya podes iniciar sesion.
+        </p>
+      ) : null}
 
-          {showRegisteredMessage ? (
-            <p className="mb-4 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
-              Cuenta creada correctamente. Ya podes iniciar sesion.
-            </p>
-          ) : null}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="sr-only">
+            Correo electrónico
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            maxLength={254}
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Correo electrónico"
+          />
+        </div>
 
-          {showResetMessage ? (
-            <p className="mb-4 text-sm text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2">
-              Contrasena actualizada correctamente. Ya podes iniciar sesion.
-            </p>
-          ) : null}
+        <div>
+          <label htmlFor="password" className="sr-only">
+            Contraseña
+          </label>
+          <PasswordInput
+            id="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            maxLength={128}
+            className="auth-input-surface h-12 w-full rounded-xl px-4 text-base focus:border-[var(--campus-secondary)] focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Contraseña"
+          />
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Correo electronico
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                maxLength={254}
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Correo electronico"
-              />
-            </div>
+        <div className="flex justify-end">
+          <Link href="/olvide-mi-contrasena" className="auth-link text-sm">
+            Olvidé mi contraseña
+          </Link>
+        </div>
 
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Contrasena
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                maxLength={128}
-                className="w-full h-12 bg-white text-gray-800 border-2 border-[#c9a227] rounded-lg placeholder:text-gray-500 focus:border-[#d4a726] focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Contrasena"
-              />
-            </div>
+        {errorMessage ? (
+          <p className="campus-feedback-panel rounded-xl px-4 py-3 text-sm">{errorMessage}</p>
+        ) : null}
 
-            <div className="flex justify-end">
-              <Link href="/olvide-mi-contrasena" className="text-sm text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-                Olvide mi contrasena
-              </Link>
-            </div>
+        <button
+          type="submit"
+          disabled={isLoading || !isClientReady}
+          className="campus-accent-button h-12 w-full rounded-xl text-base font-semibold disabled:opacity-70"
+        >
+          {isLoading ? "Ingresando..." : "Ingresar"}
+        </button>
+      </form>
 
-            {errorMessage ? (
-              <p className="text-sm text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2">{errorMessage}</p>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={isLoading || !isClientReady}
-              className="w-full h-12 bg-[#c9a227] hover:bg-[#b8931f] text-[#0f172a] rounded-lg font-medium text-lg transition-colors disabled:opacity-70"
-            >
-              {isLoading ? "Ingresando..." : "Ingresar"}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-[#a0a0a0]">
-            No tenes cuenta?{" "}
-            <Link href="/registro" className="text-[#e3a72f] hover:text-[#d4961a] transition-colors">
-              Crear cuenta
-            </Link>
-          </p>
-        </section>
-      </main>
-    </div>
+      <p className="auth-muted-copy mt-6 text-center text-sm">
+        No tenés cuenta?{" "}
+        <Link href="/registro" className="auth-link">
+          Crear cuenta
+        </Link>
+      </p>
+    </AuthSplitLayout>
   )
 }

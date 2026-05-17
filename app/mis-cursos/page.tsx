@@ -6,6 +6,12 @@ import { useEffect, useState } from "react"
 
 import LearningShell from "@/components/learning/LearningShell"
 import { clearAuthToken, getAuthToken, getAuthTokenPayload, isAdminAuthPayload } from "@/lib/auth-token"
+import {
+  campusAccentBadgeClassName,
+  campusCardClassName,
+  campusPanelClassName,
+  campusPrimaryButtonClassName,
+} from "@/lib/campus-theme"
 import { toSlug } from "@/lib/slug"
 import { getSafeImageSrc } from "@/lib/safe-url"
 import type { MiCurso } from "@/types/learning"
@@ -30,7 +36,7 @@ function formatEstado(estado: string) {
   return estado.replace(/_/g, " ")
 }
 
-const panelClassName = "rounded-2xl border border-white/10 bg-[#0d1726]"
+const panelClassName = campusPanelClassName
 
 export default function MisCursosPage() {
   const router = useRouter()
@@ -91,28 +97,20 @@ export default function MisCursosPage() {
     <LearningShell
       title="Mis cursos"
       breadcrumbs={[{ label: "Campus", href: "/cursos" }, { label: "Mis cursos" }]}
-      actions={
-        <Link
-          href="/cursos"
-          className="inline-flex items-center justify-center rounded-2xl border border-[#e3a72f]/25 bg-[#e3a72f]/10 px-5 py-2.5 text-sm font-medium text-[#f3d48a] transition-colors hover:bg-[#e3a72f]/15"
-        >
-          Explorar catalogo
-        </Link>
-      }
     >
       {errorMessage ? (
-        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-5 py-4 text-sm text-rose-200">{errorMessage}</div>
+        <div className="campus-feedback-panel rounded-2xl px-5 py-4 text-sm">{errorMessage}</div>
       ) : null}
 
       {isLoading ? (
-        <div className={`${panelClassName} px-6 py-16 text-center text-slate-400`}>Cargando tus cursos...</div>
+        <div className={`${panelClassName} px-6 py-16 text-center text-[var(--campus-text-muted)]`}>Cargando tus cursos...</div>
       ) : courses.length === 0 ? (
         <div className={`${panelClassName} px-6 py-16 text-center`}>
-          <p className="text-lg font-medium text-white">Todavia no estas inscripto en ningun curso.</p>
-          <p className="mt-3 text-sm text-slate-400">Sumate desde el catalogo para empezar a construir tu recorrido.</p>
+          <p className="text-lg font-medium text-[var(--campus-text)]">Todavia no estas inscripto en ningun curso.</p>
+          <p className="mt-3 text-sm text-[var(--campus-text-muted)]">Sumate desde el catalogo para empezar a construir tu recorrido.</p>
           <Link
             href="/cursos"
-            className="mt-6 inline-flex rounded-2xl bg-[#e3a72f] px-6 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a]"
+            className={`${campusPrimaryButtonClassName} mt-6 px-6 py-3`}
           >
             Ir al catalogo
           </Link>
@@ -125,37 +123,39 @@ export default function MisCursosPage() {
             const courseImage = getSafeImageSrc(course.imagenUrl)
 
             return (
-              <article key={course.cursoId} className={`${panelClassName} overflow-hidden p-4 transition-colors hover:border-white/20`}>
+              <article key={course.cursoId} className={`${campusCardClassName} overflow-hidden p-4`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-xl font-semibold text-white break-words [overflow-wrap:anywhere]">{course.nombre}</h2>
+                    <h2 className="text-xl font-semibold text-[var(--campus-text)] break-words [overflow-wrap:anywhere]">{course.nombre}</h2>
                   </div>
-                  <span className="shrink-0 rounded-full border border-[#5f87ab]/20 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+                  <span className={`${campusAccentBadgeClassName} shrink-0`}>
                     {formatEstado(course.inscripcion.estado)}
                   </span>
                 </div>
 
-                <div className="mt-4 overflow-hidden rounded-xl bg-[#13233a]">
+                <div className="mt-4 overflow-hidden rounded-xl border border-[var(--campus-border)] bg-[var(--campus-surface-soft)]">
                   {courseImage ? (
                     <img src={courseImage} alt={`Imagen de ${course.nombre}`} className="h-44 w-full object-cover" />
                   ) : (
-                    <div className="flex h-44 items-center justify-center text-sm text-slate-400">Imagen no disponible</div>
+                    <div className="flex h-44 items-center justify-center text-sm text-[var(--campus-text-muted)]">Imagen no disponible</div>
                   )}
                 </div>
 
-                <p className="mt-4 min-h-20 text-sm leading-7 text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
+                <p className="mt-4 min-h-20 text-sm leading-7 text-[var(--campus-text-muted)] break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
                   {course.descripcion || "Este curso todavia no tiene descripcion cargada."}
                 </p>
 
-                <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-slate-500">
+                <div className="mt-4 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-[var(--campus-text-muted)]">
                   <span>{totalCourseClasses} clases</span>
-                  <span>{formatEstado(course.inscripcion.estado)}</span>
+                  <span className={`${campusAccentBadgeClassName} normal-case tracking-[0.02em]`}>
+                    {formatEstado(course.inscripcion.estado)}
+                  </span>
                 </div>
 
                 <div className="mt-5">
                   <Link
                     href={courseHref}
-                    className="inline-flex w-full items-center justify-center rounded-2xl bg-[#e3a72f] px-4 py-3 text-sm font-semibold text-[#08111e] transition-colors hover:bg-[#d4961a]"
+                    className={`${campusPrimaryButtonClassName} w-full px-4 py-3`}
                   >
                     Continuar curso
                   </Link>

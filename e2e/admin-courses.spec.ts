@@ -19,6 +19,7 @@ test("admin crea, edita y elimina cursos", async ({ page }) => {
       descripcion: "Curso inicial de modelado 3D para estudiantes.",
       imagenUrl: "https://example.com/cad.jpg",
       estado: "activo",
+      archivos: [],
       clases: [],
     },
   ]
@@ -36,13 +37,24 @@ test("admin crea, edita y elimina cursos", async ({ page }) => {
     }
 
     if (method === "POST") {
-      const body = route.request().postDataJSON() as { nombre: string; descripcion?: string; imagenUrl?: string; estado?: string }
       const createdCourse = {
         cursoId: 2,
-        nombre: body.nombre,
-        descripcion: body.descripcion ?? null,
-        imagenUrl: body.imagenUrl ?? null,
-        estado: body.estado ?? "activo",
+        nombre: "Curso nuevo",
+        descripcion: "Curso creado desde Playwright",
+        imagenUrl: "https://example.com/nuevo.jpg",
+        estado: "activo",
+        archivos: [
+          {
+            cursoArchivoId: 21,
+            nombreOriginal: "guia-curso.pdf",
+            url: "https://example.com/guia-curso.pdf",
+          },
+          {
+            cursoArchivoId: 22,
+            nombreOriginal: "cronograma-curso.pdf",
+            url: "https://example.com/cronograma-curso.pdf",
+          },
+        ],
         clases: [],
       }
       courses = [...courses, createdCourse]
@@ -59,15 +71,19 @@ test("admin crea, edita y elimina cursos", async ({ page }) => {
     const method = route.request().method()
 
     if (method === "PATCH") {
-      const body = route.request().postDataJSON() as { nombre: string; descripcion?: string; imagenUrl?: string; estado?: string }
       courses = courses.map((course) =>
         course.cursoId === 2
           ? {
               ...course,
-              nombre: body.nombre,
-              descripcion: body.descripcion ?? null,
-              imagenUrl: body.imagenUrl ?? null,
-              estado: body.estado ?? course.estado,
+              nombre: "Curso nuevo editado",
+              archivos: [
+                ...(course.archivos ?? []),
+                {
+                  cursoArchivoId: 23,
+                  nombreOriginal: "programa-curso.pdf",
+                  url: "https://example.com/programa-curso.pdf",
+                },
+              ],
             }
           : course,
       )
@@ -94,10 +110,30 @@ test("admin crea, edita y elimina cursos", async ({ page }) => {
   await setAuthToken(page, createToken({ sub: "admin-1", email: "admin@asme.org", rol: "admin" }))
 
   await page.goto("/admin/cursos")
+  await expect(page.getByRole("heading", { name: "Nuevo curso" })).toBeVisible()
+
+  await expect(page.locator('label[for="nombre"]')).toContainText("*")
+  await expect(page.locator("#nombre")).toHaveAttribute("required", "")
 
   await page.locator("#nombre").fill("Curso nuevo")
   await page.locator("#descripcion").fill("Curso creado desde Playwright")
-  await page.locator("#imagenUrl").fill("https://example.com/nuevo.jpg")
+  await page.locator("#foto").setInputFiles({
+    name: "portada-curso.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("fake image content"),
+  })
+  await page.locator("#archivos").setInputFiles({
+    name: "guia-curso.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("fake file content"),
+  })
+  await page.locator("#archivos").setInputFiles({
+    name: "cronograma-curso.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("fake second file content"),
+  })
+  await expect(page.getByText("guia-curso.pdf")).toBeVisible()
+  await expect(page.getByText("cronograma-curso.pdf")).toBeVisible()
   await page.getByRole("button", { name: "Crear curso" }).click()
 
   await expect(page.getByText("Curso creado correctamente")).toBeVisible()
@@ -105,11 +141,30 @@ test("admin crea, edita y elimina cursos", async ({ page }) => {
 
   await page.getByRole("button", { name: "Editar curso Curso nuevo" }).click()
   await expect(page.locator("#nombre")).toHaveValue("Curso nuevo")
+  await expect(page.getByText("guia-curso.pdf")).toBeVisible()
+  await expect(page.getByText("cronograma-curso.pdf")).toBeVisible()
+  await expect(page.getByRole("button", { name: "Eliminar foto actual" })).toBeVisible()
   await page.locator("#nombre").fill("Curso nuevo editado")
+  await page.locator("#archivos").setInputFiles({
+    name: "programa-curso.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("fake third file content"),
+  })
+  await expect(page.getByText("programa-curso.pdf")).toBeVisible()
+  await expect(page.getByText("guia-curso.pdf")).toBeVisible()
   await page.getByRole("button", { name: "Guardar cambios" }).click()
 
-  await expect(page.getByText("Curso actualizado correctamente")).toBeVisible()
+  const updatedDialog = page.getByRole("dialog")
+  await expect(updatedDialog).toBeVisible()
+  await expect(updatedDialog.getByRole("heading", { name: "Curso actualizado" })).toBeVisible()
+  await expect(updatedDialog.getByText("Curso actualizado correctamente")).toBeVisible()
+  await updatedDialog.getByRole("button", { name: "Entendido" }).click()
   await expect(page.getByRole("heading", { name: "Curso nuevo editado" })).toBeVisible()
+  await page.getByRole("button", { name: "Editar curso Curso nuevo editado" }).click()
+  await expect(page.getByText("guia-curso.pdf")).toBeVisible()
+  await expect(page.getByText("cronograma-curso.pdf")).toBeVisible()
+  await expect(page.getByText("programa-curso.pdf")).toBeVisible()
+  await page.getByRole("button", { name: "Cancelar edicion" }).click()
 
   await page.getByRole("button", { name: "Eliminar curso Curso nuevo editado" }).click()
   const confirmDialog = page.getByRole("dialog")

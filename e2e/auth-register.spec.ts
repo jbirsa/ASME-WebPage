@@ -17,6 +17,9 @@ test("registro exitoso redirige a login", async ({ page }) => {
 
   await page.goto("/registro")
 
+  await expect(page.getByRole("heading", { name: "ASME Campus" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Crear cuenta" })).toBeVisible()
+
   await page.locator("#nombre").fill("Nuevo Usuario")
   await page.locator("#email").fill("nuevo@asme.org")
   await page.locator("#password").fill("123456")
@@ -39,6 +42,8 @@ test("registro muestra error del backend", async ({ page }) => {
   })
 
   await page.goto("/registro")
+
+  await expect(page.getByRole("heading", { name: "ASME Campus" })).toBeVisible()
 
   await page.locator("#nombre").fill("Nuevo Usuario")
   await page.locator("#email").fill("nuevo@asme.org")

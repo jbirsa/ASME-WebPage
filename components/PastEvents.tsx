@@ -53,6 +53,7 @@ export default function PastEvents({ events }: { events: Evento[] }) {
               const delay = 150 * index
               const animation = isEven ? "fade-right" : "fade-left"
               const imageSrc = getSafeImageSrc(event.imagen_url)
+              const locationLabel = [event.sede, event.direccion].filter(Boolean).join(" · ")
 
               return (
                 <div
@@ -72,13 +73,22 @@ export default function PastEvents({ events }: { events: Evento[] }) {
                     {/* Image */}
                     <div className="relative h-48 overflow-hidden">
                       {imageSrc ? (
-                        <Image
-                          src={imageSrc}
-                          alt={event.nombre}
-                          fill
-                          className="object-cover grayscale-[50%] group-hover:grayscale-[20%] transition-all duration-300"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
+                        imageSrc.startsWith("/") ? (
+                          <Image
+                            src={imageSrc}
+                            alt={event.nombre}
+                            fill
+                            className="object-cover grayscale-[50%] group-hover:grayscale-[20%] transition-all duration-300"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                        ) : (
+                          <img
+                            src={imageSrc}
+                            alt={event.nombre}
+                            className="absolute inset-0 h-full w-full object-cover grayscale-[50%] group-hover:grayscale-[20%] transition-all duration-300"
+                            loading="lazy"
+                          />
+                        )
                       ) : null}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent"></div>
 
@@ -102,10 +112,12 @@ export default function PastEvents({ events }: { events: Evento[] }) {
 
                       {/* Location and time info */}
                       <div className="flex flex-wrap items-center gap-4 text-[#e3a72f] text-xs">
-                        <div className="flex items-center">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          {event.direccion}
-                        </div>
+                        {locationLabel ? (
+                          <div className="flex items-center">
+                            <MapPin className="w-3 h-3 mr-1" />
+                            {locationLabel}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   </div>

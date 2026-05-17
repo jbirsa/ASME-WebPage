@@ -28,6 +28,7 @@ test("admin crea, edita y elimina clases por curso", async ({ page }) => {
       descripcion: "Descripcion inicial",
       videoUrl: "https://www.youtube.com/watch?v=abcd1234",
       orden: 1,
+      archivos: [],
     },
   ]
 
@@ -48,19 +49,24 @@ test("admin crea, edita y elimina clases por curso", async ({ page }) => {
   })
 
   await page.route("**/api/clases", async (route) => {
-    const body = route.request().postDataJSON() as {
-      titulo: string
-      descripcion?: string
-      videoUrl?: string
-      orden?: number
-    }
-
     const createdClass = {
       claseId: 12,
-      titulo: body.titulo,
-      descripcion: body.descripcion ?? null,
-      videoUrl: body.videoUrl ?? null,
-      orden: body.orden ?? 2,
+      titulo: "Clase nueva",
+      descripcion: "Descripcion de clase nueva",
+      videoUrl: "https://www.youtube.com/watch?v=nueva123",
+      orden: 2,
+      archivos: [
+        {
+          claseArchivoId: 41,
+          nombreOriginal: "apunte-clase.pdf",
+          url: "https://example.com/apunte-clase.pdf",
+        },
+        {
+          claseArchivoId: 42,
+          nombreOriginal: "slides-clase.pdf",
+          url: "https://example.com/slides-clase.pdf",
+        },
+      ],
     }
 
     classes = [...classes, createdClass]
@@ -76,21 +82,19 @@ test("admin crea, edita y elimina clases por curso", async ({ page }) => {
     const method = route.request().method()
 
     if (method === "PATCH") {
-      const body = route.request().postDataJSON() as {
-        titulo: string
-        descripcion?: string
-        videoUrl?: string
-        orden?: number
-      }
-
       classes = classes.map((classItem) =>
         classItem.claseId === 12
           ? {
               ...classItem,
-              titulo: body.titulo,
-              descripcion: body.descripcion ?? null,
-              videoUrl: body.videoUrl ?? null,
-              orden: body.orden ?? classItem.orden,
+              titulo: "Clase nueva editada",
+              archivos: [
+                ...(classItem.archivos ?? []),
+                {
+                  claseArchivoId: 43,
+                  nombreOriginal: "ejercicios-clase.pdf",
+                  url: "https://example.com/ejercicios-clase.pdf",
+                },
+              ],
             }
           : classItem,
       )
@@ -117,11 +121,27 @@ test("admin crea, edita y elimina clases por curso", async ({ page }) => {
   await setAuthToken(page, createToken({ sub: "admin-1", email: "admin@asme.org", rol: "admin" }))
 
   await page.goto("/admin/cursos/1/clases")
+  await expect(page.getByRole("heading", { name: "Nueva clase" })).toBeVisible()
+
+  await expect(page.locator('label[for="titulo"]')).toContainText("*")
+  await expect(page.locator("#titulo")).toHaveAttribute("required", "")
 
   await page.locator("#titulo").fill("Clase nueva")
   await page.locator("#descripcion").fill("Descripcion de clase nueva")
   await page.locator("#videoUrl").fill("https://www.youtube.com/watch?v=nueva123")
   await page.locator("#orden").fill("2")
+  await page.locator("#archivos").setInputFiles({
+    name: "apunte-clase.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("fake class file"),
+  })
+  await page.locator("#archivos").setInputFiles({
+    name: "slides-clase.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("fake second class file"),
+  })
+  await expect(page.getByText("apunte-clase.pdf")).toBeVisible()
+  await expect(page.getByText("slides-clase.pdf")).toBeVisible()
   await page.getByRole("button", { name: "Crear clase" }).click()
 
   await expect(page.getByText("Clase creada correctamente")).toBeVisible()
@@ -129,11 +149,29 @@ test("admin crea, edita y elimina clases por curso", async ({ page }) => {
 
   await page.getByRole("button", { name: "Editar clase Clase nueva" }).click()
   await expect(page.locator("#titulo")).toHaveValue("Clase nueva")
+  await expect(page.getByText("apunte-clase.pdf")).toBeVisible()
+  await expect(page.getByText("slides-clase.pdf")).toBeVisible()
   await page.locator("#titulo").fill("Clase nueva editada")
+  await page.locator("#archivos").setInputFiles({
+    name: "ejercicios-clase.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("fake third class file"),
+  })
+  await expect(page.getByText("ejercicios-clase.pdf")).toBeVisible()
+  await expect(page.getByText("apunte-clase.pdf")).toBeVisible()
   await page.getByRole("button", { name: "Guardar cambios" }).click()
 
-  await expect(page.getByText("Clase actualizada correctamente")).toBeVisible()
+  const updatedDialog = page.getByRole("dialog")
+  await expect(updatedDialog).toBeVisible()
+  await expect(updatedDialog.getByRole("heading", { name: "Clase actualizada" })).toBeVisible()
+  await expect(updatedDialog.getByText("Clase actualizada correctamente")).toBeVisible()
+  await updatedDialog.getByRole("button", { name: "Entendido" }).click()
   await expect(page.getByRole("heading", { name: "Clase nueva editada" })).toBeVisible()
+  await page.getByRole("button", { name: "Editar clase Clase nueva editada" }).click()
+  await expect(page.getByText("apunte-clase.pdf")).toBeVisible()
+  await expect(page.getByText("slides-clase.pdf")).toBeVisible()
+  await expect(page.getByText("ejercicios-clase.pdf")).toBeVisible()
+  await page.getByRole("button", { name: "Cancelar edicion" }).click()
 
   await page.getByRole("button", { name: "Eliminar clase Clase nueva editada" }).click()
   const confirmDialog = page.getByRole("dialog")

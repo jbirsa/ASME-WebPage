@@ -16,15 +16,12 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
     {
       id: 1,
       nombre: "Evento base",
-      tipo: "presencial",
+      tipo: "Competencia",
       fecha: "2026-05-20",
       direccion: "Av. Siempre Viva 123",
-      barrio: "Centro",
-      provincia: "Cordoba",
+      sede: "Sede Distrito Rectorado (SDR)",
       descripcion: "Descripcion inicial.",
-      link: "https://example.com/base",
-      imagen_url: "https://example.com/base.jpg",
-      pagina_evento: "https://example.com/base",
+      imagen_url: "https://example.com/evento-base.jpg",
     },
   ]
 
@@ -41,19 +38,15 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
     }
 
     if (method === "POST") {
-      const body = route.request().postDataJSON() as Record<string, string>
       const createdEvent = {
         id: 2,
-        nombre: body.nombre,
-        tipo: body.tipo ?? "",
-        fecha: body.fecha ?? "",
-        direccion: body.direccion ?? "",
-        barrio: body.barrio ?? "",
-        provincia: body.provincia ?? "",
-        descripcion: body.descripcion ?? "",
-        link: body.link ?? "",
-        imagen_url: body.imagenUrl ?? "",
-        pagina_evento: body.paginaEvento ?? "",
+        nombre: "Evento nuevo",
+        tipo: "Charla",
+        fecha: "2026-06-10",
+        direccion: "Av. Corrientes 123",
+        sede: "Sede Distrito Financiero (SDF)",
+        descripcion: "Evento creado desde Playwright",
+        imagen_url: "https://example.com/evento-nuevo.jpg",
       }
       events = [...events, createdEvent]
 
@@ -69,21 +62,11 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
     const method = route.request().method()
 
     if (method === "PATCH") {
-      const body = route.request().postDataJSON() as Record<string, string>
       events = events.map((event) =>
         event.id === 2
           ? {
               ...event,
-              nombre: body.nombre,
-              tipo: body.tipo ?? "",
-              fecha: body.fecha ?? "",
-              direccion: body.direccion ?? "",
-              barrio: body.barrio ?? "",
-              provincia: body.provincia ?? "",
-              descripcion: body.descripcion ?? "",
-              link: body.link ?? "",
-              imagen_url: body.imagenUrl ?? "",
-              pagina_evento: body.paginaEvento ?? "",
+              nombre: "Evento nuevo editado",
             }
           : event,
       )
@@ -110,12 +93,19 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
   await setAuthToken(page, createToken({ sub: "admin-1", email: "admin@asme.org", rol: "admin" }))
 
   await page.goto("/admin/eventos")
+  await expect(page.getByRole("heading", { name: "Nuevo evento" })).toBeVisible()
 
   await page.locator("#nombre").fill("Evento nuevo")
-  await page.locator("#tipo").fill("presencial")
+  await page.locator("#tipo").selectOption("Charla")
   await page.locator("#fecha").fill("2026-06-10")
   await page.locator("#direccion").fill("Av. Corrientes 123")
+  await page.locator("#sede").selectOption("Sede Distrito Financiero (SDF)")
   await page.locator("#descripcion").fill("Evento creado desde Playwright")
+  await page.locator("#foto").setInputFiles({
+    name: "evento.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("fake event image"),
+  })
   await page.getByRole("button", { name: "Crear evento" }).click()
 
   await expect(page.getByText("Evento creado correctamente")).toBeVisible()
@@ -123,10 +113,17 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
 
   await page.getByRole("button", { name: "Editar evento Evento nuevo" }).click()
   await expect(page.locator("#nombre")).toHaveValue("Evento nuevo")
+  await expect(page.locator("#tipo")).toHaveValue("Charla")
+  await expect(page.locator("#sede")).toHaveValue("Sede Distrito Financiero (SDF)")
+  await expect(page.getByRole("button", { name: "Eliminar foto actual" })).toBeVisible()
   await page.locator("#nombre").fill("Evento nuevo editado")
   await page.getByRole("button", { name: "Guardar cambios" }).click()
 
-  await expect(page.getByText("Evento actualizado correctamente")).toBeVisible()
+  const updatedDialog = page.getByRole("dialog")
+  await expect(updatedDialog).toBeVisible()
+  await expect(updatedDialog.getByRole("heading", { name: "Evento actualizado" })).toBeVisible()
+  await expect(updatedDialog.getByText("Evento actualizado correctamente")).toBeVisible()
+  await updatedDialog.getByRole("button", { name: "Entendido" }).click()
   await expect(page.getByRole("heading", { name: "Evento nuevo editado" })).toBeVisible()
 
   await page.getByRole("button", { name: "Eliminar evento Evento nuevo editado" }).click()

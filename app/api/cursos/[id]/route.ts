@@ -40,15 +40,17 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
       return NextResponse.json({ message: "No autenticado" }, { status: 401 })
     }
 
-    const body = await req.json()
+    const contentType = req.headers.get("content-type") ?? ""
+    const isMultipart = contentType.includes("multipart/form-data")
+    const body = isMultipart ? await req.formData() : await req.json()
 
     const response = await fetch(getBackendApiUrl(`/cursos/${id}`), {
       method: "PATCH",
       headers: {
         Authorization: authorization,
-        "Content-Type": "application/json",
+        ...(isMultipart ? {} : { "Content-Type": "application/json" }),
       },
-      body: JSON.stringify(body),
+      body: isMultipart ? body : JSON.stringify(body),
       cache: "no-store",
     })
 

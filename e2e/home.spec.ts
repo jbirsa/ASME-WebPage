@@ -48,6 +48,7 @@ test("home renderiza eventos publicos", async ({ page }) => {
             tipo: "presencial",
             fecha: "2025-05-20",
             direccion: "Av. Siempre Viva 123",
+            sede: "Sede Distrito Rectorado (SDR)",
             barrio: "Centro",
             provincia: "Cordoba",
             descripcion: "Descripcion del evento pasado.",
@@ -72,6 +73,7 @@ test("home renderiza eventos publicos", async ({ page }) => {
             tipo: "presencial",
             fecha: "2026-05-20",
             direccion: "Av. Siempre Viva 123",
+            sede: "Sede Distrito Financiero (SDF)",
             barrio: "Centro",
             provincia: "Cordoba",
             descripcion: "Descripcion del evento futuro.",
@@ -96,4 +98,6 @@ test("home renderiza eventos publicos", async ({ page }) => {
 
   await expect(page.getByRole("heading", { name: "Evento futuro" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evento pasado" })).toBeVisible();
+  await expect(page.getByText("Sede Distrito Financiero (SDF) · Av. Siempre Viva 123")).toBeVisible();
+  await expect(page.getByText("Sede Distrito Rectorado (SDR) · Av. Siempre Viva 123")).toBeVisible();
 });

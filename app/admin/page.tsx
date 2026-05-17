@@ -4,12 +4,13 @@ import Link from "next/link"
 import { BookOpenCheck, CalendarDays, FolderKanban } from "lucide-react"
 
 import AdminShell from "@/components/admin/AdminShell"
+import { campusCardClassName } from "@/lib/campus-theme"
 
 const resources = [
   {
     href: "/admin/cursos",
     title: "Cursos",
-    description: "Crea, edita y elimina cursos del catalogo.",
+    description: "Gestiona los cursos del catalogo.",
     icon: FolderKanban,
   },
   {
@@ -21,7 +22,7 @@ const resources = [
   {
     href: "/admin/eventos",
     title: "Eventos",
-    description: "Espacio listo para el proximo ABM de eventos.",
+    description: "Gestiona los eventos.",
     icon: CalendarDays,
   },
 ]
@@ -37,13 +38,13 @@ export default function AdminPage() {
             <Link
               key={resource.href}
               href={resource.href}
-              className="rounded-2xl border border-white/10 bg-[#0d1726] p-5 transition-colors hover:border-white/20"
+              className={`${campusCardClassName} p-5`}
             >
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-slate-100">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--campus-border)] bg-[var(--campus-primary-soft)] text-[var(--campus-text)]">
                 <Icon className="h-5 w-5" />
               </span>
-              <h2 className="mt-5 text-xl font-semibold text-white">{resource.title}</h2>
-              <p className="mt-2 text-sm leading-7 text-slate-400">{resource.description}</p>
+              <h2 className="mt-5 text-xl font-semibold text-[var(--campus-text)]">{resource.title}</h2>
+              <p className="mt-2 text-sm leading-7 text-[var(--campus-text-muted)]">{resource.description}</p>
             </Link>
           )
         })}

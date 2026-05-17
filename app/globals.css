@@ -4,6 +4,33 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  --color-primary: #798ea1;
+  --color-secondary: #f5d98b;
+  --color-text: #111111;
+  --color-white: #ffffff;
+  --color-navbar: #dde6ec;
+  --color-sidebar: #e8edf1;
+  --color-page: #f3f5f7;
+
+  --campus-primary: var(--color-primary);
+  --campus-secondary: var(--color-secondary);
+  --campus-text: var(--color-text);
+  --campus-surface: var(--color-white);
+  --campus-navbar: var(--color-navbar);
+  --campus-sidebar: var(--color-sidebar);
+  --campus-background: var(--color-page);
+  --campus-primary-soft: color-mix(in srgb, var(--campus-primary) 12%, var(--campus-surface));
+  --campus-primary-dark: color-mix(in srgb, var(--campus-primary) 84%, var(--campus-text));
+  --campus-primary-deep: var(--campus-text);
+  --campus-surface-soft: color-mix(in srgb, var(--campus-primary) 8%, var(--campus-surface));
+  --campus-surface-muted: color-mix(in srgb, var(--campus-primary) 12%, var(--campus-surface));
+  --campus-border: var(--campus-secondary);
+  --campus-border-soft: color-mix(in srgb, var(--campus-primary) 24%, var(--campus-surface));
+  --campus-border-strong: color-mix(in srgb, var(--campus-text) 22%, var(--campus-secondary));
+  --campus-divider: color-mix(in srgb, var(--campus-primary) 18%, var(--campus-surface));
+  --campus-text-muted: color-mix(in srgb, var(--campus-text) 70%, var(--campus-surface));
+  --campus-accent-soft: color-mix(in srgb, var(--campus-secondary) 42%, var(--campus-surface));
+  --campus-sidebar-hover: color-mix(in srgb, var(--campus-primary) 10%, var(--campus-surface));
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -117,8 +144,204 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans), sans-serif;
+  }
+}
+
+@layer components {
+  .campus-app,
+  .campus-auth {
+    font-family: var(--font-sans), sans-serif;
+    color: var(--campus-text);
+  }
+
+  .campus-app h1,
+  .campus-app h2,
+  .campus-app h3,
+  .campus-auth h1,
+  .campus-auth h2,
+  .campus-auth h3 {
+    font-family: var(--font-display), serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: var(--campus-text);
+  }
+
+  .campus-panel {
+    background: var(--campus-surface);
+    border: 1px solid var(--campus-border);
+    box-shadow: 0 20px 48px rgba(121, 142, 161, 0.12);
+  }
+
+  .campus-card {
+    background: var(--campus-surface);
+    border: 1px solid var(--campus-border);
+    box-shadow: 0 16px 36px rgba(121, 142, 161, 0.1);
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .campus-card:hover {
+    border-color: var(--campus-secondary);
+    box-shadow: 0 22px 42px rgba(121, 142, 161, 0.13);
+    transform: translateY(-2px);
+  }
+
+  .campus-subtle-surface {
+    background: var(--campus-surface-muted);
+    border: 1px solid var(--campus-border);
+  }
+
+  .campus-outline-button {
+    background: var(--campus-surface);
+    border: 1px solid var(--campus-primary);
+    color: var(--campus-text);
+    box-shadow: 0 10px 24px rgba(121, 142, 161, 0.08);
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .campus-outline-button:hover {
+    background: var(--campus-primary-soft);
+    border-color: var(--campus-secondary);
+    box-shadow: 0 14px 30px rgba(121, 142, 161, 0.12);
+  }
+
+  .campus-outline-button:focus-visible,
+  .campus-primary-button:focus-visible,
+  .campus-management-button:focus-visible,
+  .campus-accent-button:focus-visible,
+  .auth-primary-button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--campus-secondary) 34%, transparent);
+    outline-offset: 2px;
+  }
+
+  .campus-primary-button {
+    background: var(--campus-secondary);
+    border: 1px solid color-mix(in srgb, var(--campus-text) 82%, var(--campus-secondary));
+    color: var(--campus-text);
+    box-shadow: 0 14px 28px rgba(245, 217, 139, 0.26);
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .campus-primary-button:hover {
+    background: color-mix(in srgb, var(--campus-secondary) 90%, var(--campus-text));
+    box-shadow: 0 18px 34px rgba(245, 217, 139, 0.32);
+  }
+
+  .campus-management-button {
+    background: var(--campus-primary);
+    border: 1px solid color-mix(in srgb, var(--campus-text) 20%, var(--campus-primary));
+    color: var(--campus-text);
+    box-shadow: 0 14px 28px rgba(121, 142, 161, 0.16);
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .campus-management-button:hover {
+    background: color-mix(in srgb, var(--campus-primary) 86%, var(--campus-text));
+    box-shadow: 0 18px 36px rgba(121, 142, 161, 0.22);
+  }
+
+  .campus-accent-button {
+    background: var(--campus-secondary);
+    border: 1px solid color-mix(in srgb, var(--campus-text) 82%, var(--campus-secondary));
+    color: var(--campus-text);
+    box-shadow: 0 12px 26px rgba(245, 217, 139, 0.24);
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .campus-accent-button:hover {
+    background: color-mix(in srgb, var(--campus-secondary) 90%, var(--campus-text));
+    box-shadow: 0 16px 30px rgba(245, 217, 139, 0.26);
+  }
+
+  .campus-accent-badge {
+    background: var(--campus-secondary);
+    border: 1px solid color-mix(in srgb, var(--campus-text) 22%, var(--campus-secondary));
+    color: var(--campus-text);
+  }
+
+  .campus-feedback-panel {
+    background: color-mix(in srgb, var(--campus-secondary) 18%, var(--campus-surface));
+    border: 1px solid var(--campus-secondary);
+    color: var(--campus-text);
+  }
+
+  .campus-accent-panel {
+    background: var(--campus-accent-soft);
+    border: 1px solid var(--campus-secondary);
+    color: var(--campus-text);
+  }
+
+  .campus-input-surface {
+    border-color: var(--campus-border-soft) !important;
+    background: var(--campus-surface) !important;
+    color: var(--campus-text) !important;
+    box-shadow: inset 0 1px 2px rgba(121, 142, 161, 0.04);
+  }
+
+  .campus-input-surface:focus-visible {
+    border-color: var(--campus-secondary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--campus-secondary) 34%, transparent), inset 0 1px 2px rgba(121, 142, 161, 0.04);
+  }
+
+  .campus-input-surface::placeholder {
+    color: var(--campus-text-muted);
+    opacity: 1;
+  }
+
+  .auth-panel {
+    background: var(--campus-surface);
+    border: 1px solid var(--campus-secondary);
+    box-shadow: 0 28px 64px rgba(121, 142, 161, 0.14);
+    border-radius: 2rem;
+  }
+
+  .auth-input-surface {
+    background: var(--campus-surface) !important;
+    border: 1px solid var(--campus-border-soft) !important;
+    color: var(--campus-text) !important;
+    box-shadow: inset 0 1px 2px rgba(121, 142, 161, 0.05);
+  }
+
+  .auth-input-surface:focus-visible {
+    border-color: var(--campus-secondary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--campus-secondary) 34%, transparent), inset 0 1px 2px rgba(121, 142, 161, 0.05);
+  }
+
+  .auth-input-surface::placeholder {
+    color: var(--campus-text-muted);
+    opacity: 1;
+  }
+
+  .auth-primary-button {
+    background: var(--campus-secondary);
+    border: 1px solid color-mix(in srgb, var(--campus-text) 82%, var(--campus-secondary));
+    color: var(--campus-text);
+    box-shadow: 0 16px 34px rgba(245, 217, 139, 0.24);
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .auth-primary-button:hover {
+    background: color-mix(in srgb, var(--campus-secondary) 90%, var(--campus-text));
+    box-shadow: 0 20px 40px rgba(245, 217, 139, 0.28);
+  }
+
+  .auth-link {
+    color: var(--campus-text);
+    text-decoration-color: color-mix(in srgb, var(--campus-primary) 70%, transparent);
+    text-underline-offset: 0.22em;
+    transition: color 150ms ease, text-decoration-color 150ms ease;
+  }
+
+  .auth-link:hover {
+    color: color-mix(in srgb, var(--campus-text) 84%, var(--campus-primary));
+    text-decoration-color: var(--campus-primary);
+  }
+
+  .auth-muted-copy {
+    color: var(--campus-text-muted);
   }
 }
 

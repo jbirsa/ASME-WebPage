@@ -98,7 +98,7 @@ export default function Navbar() {
               href="/cursos"
               className="hover:text-[#e3a72f] transition-colors duration-200 font-medium"
             >
-              Cursos
+              Campus
             </Link>
             <Link
               href="/aero"
