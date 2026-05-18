@@ -61,7 +61,7 @@ test("reset password muestra error cuando el codigo es invalido", async ({ page 
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ ok: false, message: "Token invalido o expirado" }),
+      body: JSON.stringify({ ok: false, message: "Codigo invalido o expirado" }),
     })
   })
 
@@ -73,7 +73,7 @@ test("reset password muestra error cuando el codigo es invalido", async ({ page 
   await page.locator("#confirmPassword").fill("654321")
   await page.getByRole("button", { name: "Actualizar contraseña" }).click()
 
-  await expect(page.getByText("Token invalido o expirado")).toBeVisible()
+  await expect(page.getByText("Codigo invalido o expirado")).toBeVisible()
   await expect(page).toHaveURL(/\/restablecer-contrasena$/)
 })
 

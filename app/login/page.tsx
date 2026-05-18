@@ -6,21 +6,30 @@ import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useState } from "react"
 
 import AuthSplitLayout from "@/components/AuthSplitLayout"
+import AuthStatusDialog from "@/components/auth/AuthStatusDialog"
 import { Input } from "@/components/ui/input"
 import { PasswordInput } from "@/components/ui/password-input"
 import { getAuthToken, setAuthToken } from "@/lib/auth-token"
 import { isValidEmailInput, normalizeEmailInput } from "@/lib/form-validation"
-import type { LoginResponse } from "@/types/learning"
 
-function extractErrorMessage(payload: unknown) {
+function extractErrorMessage(payload: unknown, fallback = "No se pudo iniciar sesion") {
   if (typeof payload === "object" && payload !== null) {
     const maybePayload = payload as { message?: string | string[] }
     if (Array.isArray(maybePayload.message)) return maybePayload.message.join(", ")
     if (typeof maybePayload.message === "string") return maybePayload.message
   }
 
-  return "No se pudo iniciar sesion"
+  return fallback
 }
+
+function extractAccessToken(payload: unknown) {
+  if (typeof payload !== "object" || payload === null) return null
+
+  const maybePayload = payload as { access_token?: string }
+  return typeof maybePayload.access_token === "string" ? maybePayload.access_token : null
+}
+
+type AuthDialogType = "registered" | "verified" | "reset" | "requiresVerification" | "resendSuccess"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -29,8 +38,10 @@ export default function LoginPage() {
   const [isClientReady, setIsClientReady] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const [showRegisteredMessage, setShowRegisteredMessage] = useState(false)
-  const [showResetMessage, setShowResetMessage] = useState(false)
+  const [dialogType, setDialogType] = useState<AuthDialogType | null>(null)
+  const [verificationMessage, setVerificationMessage] = useState("")
+  const [dialogErrorMessage, setDialogErrorMessage] = useState("")
+  const [isResendingVerification, setIsResendingVerification] = useState(false)
 
   useEffect(() => {
     setIsClientReady(true)
@@ -39,13 +50,68 @@ export default function LoginPage() {
     if (token) router.replace("/cursos")
 
     const searchParams = new URLSearchParams(window.location.search)
-    setShowRegisteredMessage(searchParams.get("registered") === "1")
-    setShowResetMessage(searchParams.get("reset") === "1")
+    const prefilledEmail = normalizeEmailInput(searchParams.get("email") ?? "")
+    if (prefilledEmail) {
+      setEmail(prefilledEmail)
+    }
+
+    if (searchParams.get("registered") === "1") {
+      setDialogType("registered")
+    } else if (searchParams.get("verified") === "1") {
+      setDialogType("verified")
+    } else if (searchParams.get("reset") === "1") {
+      setDialogType("reset")
+    }
+
+    if (["registered", "verified", "reset", "email"].some((key) => searchParams.has(key))) {
+      window.history.replaceState({}, "", "/login")
+    }
   }, [router])
+
+  const handleResendVerification = async () => {
+    setErrorMessage("")
+    setDialogErrorMessage("")
+
+    const normalizedEmail = normalizeEmailInput(email)
+    if (!isValidEmailInput(normalizedEmail)) {
+      setDialogErrorMessage("Ingresa un correo electronico valido para reenviar la verificacion")
+      return
+    }
+
+    setIsResendingVerification(true)
+
+    try {
+      const response = await fetch("/api/auth/resend-verification-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: normalizedEmail }),
+      })
+
+      const payload = (await response.json().catch(() => null)) as unknown
+      if (!response.ok) {
+        throw new Error(extractErrorMessage(payload, "No se pudo reenviar la verificacion"))
+      }
+
+      setDialogType("resendSuccess")
+    } catch (error) {
+      if (error instanceof Error) {
+        setDialogErrorMessage(error.message)
+      } else {
+        setDialogErrorMessage("No se pudo reenviar la verificacion")
+      }
+    } finally {
+      setIsResendingVerification(false)
+    }
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setErrorMessage("")
+    setDialogType(null)
+    setVerificationMessage("")
+    setDialogErrorMessage("")
 
     const normalizedEmail = normalizeEmailInput(email)
     if (!isValidEmailInput(normalizedEmail)) {
@@ -69,13 +135,23 @@ export default function LoginPage() {
         body: JSON.stringify({ email: normalizedEmail, password }),
       })
 
-      const payload = (await response.json().catch(() => null)) as LoginResponse | null
+      const payload = (await response.json().catch(() => null)) as unknown
 
-      if (!response.ok || !payload?.access_token) {
+      if (response.status === 403) {
+        setDialogType("requiresVerification")
+        setVerificationMessage(
+          extractErrorMessage(payload, "Tu cuenta todavia no esta verificada. Revisa tu correo o pedi un nuevo enlace."),
+        )
+        return
+      }
+
+      const accessToken = extractAccessToken(payload)
+
+      if (!response.ok || !accessToken) {
         throw new Error(extractErrorMessage(payload))
       }
 
-      setAuthToken(payload.access_token)
+      setAuthToken(accessToken)
       router.replace("/cursos")
     } catch (error) {
       if (error instanceof Error) {
@@ -95,18 +171,6 @@ export default function LoginPage() {
         <h2 className="text-3xl font-semibold tracking-tight md:text-[2.1rem]">Iniciá sesión</h2>
         <p className="auth-muted-copy mt-3 text-sm leading-6 md:text-base">Accedé a tus cursos, clases y recursos del campus ASME.</p>
       </div>
-
-      {showRegisteredMessage ? (
-        <p className="campus-accent-panel mb-4 rounded-xl px-4 py-3 text-sm">
-          Cuenta creada correctamente. Ya podes iniciar sesion.
-        </p>
-      ) : null}
-
-      {showResetMessage ? (
-        <p className="campus-accent-panel mb-4 rounded-xl px-4 py-3 text-sm">
-          Contraseña actualizada correctamente. Ya podes iniciar sesion.
-        </p>
-      ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -165,6 +229,95 @@ export default function LoginPage() {
           Crear cuenta
         </Link>
       </p>
+
+      <AuthStatusDialog
+        open={dialogType !== null}
+        eyebrow={
+          dialogType === "verified"
+            ? "Verificacion completada"
+            : dialogType === "reset"
+              ? "Contraseña actualizada"
+              : dialogType === "resendSuccess"
+                ? "Correo reenviado"
+                : "Estado de cuenta"
+        }
+        title={
+          dialogType === "registered"
+            ? "Revisá tu correo"
+            : dialogType === "verified"
+              ? "Correo verificado"
+              : dialogType === "reset"
+                ? "Contraseña actualizada"
+                : dialogType === "requiresVerification"
+                  ? "Cuenta pendiente de verificacion"
+                  : dialogType === "resendSuccess"
+                    ? "Verificacion reenviada"
+                    : ""
+        }
+        description={
+          dialogType === "registered"
+            ? "Te enviamos un correo para verificar tu cuenta antes de iniciar sesion."
+            : dialogType === "verified"
+              ? "Tu correo ya fue verificado. Ya podes iniciar sesion."
+              : dialogType === "reset"
+                ? "Tu contraseña fue actualizada correctamente. Ya podes iniciar sesion con la nueva clave."
+                : dialogType === "requiresVerification"
+                  ? verificationMessage
+                  : dialogType === "resendSuccess"
+                    ? "Si el correo existe y la cuenta sigue pendiente, reenviamos la verificacion."
+                    : ""
+        }
+        primaryAction={
+          dialogType === "registered"
+            ? {
+                label: "Entendido",
+                onClick: () => setDialogType(null),
+              }
+            : dialogType === "requiresVerification"
+              ? {
+                  label: "Reenviar verificacion",
+                  onClick: () => {
+                    void handleResendVerification()
+                  },
+                  isLoading: isResendingVerification,
+                  loadingLabel: "Reenviando...",
+                }
+              : dialogType === "resendSuccess"
+                ? {
+                    label: "Entendido",
+                    onClick: () => setDialogType(null),
+                  }
+                : {
+                    label: "Continuar",
+                    onClick: () => setDialogType(null),
+                  }
+        }
+        secondaryAction={
+          dialogType === "registered"
+            ? {
+                label: "Reenviar verificacion",
+                onClick: () => {
+                  void handleResendVerification()
+                },
+                isLoading: isResendingVerification,
+                loadingLabel: "Reenviando...",
+              }
+            : dialogType === "requiresVerification"
+              ? {
+                  label: "Cerrar",
+                  onClick: () => setDialogType(null),
+                }
+              : undefined
+        }
+        onClose={() => {
+          if (isResendingVerification) return
+          setDialogType(null)
+        }}
+      >
+        {dialogType === "registered" || dialogType === "requiresVerification" ? (
+          dialogErrorMessage ? <p className="campus-feedback-panel rounded-xl px-4 py-3 text-sm">{dialogErrorMessage}</p> : null
+        ) : null}
+      </AuthStatusDialog>
     </AuthSplitLayout>
   )
 }

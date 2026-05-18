@@ -87,7 +87,7 @@ export default function RegistroPage() {
         throw new Error(extractErrorMessage(payload))
       }
 
-      router.replace("/login?registered=1")
+      router.replace(`/login?registered=1&email=${encodeURIComponent(normalizedEmail)}`)
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message)

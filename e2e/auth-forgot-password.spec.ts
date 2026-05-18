@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test"
 
-test("forgot password muestra mensaje generico y codigo de desarrollo", async ({ page }) => {
+test("forgot password muestra mensaje generico al enviar el formulario", async ({ page }) => {
   await page.route("**/api/auth/forgot-password", async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ sent: true, token: "dev-reset-123" }),
+      body: JSON.stringify({ sent: true, code: "QJRMTA" }),
     })
   })
 
@@ -19,10 +19,11 @@ test("forgot password muestra mensaje generico y codigo de desarrollo", async ({
   await expect(submitButton).toBeEnabled()
   await submitButton.click()
 
+  await expect(page.getByRole("dialog")).toBeVisible()
+  await expect(page.getByText("Revisá tu correo")).toBeVisible()
   await expect(page.getByText("Si el correo existe, te enviamos un codigo para restablecer la contraseña.")).toBeVisible()
-  await expect(page.getByText("Codigo de desarrollo")).toBeVisible()
-  await expect(page.getByText("dev-reset-123")).toBeVisible()
-  await expect(page.getByRole("link", { name: "Usar este codigo ahora" })).toBeVisible()
+  await expect(page.getByText("Codigo de desarrollo")).toHaveCount(0)
+  await expect(page.getByRole("button", { name: "Entendido" })).toBeVisible()
 })
 
 test("forgot password muestra error de backend", async ({ page }) => {

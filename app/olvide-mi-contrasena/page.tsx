@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useState } from "react"
 
 import AuthSplitLayout from "@/components/AuthSplitLayout"
+import AuthStatusDialog from "@/components/auth/AuthStatusDialog"
 import { Input } from "@/components/ui/input"
 import { getAuthToken } from "@/lib/auth-token"
 import { isValidEmailInput, normalizeEmailInput } from "@/lib/form-validation"
@@ -20,16 +21,6 @@ function extractErrorMessage(payload: unknown) {
   return "No se pudo iniciar la recuperacion"
 }
 
-function extractDevelopmentCode(payload: unknown) {
-  if (typeof payload !== "object" || payload === null) return null
-
-  const maybePayload = payload as { token?: string; code?: string }
-  if (typeof maybePayload.code === "string") return maybePayload.code
-  if (typeof maybePayload.token === "string") return maybePayload.token
-
-  return null
-}
-
 export default function OlvideMiContrasenaPage() {
   const router = useRouter()
   const [email, setEmail] = useState("")
@@ -37,7 +28,6 @@ export default function OlvideMiContrasenaPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
-  const [developmentCode, setDevelopmentCode] = useState<string | null>(null)
 
   useEffect(() => {
     setIsClientReady(true)
@@ -50,7 +40,6 @@ export default function OlvideMiContrasenaPage() {
     event.preventDefault()
     setErrorMessage("")
     setSuccessMessage("")
-    setDevelopmentCode(null)
 
     const normalizedEmail = normalizeEmailInput(email)
     if (!isValidEmailInput(normalizedEmail)) {
@@ -76,7 +65,6 @@ export default function OlvideMiContrasenaPage() {
       }
 
       setSuccessMessage("Si el correo existe, te enviamos un codigo para restablecer la contraseña.")
-      setDevelopmentCode(extractDevelopmentCode(payload))
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message)
@@ -114,23 +102,6 @@ export default function OlvideMiContrasenaPage() {
           />
         </div>
 
-        {successMessage ? (
-          <p className="campus-accent-panel rounded-xl px-4 py-3 text-sm">{successMessage}</p>
-        ) : null}
-
-        {developmentCode ? (
-          <div className="campus-accent-panel rounded-xl px-4 py-4 text-sm">
-            <p className="font-medium">Codigo de desarrollo</p>
-            <p className="mt-2 break-all font-mono text-xs">{developmentCode}</p>
-            <Link
-              href={`/restablecer-contrasena?codigo=${encodeURIComponent(developmentCode)}`}
-              className="auth-link mt-3 inline-flex"
-            >
-              Usar este codigo ahora
-            </Link>
-          </div>
-        ) : null}
-
         {errorMessage ? (
           <p className="campus-feedback-panel rounded-xl px-4 py-3 text-sm">{errorMessage}</p>
         ) : null}
@@ -157,6 +128,18 @@ export default function OlvideMiContrasenaPage() {
           </Link>
         </p>
       </div>
+
+      <AuthStatusDialog
+        open={Boolean(successMessage)}
+        eyebrow="Correo enviado"
+        title="Revisá tu correo"
+        description={successMessage}
+        primaryAction={{
+          label: "Entendido",
+          onClick: () => setSuccessMessage(""),
+        }}
+        onClose={() => setSuccessMessage("")}
+      />
     </AuthSplitLayout>
   )
 }

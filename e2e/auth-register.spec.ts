@@ -28,8 +28,10 @@ test("registro exitoso redirige a login", async ({ page }) => {
   await expect(submitButton).toBeEnabled({ timeout: 30_000 })
   await submitButton.click()
 
-  await expect(page).toHaveURL(/\/login\?registered=1/, { timeout: 30_000 })
-  await expect(page.getByText("Cuenta creada correctamente. Ya podes iniciar sesion.")).toBeVisible()
+  await expect(page).toHaveURL(/\/login$/, { timeout: 30_000 })
+  await expect(page.getByText("Te enviamos un correo para verificar tu cuenta antes de iniciar sesion.")).toBeVisible()
+  await expect(page.locator("#email")).toHaveValue("nuevo@asme.org")
+  await expect(page.getByRole("button", { name: "Reenviar verificacion" })).toBeVisible()
 })
 
 test("registro muestra error del backend", async ({ page }) => {
