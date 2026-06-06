@@ -22,7 +22,7 @@ import {
   campusSubtleSurfaceClassName,
 } from "@/lib/campus-theme"
 import { formatEventDate } from "@/lib/date"
-import { trimMultiline, trimSingleLine } from "@/lib/form-validation"
+import { isValidHttpUrlInput, trimMultiline, trimSingleLine } from "@/lib/form-validation"
 import type { Evento } from "@/types/db_types"
 
 const EVENT_TYPE_OPTIONS = ["Charla", "Visita", "Competencia", "Evento especial"] as const
@@ -39,6 +39,7 @@ type EventFormState = {
   direccion: string
   sede: string
   descripcion: string
+  link: string
 }
 
 const emptyFormState: EventFormState = {
@@ -48,6 +49,7 @@ const emptyFormState: EventFormState = {
   direccion: "",
   sede: "",
   descripcion: "",
+  link: "",
 }
 
 const selectClassName = campusSelectClassName
@@ -142,6 +144,7 @@ export default function AdminEventosPage() {
       direccion: trimSingleLine(formState.direccion),
       sede: trimSingleLine(formState.sede),
       descripcion: trimMultiline(formState.descripcion),
+      link: trimSingleLine(formState.link),
     }
 
     if (!normalizedForm.nombre) {
@@ -189,6 +192,11 @@ export default function AdminEventosPage() {
       return
     }
 
+    if (normalizedForm.link && (!isValidHttpUrlInput(normalizedForm.link) || normalizedForm.link.length > 500)) {
+      setErrorMessage("El link de inscripcion debe ser una URL http o https valida")
+      return
+    }
+
     if (normalizedForm.sede && !EVENT_SEDE_OPTIONS.includes(normalizedForm.sede as (typeof EVENT_SEDE_OPTIONS)[number])) {
       setErrorMessage("La sede del evento no es valida")
       return
@@ -207,6 +215,7 @@ export default function AdminEventosPage() {
     formData.set("direccion", normalizedForm.direccion)
     formData.set("descripcion", normalizedForm.descripcion)
     if (normalizedForm.sede) formData.set("sede", normalizedForm.sede)
+    if (normalizedForm.link) formData.set("link", normalizedForm.link)
 
     setIsSaving(true)
 
@@ -271,6 +280,7 @@ export default function AdminEventosPage() {
       direccion: event.direccion ?? "",
       sede: event.sede ?? "",
       descripcion: event.descripcion ?? "",
+      link: event.link ?? "",
     })
     setCurrentPhotoUrl(event.imagen_url ?? null)
     setRemoveCurrentPhoto(false)
@@ -465,6 +475,21 @@ export default function AdminEventosPage() {
               maxLength={3000}
               required
               className={`min-h-28 ${campusInputClassName}`}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label htmlFor="link" className="mb-2 block text-sm font-medium text-[var(--campus-text)]">
+              Link de inscripcion
+            </label>
+            <Input
+              id="link"
+              type="url"
+              value={formState.link}
+              onChange={(inputEvent) => setFormState((current) => ({ ...current, link: inputEvent.target.value }))}
+              placeholder="https://forms.gle/tu-formulario"
+              maxLength={500}
+              className={campusInputClassName}
             />
           </div>
 

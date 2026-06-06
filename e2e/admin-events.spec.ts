@@ -12,6 +12,7 @@ async function setAuthToken(page: Page, token: string) {
 }
 
 test("admin crea, edita y elimina eventos", async ({ page }) => {
+  let createRequestBody = ""
   let events = [
     {
       id: 1,
@@ -21,6 +22,7 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
       direccion: "Av. Siempre Viva 123",
       sede: "Sede Distrito Rectorado (SDR)",
       descripcion: "Descripcion inicial.",
+      link: "https://example.com/base",
       imagen_url: "https://example.com/evento-base.jpg",
     },
   ]
@@ -38,6 +40,8 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
     }
 
     if (method === "POST") {
+      createRequestBody = (await route.request().postDataBuffer())?.toString("utf8") ?? ""
+
       const createdEvent = {
         id: 2,
         nombre: "Evento nuevo",
@@ -46,6 +50,7 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
         direccion: "Av. Corrientes 123",
         sede: "Sede Distrito Financiero (SDF)",
         descripcion: "Evento creado desde Playwright",
+        link: "https://forms.gle/evento-nuevo",
         imagen_url: "https://example.com/evento-nuevo.jpg",
       }
       events = [...events, createdEvent]
@@ -67,6 +72,7 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
           ? {
               ...event,
               nombre: "Evento nuevo editado",
+              link: "",
             }
           : event,
       )
@@ -101,6 +107,7 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
   await page.locator("#direccion").fill("Av. Corrientes 123")
   await page.locator("#sede").selectOption("Sede Distrito Financiero (SDF)")
   await page.locator("#descripcion").fill("Evento creado desde Playwright")
+  await page.locator("#link").fill("https://forms.gle/evento-nuevo")
   await page.locator("#foto").setInputFiles({
     name: "evento.png",
     mimeType: "image/png",
@@ -108,6 +115,8 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
   })
   await page.getByRole("button", { name: "Crear evento" }).click()
 
+  expect(createRequestBody).toContain('name="link"')
+  expect(createRequestBody).toContain("https://forms.gle/evento-nuevo")
   await expect(page.getByText("Evento creado correctamente")).toBeVisible()
   await expect(page.getByRole("heading", { name: "Evento nuevo" })).toBeVisible()
 
@@ -115,8 +124,10 @@ test("admin crea, edita y elimina eventos", async ({ page }) => {
   await expect(page.locator("#nombre")).toHaveValue("Evento nuevo")
   await expect(page.locator("#tipo")).toHaveValue("Charla")
   await expect(page.locator("#sede")).toHaveValue("Sede Distrito Financiero (SDF)")
+  await expect(page.locator("#link")).toHaveValue("https://forms.gle/evento-nuevo")
   await expect(page.getByRole("button", { name: "Eliminar foto actual" })).toBeVisible()
   await page.locator("#nombre").fill("Evento nuevo editado")
+  await page.locator("#link").fill("")
   await page.getByRole("button", { name: "Guardar cambios" }).click()
 
   const updatedDialog = page.getByRole("dialog")
