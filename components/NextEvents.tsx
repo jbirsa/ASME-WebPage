@@ -88,20 +88,17 @@ export default function NextEvents({
           <div className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 border border-slate-500/50 rounded-2xl overflow-hidden backdrop-blur-sm shadow-2xl">
             <div className="grid md:grid-cols-2 gap-0 min-h-[500px]">
               {/* Image Section */}
-              <div className="relative h-64 md:h-full">
+              <div className="relative min-h-[320px] overflow-hidden md:min-h-[500px]">
                 {currentEvent.imagen_url && (
                   <Image
-                    src={currentEvent.imagen_url || "/placeholder.svg"}
-                    alt={currentEvent.nombre}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    priority={currentIndex === 0}
-                  />
+                     src={currentEvent.imagen_url || "/placeholder.svg"}
+                     alt={currentEvent.nombre}
+                     fill
+                     className="object-cover object-center"
+                     sizes="(max-width: 768px) 100vw, 50vw"
+                     priority={currentIndex === 0}
+                   />
                 )}
-
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               </div>
 
               {/* Content Section */}
