@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
-import { Evento } from "@/types/db_types";
 import { getSupabaseServerClient } from "@/lib/supabaseClient";
+import { normalizeEvent } from "@/lib/events";
 
 
 export async function GET(req: NextRequest) {
@@ -12,21 +12,7 @@ export async function GET(req: NextRequest) {
         if(!data)
             return NextResponse.json( { error: 'No data found' }, { status: 404 } );
 
-        const res = data.map((event: Evento) => {
-            return {
-                id: event.id,
-                nombre: event.nombre,
-                tipo: event.tipo,
-                fecha: event.fecha,
-                direccion: event.direccion,
-                barrio: event.barrio,
-                provincia: event.provincia,
-                descripcion: event.descripcion,
-                link: event.link,
-                imagen_url: event.imagen_url,
-                pagina_evento: event.pagina_evento
-            }
-        });
+        const res = await Promise.all(data.map((event) => normalizeEvent(supabase, event)));
         return NextResponse.json({ events: res }, { status: 200, headers: { 'Content-Type': 'application/json' } });
     } catch (error){
         return NextResponse.json( {error: error}, { status: 500 } );
